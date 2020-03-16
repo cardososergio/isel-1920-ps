@@ -1,0 +1,48 @@
+{
+    "user_id": "00d4a1f4283c2b352a248b5cf04ba66c",
+    "name": "Exame época normal",
+    "is_draft": true,
+    "is_public": false,
+    "release_date": "2020-03-02 10:00:00",
+    "duration": 120,
+    "available_date": "2020-03-03 00:00:00",
+    "delivery_date": "",
+    "synch": true,
+    "header": {
+        "school_name": "Instituto Superior de Engenharia de Lisboa",
+        "courses_fullname": [
+                "Licenciatura em Engenharia Informática e de Computadores",
+                "Licenciatura em Engenharia Informática, Redes e Telecomunicações"
+        ],
+        "curricular_unit": "Segurança Informática",
+        "description": "Primeira série de exercícios, Semestre de Inverno de 19/20",
+        "delivery_note"
+    },
+    "questions": [ {
+            "question_id": "a47cbf68437f19a6215c1b53146c13c6",
+            "numering": 1,
+            "text": "Quais as semelhanças e as diferenças entre um esquema assimétrico de assinatura digital e um esquema MAC? Quais os critérios de decis~ao para selecionar um deles?"
+        }, {
+            "question_id": "a47cbf68437f19a6215c1b53146c13c7",
+            "numering": 2,
+            "text": "Apresente uma forma de atacar uma implementação de um esquema de cifra assimétrica cujo algoritmo de cifra, Ea(k)(m), seja determinístico (isto é, se x = y então Ea(k)(x) = Ea(k)(y))."
+        }, {
+            "question_id": "a47cbf68437f19a6215c1b53146c13c8",
+            "numering": 3,
+            "text": "Considere os certificados X.509 e as infraestruturas de chaves pública (PKI):"
+        }, {
+            "question_id": "a47cbf68437f19a6215c1b53146c13c9",
+            "numering": 3.1,
+            "text": "De que forma a resistência à segunda pré-imagem de uma função de hash contribui para garantir a autenticidade da chave pública de um certificado."
+        }, {
+            "question_id": "a47cbf68437f19a6215c1b53146c1310",
+            "numering": 3.2,
+            "text": "Considere o certificado folha C e os intermédios I1, I2, ...; In. Alguma das chaves privadas dos certificados intermédios é usada para validar o certificado C?"
+        }
+    ],
+    "images": [ {
+            "question_id": "a47cbf68437f19a6215c1b53146c13c7",
+            "attachment": "base64 encoding"
+        }
+    ]
+}
