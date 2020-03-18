@@ -1,0 +1,26 @@
+{
+    "school_name": "Instituto Superior de Engenharia de Lisboa",
+    "statement_types": [
+        "Exame",
+        "Trabalho",
+        "Teste"
+    ],
+    "curricular_year": [
+        2019,
+        2020
+    ],
+    "semester": [
+        "1º semestre",
+        "2º semestre",
+        "Anual"
+    ],
+    "curricular_units": [
+        "Segurança Informática",
+        "Projecto e Seminário"
+    ],
+    "season": [
+        "Normal",
+        "Recurso",
+        "Especial"
+    ]
+}

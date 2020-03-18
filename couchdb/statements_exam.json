@@ -1,0 +1,88 @@
+{
+    "user_id": "00d4a1f4283c2b352a248b5cf04ba66c",
+    "statement_type": "Exame",
+    "name": "Teste época normal",
+    "is_draft": true,
+    "is_public": false,
+    "release_date": "2020-03-02 10:00:00",
+    "duration": 150,
+    "available_date": "2020-03-03 00:00:00",
+    "synch": true,
+    "curricular_year": 2019,
+    "semester": "1º semestre",
+    "curricular_unit": "Segurança Informática",
+    "season": "Normal",
+    "header": {
+        "school_name": "Instituto Superior de Engenharia de Lisboa",
+        "courses_fullname": [
+            "Licenciatura em Engenharia Informática e de Computadores",
+            "Licenciatura em Engenharia Informática, Redes e Telecomunicações"
+        ],
+        "curricular_unit": "Segurança Informática",
+        "description": "Teste final, Primeira Época, Semestre de Inverno, 19/20",
+        "delivery_note": "Duração: 2 horas e 30 minutos"
+    },
+    "questions": [
+        {
+            "question_id": "a47cbf68437f19a6215c1b53146c13c6",
+            "numering_type": "number",
+            "numering": 1,
+            "grade": 1,
+            "text": "Qual a motivação para os esquemas MAC (</i>Message Authentication Code</i>), dado que os esquemas de cifra simétrica já fornecem confidencialidade?",
+            "position": 1
+        },
+        {
+            "question_id": "a47cbf68437f19a6215c1b53146c13c7",
+            "numering_type": "number",
+            "numering": 2,
+            "grade": 1,
+            "text": "Com o objectivo de eliminar o problema do modo ECB quanto à passagem de padrões do texto em claro para o texto cifrado, foi definido o seguinte modo de operação:",
+            "footer_text": "Este modo de operação cumpre o objectivo?",
+            "position": 2
+        },
+        {
+            "question_id": "a47cbf68437f19a6215c1b53146c1334",
+            "numering_type": "bullet",
+            "text": "<i>m = m<sub>1</sub>, ..., m<sub>L</sub></i> a divisão da mensagem <i>m</i> nos blocos <i>m<sub>i</sub></i>.",
+            "position": 2.1
+        },
+        {
+            "question_id": "a47cbf68437f19a6215c1b53146c1335",
+            "numering_type": "bullet",
+            "text": "<i>R</i> é um número aleatório.",
+            "position": 2.2
+        },
+        {
+            "question_id": "a47cbf68437f19a6215c1b53146c1336",
+            "numering_type": "bullet",
+            "text": "<i>c<sub>0</sub></i> = <i>R</i>, <i>c<sub>i</sub></i> = <i>E(k)(m<sub>i</sub> &oplus; R</i>), para <i>i</i> = 1, ..., <i>L</i>, onde &oplus; denota a operação de ou-exclusivo bit a bit e <i>E</i> uma primitiva de cifra em bloco.",
+            "position": 2.3
+        },
+        {
+            "question_id": "a47cbf68437f19a6215c1b53146c13c8",
+            "numering_type": "number",
+            "numering": 3,
+            "grade": 2,
+            "text": "Considere a biblioteca JCA:",
+            "position": 3
+        },
+        {
+            "question_id": "a47cbf68437f19a6215c1b53146c13c9",
+            "numering_type": "number",
+            "numering": 3.1,
+            "text": "Porque razão a classe 'Cipher' possui o método <span style='font-family: courier'>update</span>? Normalmente, a mesma função não podia ser obtida através da utilização repetida do método <span style='font-family: courier'>doFinal</span>?",
+            "position": 3.1
+        },
+        {
+            "question_id": "a47cbf68437f19a6215c1b53146c1310",
+            "numering_type": "number",
+            "numering": 3.2,
+            "text": "Em que circunstâncias as marcas geradas por instâncias da class <Signature> podem ser verificadas por instâncias da classe <span style='font-family: courier'>Mac</span>?",
+            "position": 3.2
+        }
+    ],
+    "correction_files": [
+        "correction_file.001.pdf",
+        "correction_file.002.pdf"
+    ]
+}

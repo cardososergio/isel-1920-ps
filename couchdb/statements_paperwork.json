@@ -1,0 +1,68 @@
+{
+    "user_id": "00d4a1f4283c2b352a248b5cf04ba66c",
+    "statement_type": "Trabalho",
+    "name": "Terceira série de exercícios",
+    "is_draft": true,
+    "is_public": true,
+    "release_date": "2019-11-01 00:00:00",
+    "duration": 150,
+    "available_date": "2019-11-01 00:00:00",
+    "delivery_date": "2019-12-20 23:59:59",
+    "synch": true,
+    "curricular_year": 2019,
+    "semester": "1º semestre",
+    "curricular_unit": "Segurança Informática",
+    "header": {
+        "school_name": "Instituto Superior de Engenharia de Lisboa",
+        "courses_fullname": [
+            "Licenciatura em Engenharia Informática e de Computadores",
+            "Licenciatura em Engenharia Informática, Redes e Telecomunicações"
+        ],
+        "curricular_unit": "Segurança Informática",
+        "description": "Terceira série de exercícios, Semestre de Inverno de 19/20",
+        "delivery_note": "Data limite de entrega: 20 de dezembro de 2019"
+    },
+    "questions": [
+        {
+            "question_id": "a47cbf68437f19a6215c1b53146c13c6",
+            "numering_type": "number",
+            "numering": 1,
+            "text": "No contexto dos sistemas de controlo de acessos, distinga entre modelos e políticas. Dê um exemplo no âmbito de um sistema operativo.",
+            "position": 1
+        },
+        {
+            "question_id": "a47cbf68437f19a6215c1b53146c13c7",
+            "numering_type": "number",
+            "numering": 2,
+            "text": "Considere os modelos RBAC:",
+            "position": 2
+        },
+        {
+            "question_id": "a47cbf68437f19a6215c1b53146c1334",
+            "numering_type": "number",
+            "numering": 2.1,
+            "text": "No RBAC<sub>1</sub>, é possível existir uma sessão associada ao utilizador <i>u</i> e com o role <i>r</i> activo, sem que (<i>u</i>, <i>r</i>) esteja na relação <i>user assignment</i> (UA)?",
+            "position": 2.1
+        },
+        {
+            "question_id": "a47cbf68437f19a6215c1b53146c1335",
+            "numering_type": "number",
+            "numering": 2.2,
+            "text": "Qual a relação entre o princípio de privilégios mínimos e o conceito de sessão?",
+            "position": 2.2
+        },
+        {
+            "question_id": "a47cbf68437f19a6215c1b53146c13c8",
+            "numering_type": "number",
+            "numering": 3,
+            "text": "Explique sucintamente de que forma a vulnerabilidade CVE-2019-9766 [1] pode levar a que um atacante consiga executar código arbitrário no computador da vítima.",
+            "position": 3
+        }
+    ],
+    "references": [
+        {
+            "id": 1,
+            "description": "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-9766"
+        }
+    ]
+}
