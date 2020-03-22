@@ -1,45 +1,45 @@
 {
-    "user_id": "",
-    "statement_type": "",
-    "name": "",
-    "is_draft": "",
-    "is_public": "",
-    "release_date": "",
-    "duration": "",
-    "available_date": "",
-    "delivery_date": "",
-    "synch": "",
-    "curricular_year": "",
-    "semester": "",
-    "curricular_unit": "",
-    "season": "",
+    "user_id": "id do docente",
+    "statement_type": "se é exame, teste ou trabalho",
+    "name": "nome para visualmente identificar",
+    "is_draft": "indicar se já o finalizou",
+    "is_public": "indicar se outros docentes e alunos o podem consultar",
+    "release_date": "data em que o exame/teste será feito. Se for trabalho, data em que foi disponibilizado",
+    "duration": "duração do exame/teste",
+    "available_date": "data em que o enunciado é disponibilizado para consulta",
+    "delivery_date": "Se for trabalho, a data limite de entrega",
+    "synch": "indicar se o enunciado já foi sincronizado com o servidor",
+    "curricular_year": "ano letivo",
+    "semester": "semestre",
+    "curricular_unit": "disciplina",
+    "season": "época",
     "header": {
-        "school_name": "",
+        "school_name": "Nome da universidade",
         "courses_fullname": [
-            ""
+            "Cada entrada corresponde a uma disciplina"
         ],
-        "curricular_unit": "",
-        "description": "",
-        "delivery_note": ""
+        "curricular_unit": "ano letivo",
+        "description": "descrição do enunciado",
+        "delivery_note": "Caso seja exame/teste, indicar a duração. Se for trabalho, a data de entrega"
     },
     "questions": [
         {
-            "question_id": "",
-            "numering_type": "",
-            "numering": "",
-            "grade": "",
-            "text": "",
-            "footer_text": "",
-            "position": ""
+            "question_id": "id para identificar cada pergunta",
+            "numering_type": "a pergunta é númerica ou em bullet",
+            "numering": "se for númerica, qual o número",
+            "grade": "Indica a pontuação da pergunta",
+            "text": "Pergunta",
+            "footer_text": "Caso haja necessidade de incluir texto numa pergunta que tenha sub-perguntas",
+            "position": "qual a sua posição relativamente ao enunciado"
         }
     ],
     "references": [
         {
-            "id": "",
-            "description": ""
+            "id": "id para a referencia",
+            "description": "pode ser o url, texto, etc."
         }
     ],
     "correction_files": [
-        ""
+        "caso seja agregada algum documento de correção, fica guardado o nome do ficheiro. Assim consegue-se relacionar com a tag 'attachments'"
     ]
 }

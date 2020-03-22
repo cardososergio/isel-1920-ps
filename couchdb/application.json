@@ -7,7 +7,8 @@
     ],
     "curricular_year": [
         2019,
-        2020
+        2020,
+        "caso não haja o ano letivo, o docente poderá adicionar"
     ],
     "semester": [
         "1º semestre",
@@ -16,7 +17,8 @@
     ],
     "curricular_units": [
         "Segurança Informática",
-        "Projecto e Seminário"
+        "Projecto e Seminário",
+        "caso não haja a disciplina, o docente poderá adicionar"
     ],
     "season": [
         "Normal",
