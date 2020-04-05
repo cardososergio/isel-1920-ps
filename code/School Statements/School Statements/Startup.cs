@@ -36,6 +36,8 @@ namespace School_Statements
                 configuration.RootPath = "ClientApp/build";
             });
 
+            services.AddOptions();
+
             services.Configure<Saml2Configuration>(Configuration.GetSection("Saml2"));
             services.Configure<Saml2Configuration>(saml2Configuration =>
             {
@@ -62,7 +64,6 @@ namespace School_Statements
             });
             services.AddSaml2();
         }
-
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {

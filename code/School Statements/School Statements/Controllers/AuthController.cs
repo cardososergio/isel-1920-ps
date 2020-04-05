@@ -9,42 +9,57 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using System.Security.Authentication;
 using School_Statements.Identity;
+using ITfoxtec.Identity.Saml2.Schemas.Metadata;
+using System.Security.Cryptography.X509Certificates;
 
 namespace School_Statements.Controllers
 {
-    [AllowAnonymous]
-    [Route("Auth")]
-    public class AuthController : Controller
+    [Route("auth")]
+    [ApiController]
+    public class AuthController : ControllerBase
     {
-        const string relayStateReturnUrl = "ReturnUrl";
-        private readonly Saml2Configuration config;
-
-        public AuthController(IOptions<Saml2Configuration> configAccessor)
+        // GET: api/User
+        [HttpGet]
+        public ActionResult<IEnumerable<string>> Get()
         {
-            config = configAccessor.Value;
+            return new string[] { "value1", "value2" };
         }
 
-        [Route("Login")]
+        const string relayStateReturnUrl = "https://schoolstatements.azurewebsites.net/auth/callback";
+        //private readonly Saml2Configuration config;
+
+        /*public AuthController(IOptions<Saml2Configuration> configAccessor)
+        {
+            config = configAccessor.Value;
+        }*/
+
+        [Route("login")]
         public IActionResult Login(string returnUrl = null)
         {
+            Saml2Configuration config = new Saml2Configuration();
+            config.AllowedAudienceUris.Add("https://schoolstatements.azurewebsites.net/auth/metadata");
+            config.AudienceRestricted = true;
+            config.AuthnResponseSignType = Saml2AuthnResponseSignTypes.SignResponse;
+            config.CertificateValidationMode = System.ServiceModel.Security.X509CertificateValidationMode.ChainTrust;
+            config.Issuer = "https://schoolstatements.azurewebites.net/auth/metadata";
+            config.RevocationMode = X509RevocationMode.NoCheck;
+            config.SaveBootstrapContext = false;
+            config.SignAuthnRequest = true;
+            config.SignatureAlgorithm = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
+            config.SigningCertificate = new X509Certificate2("itfoxtec.identity.saml2.testwebappcore_Certificate.pfx", "!QAZ2wsx");
+            config.SingleSignOnDestination = new Uri("https://idp.net.ipl.pt/simplesaml/saml2/idp/SSOService.php");
+
             var binding = new Saml2RedirectBinding();
             binding.SetRelayStateQuery(new Dictionary<string, string> { { relayStateReturnUrl, returnUrl ?? Url.Content("~/") } });
 
             return binding.Bind(new Saml2AuthnRequest(config)
             {
-                //ForceAuthn = true,
                 Subject = new Subject { NameID = new NameID { ID = "abcd" } },
-                //NameIdPolicy = new NameIdPolicy { AllowCreate = true, Format = "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent" },
-                //RequestedAuthnContext = new RequestedAuthnContext
-                //{
-                //    Comparison = AuthnContextComparisonTypes.Exact,
-                //    AuthnContextClassRef = new string[] { AuthnContextClassTypes.PasswordProtectedTransport.OriginalString },
-                //},
             }).ToActionResult();
         }
 
-        [Route("AssertionConsumerService")]
-        public async Task<IActionResult> AssertionConsumerService()
+        /*[Route("Callback")]
+        public async Task<IActionResult> Callback()
         {
             var binding = new Saml2PostBinding();
             var saml2AuthnResponse = new Saml2AuthnResponse(config);
@@ -62,31 +77,8 @@ namespace School_Statements.Controllers
             return Redirect(returnUrl);
         }
 
-        [HttpPost("Logout")]
-        [ValidateAntiForgeryToken]
+        [Route("Logout")]
         public async Task<IActionResult> Logout()
-        {
-            if (!User.Identity.IsAuthenticated)
-            {
-                return Redirect(Url.Content("~/"));
-            }
-
-            var binding = new Saml2PostBinding();
-            var saml2LogoutRequest = await new Saml2LogoutRequest(config, User).DeleteSession(HttpContext);
-            return binding.Bind(saml2LogoutRequest).ToActionResult();
-        }
-
-        [Route("LoggedOut")]
-        public IActionResult LoggedOut()
-        {
-            var binding = new Saml2PostBinding();
-            binding.Unbind(Request.ToGenericHttpRequest(), new Saml2LogoutResponse(config));
-
-            return Redirect(Url.Content("~/"));
-        }
-
-        [Route("SingleLogout")]
-        public async Task<IActionResult> SingleLogout()
         {
             Saml2StatusCodes status;
             var requestBinding = new Saml2PostBinding();
@@ -99,8 +91,6 @@ namespace School_Statements.Controllers
             }
             catch (Exception exc)
             {
-                // log exception
-                //Debug.WriteLine("SingleLogout error: " + exc.ToString());
                 status = Saml2StatusCodes.RequestDenied;
             }
 
@@ -113,5 +103,48 @@ namespace School_Statements.Controllers
             };
             return responsebinding.Bind(saml2LogoutResponse).ToActionResult();
         }
+
+        [Route("metadata")]
+        public IActionResult Metadata()
+        {
+            var defaultSite = new Uri($"{Request.Scheme}://{Request.Host.ToUriComponent()}/");
+
+            var entityDescriptor = new EntityDescriptor(config);
+            entityDescriptor.ValidUntil = 365;
+            entityDescriptor.SPSsoDescriptor = new SPSsoDescriptor
+            {
+                WantAssertionsSigned = true,
+                SigningCertificates = new X509Certificate2[]
+                {
+                    config.SigningCertificate
+                },
+                SingleLogoutServices = new SingleLogoutService[]
+                {
+                    new SingleLogoutService { Binding = ProtocolBindings.HttpPost, Location = new Uri(defaultSite, "Auth/Logout") }
+                },
+                NameIDFormats = new Uri[] { NameIdentifierFormats.X509SubjectName },
+                AssertionConsumerServices = new AssertionConsumerService[]
+                {
+                    new AssertionConsumerService {  Binding = ProtocolBindings.HttpPost, Location = new Uri(defaultSite, "Auth/Callback") }
+                },
+                AttributeConsumingServices = new AttributeConsumingService[]
+                {
+                    new AttributeConsumingService { ServiceName = new ServiceName("Editor de enunciados", "en"), RequestedAttributes = CreateRequestedAttributes() }
+                },
+            };
+            entityDescriptor.ContactPerson = new ContactPerson(ContactTypes.Administrative)
+            {
+                GivenName = "Sérgio",
+                SurName = "Cardoso",
+                EmailAddress = "a32263@alunos.isel.pt"
+            };
+            return new Saml2Metadata(entityDescriptor).CreateMetadata().ToActionResult();
+        }
+
+        private IEnumerable<RequestedAttribute> CreateRequestedAttributes()
+        {
+            yield return new RequestedAttribute("urn:oid:2.5.4.4");
+            yield return new RequestedAttribute("urn:oid:2.5.4.3", false);
+        }*/
     }
 }
