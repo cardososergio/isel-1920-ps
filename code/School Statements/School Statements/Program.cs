@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
-namespace School_Statements
+namespace SchoolStatements
 {
     public class Program
     {

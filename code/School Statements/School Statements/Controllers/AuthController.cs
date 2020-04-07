@@ -1,150 +1,60 @@
-﻿using ITfoxtec.Identity.Saml2;
-using ITfoxtec.Identity.Saml2.Schemas;
-using ITfoxtec.Identity.Saml2.MvcCore;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
-using System.Security.Authentication;
-using School_Statements.Identity;
-using ITfoxtec.Identity.Saml2.Schemas.Metadata;
-using System.Security.Cryptography.X509Certificates;
+﻿using Microsoft.AspNetCore.Mvc;
+using OneLogin.Saml;
+using Microsoft.Extensions.Configuration;
 
-namespace School_Statements.Controllers
+namespace SchoolStatements.Controllers
 {
     [Route("auth")]
     [ApiController]
     public class AuthController : ControllerBase
     {
-        // GET: api/User
+        readonly IConfiguration configuration;
+
+        public AuthController(IConfiguration configuration)
+        {
+            this.configuration = configuration;
+        }
+
         [HttpGet]
-        public ActionResult<IEnumerable<string>> Get()
+        public IActionResult Get()
         {
-            return new string[] { "value1", "value2" };
+            /*var keyIdentifier = "https://saml.vault.azure.net/secrets/testing";
+            KeyVaultClient kvc = new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(GetToken));
+            SecretBundle secret = Task.Run(() => kvc.GetSecretAsync(keyIdentifier)).ConfigureAwait(false).GetAwaiter().GetResult();
+            var bytes = Convert.FromBase64String(secret.Value);*/
+
+            AuthRequest req = new AuthRequest(configuration["Saml:Issuer"], configuration["Saml:IdPUrl"], configuration["Saml:AssertionUrl"]);
+
+            return Redirect(configuration["Saml:IdPUrl"] + "?SAMLRequest=" + req.GetRequest() + "&ReplayState=" + req.GetRelayState());
         }
 
-        const string relayStateReturnUrl = "https://schoolstatements.azurewebsites.net/auth/callback";
-        //private readonly Saml2Configuration config;
-
-        /*public AuthController(IOptions<Saml2Configuration> configAccessor)
+        [HttpPost]
+        public void Post()
         {
-            config = configAccessor.Value;
-        }*/
-
-        [Route("login")]
-        public IActionResult Login(string returnUrl = null)
-        {
-            Saml2Configuration config = new Saml2Configuration();
-            config.AllowedAudienceUris.Add("https://schoolstatements.azurewebsites.net/auth/metadata");
-            config.AudienceRestricted = true;
-            config.AuthnResponseSignType = Saml2AuthnResponseSignTypes.SignResponse;
-            config.CertificateValidationMode = System.ServiceModel.Security.X509CertificateValidationMode.ChainTrust;
-            config.Issuer = "https://schoolstatements.azurewebites.net/auth/metadata";
-            config.RevocationMode = X509RevocationMode.NoCheck;
-            config.SaveBootstrapContext = false;
-            config.SignAuthnRequest = true;
-            config.SignatureAlgorithm = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
-            config.SigningCertificate = new X509Certificate2("itfoxtec.identity.saml2.testwebappcore_Certificate.pfx", "!QAZ2wsx");
-            config.SingleSignOnDestination = new Uri("https://idp.net.ipl.pt/simplesaml/saml2/idp/SSOService.php");
-
-            var binding = new Saml2RedirectBinding();
-            binding.SetRelayStateQuery(new Dictionary<string, string> { { relayStateReturnUrl, returnUrl ?? Url.Content("~/") } });
-
-            return binding.Bind(new Saml2AuthnRequest(config)
+            if (Request.Form["SAMLResponse"].ToString() != null)
             {
-                Subject = new Subject { NameID = new NameID { ID = "abcd" } },
-            }).ToActionResult();
-        }
+                Response samlResponse = new Response();
+                samlResponse.LoadXmlFromBase64(Request.Form["SAMLResponse"].ToString());
 
-        /*[Route("Callback")]
-        public async Task<IActionResult> Callback()
-        {
-            var binding = new Saml2PostBinding();
-            var saml2AuthnResponse = new Saml2AuthnResponse(config);
+                if (samlResponse.IsValid())
+                {
+                    var email = samlResponse.GetEmail();
+                }
 
-            binding.ReadSamlResponse(Request.ToGenericHttpRequest(), saml2AuthnResponse);
-            if (saml2AuthnResponse.Status != Saml2StatusCodes.Success)
-            {
-                throw new AuthenticationException($"SAML Response status: {saml2AuthnResponse.Status}");
+                Redirect("/counter");
             }
-            binding.Unbind(Request.ToGenericHttpRequest(), saml2AuthnResponse);
-            await saml2AuthnResponse.CreateSession(HttpContext, claimsTransform: (claimsPrincipal) => ClaimsTransform.Transform(claimsPrincipal));
-
-            var relayStateQuery = binding.GetRelayStateQuery();
-            var returnUrl = relayStateQuery.ContainsKey(relayStateReturnUrl) ? relayStateQuery[relayStateReturnUrl] : Url.Content("~/");
-            return Redirect(returnUrl);
         }
 
-        [Route("Logout")]
-        public async Task<IActionResult> Logout()
+        /*public async Task<string> GetToken(string authority, string resource, string scope)
         {
-            Saml2StatusCodes status;
-            var requestBinding = new Saml2PostBinding();
-            var logoutRequest = new Saml2LogoutRequest(config, User);
-            try
-            {
-                requestBinding.Unbind(Request.ToGenericHttpRequest(), logoutRequest);
-                status = Saml2StatusCodes.Success;
-                await logoutRequest.DeleteSession(HttpContext);
-            }
-            catch (Exception exc)
-            {
-                status = Saml2StatusCodes.RequestDenied;
-            }
+            var authContext = new AuthenticationContext(authority);
+            ClientCredential clientCred = new ClientCredential("6ed4ba48-1536-4d37-b157-e2572ae16144", "DG7mzdn-8YthjsW0jvtuGFWNmVTd6[[_");
+            AuthenticationResult result = await authContext.AcquireTokenAsync(resource, clientCred);
 
-            var responsebinding = new Saml2PostBinding();
-            responsebinding.RelayState = requestBinding.RelayState;
-            var saml2LogoutResponse = new Saml2LogoutResponse(config)
-            {
-                InResponseToAsString = logoutRequest.IdAsString,
-                Status = status,
-            };
-            return responsebinding.Bind(saml2LogoutResponse).ToActionResult();
-        }
+            if (result == null)
+                throw new InvalidOperationException("Failed to obtain the JWT token");
 
-        [Route("metadata")]
-        public IActionResult Metadata()
-        {
-            var defaultSite = new Uri($"{Request.Scheme}://{Request.Host.ToUriComponent()}/");
-
-            var entityDescriptor = new EntityDescriptor(config);
-            entityDescriptor.ValidUntil = 365;
-            entityDescriptor.SPSsoDescriptor = new SPSsoDescriptor
-            {
-                WantAssertionsSigned = true,
-                SigningCertificates = new X509Certificate2[]
-                {
-                    config.SigningCertificate
-                },
-                SingleLogoutServices = new SingleLogoutService[]
-                {
-                    new SingleLogoutService { Binding = ProtocolBindings.HttpPost, Location = new Uri(defaultSite, "Auth/Logout") }
-                },
-                NameIDFormats = new Uri[] { NameIdentifierFormats.X509SubjectName },
-                AssertionConsumerServices = new AssertionConsumerService[]
-                {
-                    new AssertionConsumerService {  Binding = ProtocolBindings.HttpPost, Location = new Uri(defaultSite, "Auth/Callback") }
-                },
-                AttributeConsumingServices = new AttributeConsumingService[]
-                {
-                    new AttributeConsumingService { ServiceName = new ServiceName("Editor de enunciados", "en"), RequestedAttributes = CreateRequestedAttributes() }
-                },
-            };
-            entityDescriptor.ContactPerson = new ContactPerson(ContactTypes.Administrative)
-            {
-                GivenName = "Sérgio",
-                SurName = "Cardoso",
-                EmailAddress = "a32263@alunos.isel.pt"
-            };
-            return new Saml2Metadata(entityDescriptor).CreateMetadata().ToActionResult();
-        }
-
-        private IEnumerable<RequestedAttribute> CreateRequestedAttributes()
-        {
-            yield return new RequestedAttribute("urn:oid:2.5.4.4");
-            yield return new RequestedAttribute("urn:oid:2.5.4.3", false);
+            return result.AccessToken;
         }*/
     }
 }
