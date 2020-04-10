@@ -10,7 +10,7 @@ go
 
 create table dbo.tblConfiguration (ApplicationId uniqueidentifier rowguidcol not null, SchoolName varchar(250) not null, [Configuration] varchar(max))
 create table dbo.tblProfiles (ProfileId tinyint identity(1,1) not null, ProfileName varchar(50) not null, constraint PK_tblProfiles primary key clustered(ProfileId))
-create table dbo.tblUsers (UserId uniqueidentifier rowguidcol not null, [Name] varchar(250) not null, Email varchar(100) not null, [Password] varchar(max) not null, Salt varchar(20) not null, ProfileId tinyint not null, constraint PK_tblUsers primary key clustered(UserId))
+create table dbo.tblUsers (UserId uniqueidentifier rowguidcol not null, [Name] varchar(250) not null, Email varchar(100) not null, [Password] varchar(50) not null, Salt varchar(50) not null, ProfileId tinyint not null, constraint PK_tblUsers primary key clustered(UserId))
 create table dbo.tblCurricularUnits (CurricularUnitId uniqueidentifier rowguidcol not null, CurricularUnit varchar(100) not null, constraint PK_tblCurricularUnits primary key clustered(CurricularUnitId))
 go
 
@@ -134,8 +134,8 @@ create procedure dbo.spSetUser
  @UserId uniqueidentifier = null,
  @Name varchar(250),
  @Email varchar(100),
- @Password varchar(max),
- @Salt varchar(20),
+ @Password varchar(50),
+ @Salt varchar(50),
  @ProfileId tinyint
 )
 as

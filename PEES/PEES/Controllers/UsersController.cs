@@ -42,5 +42,14 @@ namespace PEES.Controllers
         public void Delete(int id)
         {
         }
+
+        private string GetEncPassword(string password, string salt)
+        {
+            string encPassword = "";
+
+
+
+            return encPassword;
+        }
     }
 }
