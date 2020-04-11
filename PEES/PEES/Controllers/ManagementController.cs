@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
 using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using PEES.Classes;
+using DataAccess.DAL;
+using DataAccess.DAO;
 
 namespace PEES.Controllers
 {
@@ -14,52 +14,27 @@ namespace PEES.Controllers
     [ApiController]
     public class ManagementController : ControllerBase
     {
-        readonly IConfiguration configuration;
-
         public ManagementController(IConfiguration configuration)
         {
-            this.configuration = configuration;
+            Management.connectionString = configuration.GetConnectionString("SqlServer");
         }
 
         [Route("/api/[controller]/[action]")]
-        [HttpGet]
+        [HttpPost]
         public ActionResult Login([FromBody] RequestLogin login)
         {
             bool result = false;
 
             try
             {
-                string dbPassword = "";
-                string dbSalt = "";
+                var passwordSalt = Management.GetPasswordSlat(login.Email);
 
-                using (SqlConnection sqlConnection = new SqlConnection(configuration["ConnectionString:SqlServer"]))
-                {
-                    sqlConnection.Open();
-
-                    using (SqlCommand sqlCommand = new SqlCommand("dbo.spGetUserPassword", sqlConnection))
-                    {
-                        sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
-
-                        sqlCommand.Parameters.AddWithValue("@Email", login.Email);
-
-                        using (SqlDataReader reader = sqlCommand.ExecuteReader())
-                        {
-                            while (reader.Read())
-                            {
-                                dbPassword = (string)reader["Password"];
-                                dbSalt = (string)reader["Salt"];
-                            }
-                        }
-                    }
-                }
-
-                if (dbPassword != "" && dbSalt != "")
-                    result = (Utils.CreatePasswordHash(login.Password, dbSalt) == dbPassword);
+                if (passwordSalt.Password != "" && passwordSalt.Salt != "")
+                    result = (Utils.CreatePasswordHash(login.Password, passwordSalt.Salt) == passwordSalt.Password);
             }
             catch (Exception)
             {
                 Response.StatusCode = 500;
-                //throw;
             }
 
             var token = result ? Guid.NewGuid().ToString() : "";
@@ -68,16 +43,22 @@ namespace PEES.Controllers
             return new JsonResult(new ManagementStatus() { Status = result, Token = token });
         }
 
-        private class ManagementStatus
+        [HttpGet]
+        public ActionResult Index()
         {
-            public bool Status { get; set; }
-            public string Token { get; set; }
-        }
+            Configuration result;
 
-        public class RequestLogin
-        {
-            public string Email { get; set; }
-            public string Password { get; set; }
+            try
+            {
+                result = Management.GetConfiguration();
+            }
+            catch (Exception)
+            {
+                Response.StatusCode = 500;
+                throw;
+            }
+
+            return new JsonResult(Response.StatusCode != 500 ? result :  null);
         }
 
         /*

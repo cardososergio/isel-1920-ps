@@ -1,4 +1,6 @@
-﻿using System;
+﻿using DataAccess.DAL;
+using DataAccess.DAO;
+using System;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -8,9 +10,21 @@ namespace TestingFunctions
     {
         static void Main(string[] args)
         {
-            string salt = "rVHVy/tQ1m1eM3S5OA1hhQ==";// CreateSalt();
+            Configuration result;
+            Management.connectionString = "Server=.;Database=PEES;Trusted_Connection=True;";
+
+            try
+            {
+                result = Management.GetConfiguration();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            /*string salt = "rVHVy/tQ1m1eM3S5OA1hhQ==";// CreateSalt();
             Console.WriteLine(salt);
-            Console.WriteLine(CreatePasswordHash("cardoso.sergio@outlook.com", salt));
+            Console.WriteLine(CreatePasswordHash("cardoso.sergio@outlook.com", salt));*/
         }
 
         public static string CreateSalt()

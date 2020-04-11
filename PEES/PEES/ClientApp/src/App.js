@@ -3,7 +3,7 @@ import { Route } from 'react-router';
 import { Layout } from './components/Layout';
 import { Home } from './components/Home';
 import { Counter } from './components/Counter';
-import { Management } from './components/Management'
+import { Management } from './components/management/Management'
 
 import './custom.css'
 

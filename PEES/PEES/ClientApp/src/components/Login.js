@@ -8,18 +8,20 @@ export default class Login extends Component {
         this.email = '';
         this.password = '';
 
-        this.state = { "enableButton": false }
+        this.state = {
+            enableButton: false,
+        }
     }
 
     validateForm = () => {
-        this.setState({ "enableButton": this.email.length > 0 && this.password.length > 0 });
+        this.setState({ enableButton: this.email.length > 0 && this.password.length > 0 });
     }
 
     handleSubmit = event => {
         event.preventDefault();
 
         const requestOptions = {
-            method: 'GET',
+            method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 'email': this.email, 'password': this.password })
         };
@@ -27,7 +29,8 @@ export default class Login extends Component {
         fetch('/api/management/login', requestOptions)
             .then(response => response.json())
             .then(data => {
-                this.props.handleStateChange(data.token);
+                if (data.status)
+                    this.props.handleStateChange(data.token);
             })
             .catch(error => {
                 this.setState({ errorMessage: error });
@@ -38,6 +41,11 @@ export default class Login extends Component {
     render() {
         return (
             <Container>
+                <Row>
+                    <Col sm="12" md={{ size: 4, offset: 4 }} className="text-center" style={{marginTop: 50 + 'px'}}>
+                        <h2>{this.props.header}</h2>
+                    </Col>
+                </Row>
                 <Row>
                     <Col sm="12" md={{ size: 4, offset: 4 }}>
                         <Form onSubmit={this.handleSubmit}>

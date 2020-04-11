@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30002.166
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PEES", "PEES\PEES.csproj", "{E35C0476-0C83-480E-94A5-6DBCCAD7E9C0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PEES", "PEES\PEES.csproj", "{E35C0476-0C83-480E-94A5-6DBCCAD7E9C0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestingFunctions", "TestingFunctions\TestingFunctions.csproj", "{D6DEB7F6-C06B-420D-9CEA-8AB58E4C731B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestingFunctions", "TestingFunctions\TestingFunctions.csproj", "{D6DEB7F6-C06B-420D-9CEA-8AB58E4C731B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Data Access", "Data Access\Data Access.csproj", "{A76AA531-95B8-455A-9574-55FE15652D84}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{D6DEB7F6-C06B-420D-9CEA-8AB58E4C731B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D6DEB7F6-C06B-420D-9CEA-8AB58E4C731B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D6DEB7F6-C06B-420D-9CEA-8AB58E4C731B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A76AA531-95B8-455A-9574-55FE15652D84}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A76AA531-95B8-455A-9574-55FE15652D84}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A76AA531-95B8-455A-9574-55FE15652D84}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A76AA531-95B8-455A-9574-55FE15652D84}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
