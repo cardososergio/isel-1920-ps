@@ -24,7 +24,7 @@ export class Management extends Component {
             <>
                 {(this.state.managementToken === undefined ?
                     <Login header="Administração" handleStateChange={this.handleStateChange} /> :
-                    <ManagementDetail/>)}
+                    <ManagementDetail />)}
             </>
         );
     }

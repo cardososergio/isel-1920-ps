@@ -9,6 +9,11 @@
     box-shadow: 1px 1px 1px 0px rgba(0,0,0,0.25);
 }
 
+    .card.large {
+        min-width: 20rem !important;
+        max-width: 20rem !important;
+    }
+
 .card-body {
     padding: 0.7rem !important;
 }
@@ -21,11 +26,24 @@
         cursor: pointer;
     }
 
-span[contenteditable="true"]:focus {
-    border-bottom: 1px solid #aaa;
+span[contenteditable="true"] {
+    white-space: nowrap;
+    overflow: hidden;
     width: 7.5rem;
     display: inline-block;
-    outline-style: none;
-    overflow-wrap: normal;
-    overflow: hidden;
+}
+
+    span[contenteditable="true"]:focus {
+        border-bottom: 1px solid #aaa;
+        outline-style: none;
+    }
+
+        span[contenteditable="true"].large, span[contenteditable="true"]:focus.large {
+            width: 17.5rem;
+        }
+
+
+.main-card-border {
+    border-bottom: 1px solid #dee2e6;
+    margin-bottom: 5px;
 }
