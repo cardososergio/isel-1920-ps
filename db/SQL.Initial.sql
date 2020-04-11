@@ -49,6 +49,8 @@ if exists(select 1 from sys.procedures where name = 'spGetUser')
 	drop procedure dbo.spGetUser
 if exists(select 1 from sys.procedures where name = 'spSetUser')
 	drop procedure dbo.spSetUser
+if exists(select 1 from sys.procedures where name = 'spGetUserPassword')
+	drop procedure dbo.spGetUserPassword
 go
 
 create procedure dbo.spGetCurricularUnits
@@ -165,4 +167,16 @@ as
 	end
 	
 	select @id
+go
+
+create procedure dbo.spGetUserPassword
+(
+ @Email varchar(100)
+)
+as
+	set nocount on;
+
+	select [Password], Salt
+	from dbo.tblUsers
+	where Email = @Email and ProfileId = 3 -- Administrator
 go

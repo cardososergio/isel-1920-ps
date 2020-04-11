@@ -10,7 +10,7 @@ namespace TestingFunctions
         {
             string salt = "rVHVy/tQ1m1eM3S5OA1hhQ==";// CreateSalt();
             Console.WriteLine(salt);
-            Console.WriteLine(CreatePasswordHash("Portugal#2020Portugal#2020Portugal#2020Portugal#2020", salt));
+            Console.WriteLine(CreatePasswordHash("cardoso.sergio@outlook.com", salt));
         }
 
         public static string CreateSalt()
