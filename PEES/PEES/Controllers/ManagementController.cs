@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using PEES.Classes;
 using DataAccess.DAL;
 using DataAccess.DAO;
+using System.Text;
 
 namespace PEES.Controllers
 {
@@ -38,14 +39,31 @@ namespace PEES.Controllers
             }
 
             var token = result ? Guid.NewGuid().ToString() : "";
-            HttpContext.Session.SetString("managementToken", token);
-
+            HttpContext.Session.SetString("ManagementToken", token);
+            
             return new JsonResult(new ManagementStatus() { Status = result, Token = token });
         }
 
         [HttpGet]
         public ActionResult Index()
         {
+            // check for cookie
+            try
+            {
+                string sessionToken = HttpContext.Session.GetString("ManagementToken");
+
+                if (!Request.Cookies.TryGetValue("managementToken", out string cookieToken) || sessionToken == null || cookieToken != sessionToken)
+                {
+                    Response.StatusCode = 401;
+                    return Content("Falta de autenticação");
+                }
+            }
+            catch (Exception)
+            {
+                Response.StatusCode = 500;
+                throw;
+            }
+
             Configuration result;
 
             try

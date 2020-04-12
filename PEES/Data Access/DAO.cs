@@ -24,7 +24,7 @@ namespace DataAccess.DAO
     public class Configuration
     {
         public string SchoolName { get; set; }
-        public List<int> CurricularYears { get; set; }
+        public List<DefaultIntValue> CurricularYears { get; set; }
         public List<DefaultIntValue> Semesters { get; set; }
         public List<DefaultIntValue> Seasons { get; set; }
         public List<DefaultIntValue> NumeringTypes { get; set; }
@@ -35,12 +35,18 @@ namespace DataAccess.DAO
         {
             public int id { get; set; }
             public string value { get; set; }
+            public bool isNew { get; set; }
+            public bool isChange { get; set; }
+            public bool isDelete { get; set; }
         }
 
         public struct DefaultStringValue
         {
             public string id { get; set; }
             public string value { get; set; }
+            public bool isNew { get; set; }
+            public bool isChange { get; set; }
+            public bool isDelete { get; set; }
         }
     }
 }

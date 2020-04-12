@@ -9,14 +9,14 @@ export class Management extends Component {
     constructor() {
         super();
 
-        this.state = { "managementToken": Cookies.get('managementToken') };
+        this.state = { managementToken: Cookies.get('managementToken') };
 
         this.handleStateChange = this.handleStateChange.bind(this);
     }
 
     handleStateChange(value) {
-        this.setState({ "managementToken": value })
         Cookies.set('managementToken', value)
+        this.setState({ managementToken: value })
     }
 
     render() {
