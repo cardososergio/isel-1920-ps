@@ -1,7 +1,9 @@
-﻿import React, { Component } from 'react';
-import { Container, Row, Col, CardDeck } from "reactstrap";
+﻿import React, { Component } from 'react'
+import { Container, Row, Col, CardDeck } from "reactstrap"
+import ContentEditable from 'react-contenteditable'
 
 import ManagementCard from './ManagementCard'
+import Toast from '../Toast'
 
 import './custom.css'
 
@@ -11,9 +13,14 @@ export default class ManagementDetail extends Component {
 
         this.state = {
             configuration: null,
-            isLoading: true
+            isLoading: true,
+            toast: {
+                visible: false,
+                msg: ""
+            }
         }
 
+        this.handleSchoolNameChange = this.handleSchoolNameChange.bind(this)
         this.handleStateChange = this.handleStateChange.bind(this)
     }
 
@@ -31,24 +38,24 @@ export default class ManagementDetail extends Component {
             })
     }
 
-    handleStateChange(newItem, card) {
+    handleSchoolNameChange(e) {
+
+        let toast
+        if (e.target.value.length === 0)
+            toast = { visible: true, msg: "Validar os campos assinalados" }
+        else
+            toast = { visible: false, msg: "" }
 
         this.setState(prevState => {
             let newConfig = prevState.configuration
+            newConfig.schoolName = e.target.value
 
-            let auxConfig = (card === 'semesters' ? newConfig.semesters : (card === 'seasons' ? newConfig.seasons : (card === 'instructionTypes' ? newConfig.instructionTypes : newConfig.curricularUnits)))
-            auxConfig = auxConfig.map(item => {
-                newItem.isChange = (item.id === newItem.id && item.value !== newItem.value)
-                return item.id === newItem.id ? newItem : item
-            });
-
-            newConfig.semesters = card === 'semesters' ? auxConfig : newConfig.semesters
-            newConfig.seasons = card === 'seasons' ? auxConfig : newConfig.seasons
-            newConfig.instructionTypes = card === 'instructionTypes' ? auxConfig : newConfig.instructionTypes
-            newConfig.curricularUnits = card === 'curricularUnits' ? auxConfig : newConfig.curricularUnits
-
-            return { configuration: newConfig }
+            return { configuration: newConfig, toast: toast }
         })
+    }
+
+    handleStateChange() {
+        this.setState(prevState => { return { configuration: prevState.configuration } })
     }
 
     render() {
@@ -56,21 +63,62 @@ export default class ManagementDetail extends Component {
             return <p>Loading ...</p>;
         }
 
-        const cardCurricularYears = this.state.configuration.curricularYears.map(year =>
-            <ManagementCard key={year} value={year} item={year} handleStateChange={this.handleStateChange} />)
-        const cardSemesters = this.state.configuration.semesters.map(semester =>
-            <ManagementCard key={semester.id} value={semester.value} item={semester} card='semesters' handleStateChange={this.handleStateChange} />)
-        const cardSeasons = this.state.configuration.seasons.map(season =>
-            <ManagementCard key={season.id} value={season.value} item={season} card='seasons' handleStateChange={this.handleStateChange} />)
-        const cardNumeringTypes = this.state.configuration.numeringTypes.map(numeringType =>
-            <ManagementCard key={numeringType.id} value={numeringType.value} item={numeringType} card='numeringTypes' handleStateChange={this.handleStateChange} disabled={true} />)
-        const cardInstructionTypes = this.state.configuration.instructionTypes.map(instructionType =>
-            <ManagementCard key={instructionType.id} value={instructionType.value} item={instructionType} card='instructionsTypes' handleStateChange={this.handleStateChange} />)
-        const cardCurricularUnits = this.state.configuration.curricularUnits.map(unit =>
-            <ManagementCard key={unit.id} value={unit.value} item={unit} large={true} card='curricularUnits' handleStateChange={this.handleStateChange} />)
+        const cardCurricularYears = this.state.configuration.curricularYears.map(year => !year.isDelete && <ManagementCard
+            key={'curricularYears' + year.id}
+            value={year.value}
+            item={year}
+            card='curricularYears'
+            handleStateChange={this.handleStateChange} />)
+        const cardSemesters = this.state.configuration.semesters.map(semester => !semester.isDelete && <ManagementCard
+            key={'semesters' + semester.id}
+            value={semester.value}
+            item={semester}
+            card='semesters'
+            handleStateChange={this.handleStateChange} />)
+        const cardSeasons = this.state.configuration.seasons.map(season => !season.isDelete && <ManagementCard
+            key={'seasons' + season.id}
+            value={season.value}
+            item={season}
+            card='seasons'
+            handleStateChange={this.handleStateChange} />)
+        const cardNumeringTypes = this.state.configuration.numeringTypes.map(numeringType => !numeringType.isDelete && <ManagementCard
+            key={'numeringTypes' + numeringType.id}
+            value={numeringType.value}
+            item={numeringType}
+            card='numeringTypes'
+            handleStateChange={this.handleStateChange} disabled={true} />)
+        const cardInstructionTypes = this.state.configuration.instructionTypes.map(instructionType => !instructionType.isDelete && <ManagementCard
+            key={'instructionTypes' + instructionType.id}
+            value={instructionType.value}
+            item={instructionType}
+            card='instructionsTypes'
+            handleStateChange={this.handleStateChange} />)
+        const cardCurricularUnits = this.state.configuration.curricularUnits.map(unit => !unit.isDelete && <ManagementCard
+            key={'curricularUnits' + unit.id}
+            value={unit.value}
+            item={unit}
+            large={true}
+            card='curricularUnits'
+            handleStateChange={this.handleStateChange} />)
 
         return (
             <Container>
+                <Row>
+                    <Col><Toast msg={this.state.toast.msg} visible={this.state.toast.visible} /></Col>
+                </Row>
+                <Row className="main-card-border">
+                    <Col><h4>Estabelecimento escolar</h4></Col>
+                </Row>
+                <Row style={{ marginBottom: 20 + 'px' }}>
+                    <Col>
+                        <ContentEditable
+                            html={this.state.configuration.schoolName}
+                            onChange={this.handleSchoolNameChange}
+                            tagName='span'
+                            className='input-text'
+                        />
+                    </Col>
+                </Row>
                 <Row className="main-card-border">
                     <Col><h4>Anos curriculares</h4></Col>
                 </Row>

@@ -9,10 +9,15 @@
     box-shadow: 1px 1px 1px 0px rgba(0,0,0,0.25);
 }
 
-    .card.large {
-        min-width: 20rem !important;
-        max-width: 20rem !important;
-    }
+.card.large {
+    min-width: 20rem !important;
+    max-width: 20rem !important;
+}
+
+.got-error {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+}
 
 .card-body {
     padding: 0.7rem !important;
@@ -33,15 +38,18 @@ span[contenteditable="true"] {
     display: inline-block;
 }
 
-    span[contenteditable="true"]:focus {
-        border-bottom: 1px solid #aaa;
-        outline-style: none;
-    }
+span[contenteditable="true"]:focus {
+    border-bottom: 1px solid #aaa;
+    outline-style: none;
+}
 
-        span[contenteditable="true"].large, span[contenteditable="true"]:focus.large {
-            width: 17.5rem;
-        }
+span[contenteditable="true"].large, span[contenteditable="true"]:focus.large {
+    width: 17.5rem;
+}
 
+span[contenteditable="true"].input-text {
+    width: 100%
+}
 
 .main-card-border {
     border-bottom: 1px solid #dee2e6;
