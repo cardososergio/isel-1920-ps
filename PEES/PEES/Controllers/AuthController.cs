@@ -26,10 +26,10 @@ namespace PEES.Controllers
 
         [HttpGet("{metadata}", Name = "Metadata")]
         [Produces("application/xml")]
-        public ActionResult<IEnumerable<string>> GetByMetadata(string metadata)
+        public IActionResult GetByMetadata(string metadata)
         {
             if (metadata.ToLower() == "metadata")
-                return new string[] { "value1", "value2" };
+                return Ok(new AuthMetadata(configuration["Saml:AssertionUrl"], configuration["Saml:Issuer"], configuration["Saml:Certificate"]).getMetadata());
 
             return null;
         }

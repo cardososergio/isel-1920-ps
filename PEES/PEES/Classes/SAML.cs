@@ -159,5 +159,123 @@ namespace PEES.Classes
                 return WebUtility.UrlEncode(Convert.ToBase64String(ASCIIEncoding.ASCII.GetBytes(assertionUrl)));
             }
         }
+
+        public class AuthMetadata
+        {
+            private readonly string assertionUrl;
+            private readonly string issuer;
+            private readonly string certificate;
+
+            public AuthMetadata(string assertionUrl, string issuer, string certificate)
+            {
+                this.assertionUrl = assertionUrl;
+                this.issuer = issuer;
+                this.certificate = certificate;
+            }
+
+            public XmlDocument getMetadata()
+            {
+                using StringWriter sw = new StringWriter();
+                XmlWriterSettings xws = new XmlWriterSettings()
+                {
+                    OmitXmlDeclaration = true
+                };
+
+                using (XmlWriter xw = XmlWriter.Create(sw, xws))
+                {
+                    xw.WriteStartElement("md", "EntityDescriptor", "urn:oasis:names:tc:SAML:2.0:metadata");
+                    xw.WriteAttributeString("entityID", issuer);
+                    xw.WriteAttributeString("xmlns", "ds", null, "http://www.w3.org/2000/09/xmldsig#");
+                    xw.WriteAttributeString("xmlns", "xsi", null, "http://www.w3.org/2001/XMLSchema-instance");
+                    xw.WriteAttributeString("xmlns", "mdui", null, "urn:oasis:names:tc:SAML:metadata:ui");
+
+                    xw.WriteStartElement("md", "SPSSODescriptor", "urn:oasis:names:tc:SAML:2.0:metadata");
+                    xw.WriteAttributeString("protocolSupportEnumeration", "urn:oasis:names:tc:SAML:2.0:protocol");
+
+                    xw.WriteStartElement("md", "Extensions", "urn:oasis:names:tc:SAML:2.0:metadata");
+                    xw.WriteStartElement("mdui", "UIInfo", "urn:oasis:names:tc:SAML:metadata:ui");
+                    xw.WriteStartElement("mdui", "DisplayName", "urn:oasis:names:tc:SAML:metadata:ui");
+                    xw.WriteAttributeString("lang", "pt");
+                    xw.WriteString("PEES SP");
+                    xw.WriteEndElement();
+                    xw.WriteEndElement();
+                    xw.WriteEndElement();
+
+                    xw.WriteStartElement("md", "KeyDescriptor", "urn:oasis:names:tc:SAML:2.0:metadata");
+                    xw.WriteStartElement("ds", "KeyInfo", "http://www.w3.org/2000/09/xmldsig#");
+                    xw.WriteStartElement("ds", "X509Data", "http://www.w3.org/2000/09/xmldsig#");
+                    xw.WriteStartElement("ds", "X509Certificate", "http://www.w3.org/2000/09/xmldsig#");
+                    xw.WriteString(certificate);
+                    xw.WriteEndElement();
+                    xw.WriteEndElement();
+                    xw.WriteEndElement();
+                    xw.WriteEndElement();
+
+                    xw.WriteStartElement("md", "AssertionConsumerService", "urn:oasis:names:tc:SAML:2.0:metadata");
+                    xw.WriteAttributeString("Binding", "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST");
+                    xw.WriteAttributeString("Location", assertionUrl);
+                    xw.WriteAttributeString("index", "0");
+                    xw.WriteEndElement();
+
+                    xw.WriteStartElement("md", "AttributeConsumingService", "urn:oasis:names:tc:SAML:2.0:metadata");
+                    xw.WriteAttributeString("index", "1");
+
+                    xw.WriteStartElement("md", "ServiceName", "urn:oasis:names:tc:SAML:2.0:metadata");
+                    xw.WriteAttributeString("xml", "lang", null, "pt");
+                    xw.WriteString("PEES - SAML");
+                    xw.WriteEndElement();
+                    xw.WriteStartElement("md", "RequestedAttribute", "urn:oasis:names:tc:SAML:2.0:metadata");
+                    xw.WriteAttributeString("FriendlyName", "displayName");
+                    xw.WriteAttributeString("Name", "urn:oid:2.16.840.1.113730.3.1.241");
+                    xw.WriteAttributeString("NameFormat", "urn:oasis:names:tc:SAML:2.0:attrname-format:uri");
+                    xw.WriteAttributeString("isRequired", "true");
+                    xw.WriteEndElement();
+                    xw.WriteStartElement("md", "RequestedAttribute", "urn:oasis:names:tc:SAML:2.0:metadata");
+                    xw.WriteAttributeString("FriendlyName", "mail");
+                    xw.WriteAttributeString("Name", "urn:oid:0.9.2342.19200300.100.1.3");
+                    xw.WriteAttributeString("NameFormat", "urn:oasis:names:tc:SAML:2.0:attrname-format:uri");
+                    xw.WriteAttributeString("isRequired", "true");
+                    xw.WriteEndElement();
+                    xw.WriteEndElement();
+
+                    xw.WriteEndElement();
+
+                    xw.WriteStartElement("md", "Organization", "urn:oasis:names:tc:SAML:2.0:metadata");
+                    
+                    xw.WriteStartElement("md", "OrganizationName", "urn:oasis:names:tc:SAML:2.0:metadata");
+                    xw.WriteAttributeString("xml", "lang", null, "pt");
+                    xw.WriteString("ISEL-PS-1920");
+                    xw.WriteEndElement();
+
+                    xw.WriteStartElement("md", "OrganizationDisplayName", "urn:oasis:names:tc:SAML:2.0:metadata");
+                    xw.WriteAttributeString("xml", "lang", null, "pt");
+                    xw.WriteString("Plataforma de edicao de enunciados escolares");
+                    xw.WriteEndElement();
+
+                    xw.WriteStartElement("md", "OrganizationURL", "urn:oasis:names:tc:SAML:2.0:metadata");
+                    xw.WriteAttributeString("xml", "lang", null, "pt");
+                    xw.WriteString("https://pees.azurewebsites.net");
+                    xw.WriteEndElement();
+
+                    xw.WriteEndElement();
+
+                    xw.WriteStartElement("md", "ContactPerson", "urn:oasis:names:tc:SAML:2.0:metadata");
+                    xw.WriteAttributeString("contactType", "technical");
+
+                    xw.WriteStartElement("md", "EmailAddress", "urn:oasis:names:tc:SAML:2.0:metadata");
+                    xw.WriteString("a32263@alunos.isel.pt");
+                    xw.WriteEndElement();
+
+                    xw.WriteEndElement();
+
+                    xw.WriteEndElement();
+                }
+
+                XmlDocument xml = new XmlDocument();
+                xml.LoadXml(sw.ToString());
+
+                return xml;
+            }
+        }
     }
 }
