@@ -1,15 +1,17 @@
-﻿import React, { Component } from 'react';
+﻿import React from 'react';
 import Cookies from 'js-cookie'
 
 import Login from '../Login'
 import ManagementDetail from './ManagementDetail'
 
-export class Management extends Component {
+export class Management extends React.Component {
 
     constructor() {
         super();
 
-        this.state = { managementToken: Cookies.get('managementToken') };
+        this.state = {
+            managementToken: Cookies.get('managementToken')
+        };
 
         this.handleStateChange = this.handleStateChange.bind(this);
     }

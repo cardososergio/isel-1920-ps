@@ -1,4 +1,4 @@
-﻿import React, { Component } from 'react'
+﻿import React from 'react'
 import { Container, Row, Col, CardDeck } from "reactstrap"
 import ContentEditable from 'react-contenteditable'
 
@@ -7,7 +7,7 @@ import Toast from '../Toast'
 
 import './custom.css'
 
-export default class ManagementDetail extends Component {
+export default class ManagementDetail extends React.Component {
     constructor(props) {
         super(props)
 

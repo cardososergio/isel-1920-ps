@@ -1,4 +1,4 @@
-﻿import React, { Component } from 'react';
+﻿import React from 'react';
 import { Card, CardBody, CardText } from "reactstrap";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTimes } from '@fortawesome/free-solid-svg-icons'
@@ -6,7 +6,7 @@ import ContentEditable from 'react-contenteditable'
 
 import './custom.css'
 
-export default class ManagementCad extends Component {
+export default class ManagementCad extends React.Component {
     constructor(props) {
         super(props);
 

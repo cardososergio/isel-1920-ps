@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using PEES.Classes;
 using PEES.Classes.SAML;
-using System.Collections.Generic;
+using System.Text;
 
 namespace PEES.Controllers
 {
@@ -35,26 +36,20 @@ namespace PEES.Controllers
         }
 
         [HttpPost]
-        [Consumes("application/xml")]
-        public void Post()
+        public IActionResult Post()
         {
             if (Request.Form["SAMLResponse"].ToString() != null)
             {
-                Response samlResponse = new Response();
+                Response samlResponse = new Response(configuration["KeyVault:KeyIdentifier"], configuration["KeyVault:client_id"], configuration["KeyVault:client_secret"]);
                 samlResponse.LoadXmlFromBase64(Request.Form["SAMLResponse"].ToString());
+                var user = samlResponse.Check();
 
-                if (samlResponse.IsValid())
-                {
-                    var email = samlResponse.GetEmail();
-                }
+                Response.Cookies.Append("AccessToken", Utils.EncryptKey(Encoding.ASCII.GetBytes(user.Email)));
 
-                Redirect("/counter");
+                return RedirectPermanent("/");
             }
+
+            return RedirectPermanent("/error");
         }
     }
-
-    /*var keyIdentifier = "https://saml.vault.azure.net/secrets/testing";
-            KeyVaultClient kvc = new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(GetToken));
-            SecretBundle secret = Task.Run(() => kvc.GetSecretAsync(keyIdentifier)).ConfigureAwait(false).GetAwaiter().GetResult();
-            var bytes = Convert.FromBase64String(secret.Value);*/
 }

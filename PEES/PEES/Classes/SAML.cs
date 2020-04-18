@@ -1,8 +1,9 @@
-﻿using System;
+﻿using DataAccess.DAO;
+using System;
 using System.IO;
 using System.IO.Compression;
 using System.Net;
-using System.Security.Cryptography.Xml;
+using System.Security.Cryptography;
 using System.Text;
 using System.Xml;
 
@@ -14,11 +15,20 @@ namespace PEES.Classes
         {
             private XmlDocument xmlDoc;
 
-            public Response()
+            public Response(string keyIdentifier, string clientId, string clientSecret)
             {
+                Utils.keyIdentifier = keyIdentifier;
+                Utils.clientId = clientId;
+                Utils.clientSecret = clientSecret;
             }
 
-            public void LoadXml(string xml)
+            public void LoadXmlFromBase64(string response)
+            {
+                ASCIIEncoding enc = new ASCIIEncoding();
+                LoadXml(enc.GetString(Convert.FromBase64String(response)));
+            }
+
+            private void LoadXml(string xml)
             {
                 xmlDoc = new XmlDocument
                 {
@@ -28,73 +38,88 @@ namespace PEES.Classes
                 xmlDoc.LoadXml(xml);
             }
 
-            public void LoadXmlFromBase64(string response)
-            {
-                ASCIIEncoding enc = new ASCIIEncoding();
-                LoadXml(enc.GetString(Convert.FromBase64String(response)));
-            }
-
-            public bool IsValid()
-            {
-                bool status = true;
-
-                XmlNamespaceManager manager = new XmlNamespaceManager(xmlDoc.NameTable);
-                manager.AddNamespace("ds", SignedXml.XmlDsigNamespaceUrl);
-                manager.AddNamespace("saml", "urn:oasis:names:tc:SAML:2.0:assertion");
-                manager.AddNamespace("samlp", "urn:oasis:names:tc:SAML:2.0:protocol");
-                XmlNodeList nodeList = xmlDoc.SelectNodes("//ds:Signature", manager);
-
-                SignedXml signedXml = new SignedXml(xmlDoc);
-                signedXml.LoadXml((XmlElement)nodeList[0]);
-
-                var notBefore = NotBefore();
-                status &= !notBefore.HasValue || (notBefore <= DateTime.Now);
-
-                var notOnOrAfter = NotOnOrAfter();
-                status &= !notOnOrAfter.HasValue || (notOnOrAfter > DateTime.Now);
-
-                return status;
-            }
-
-            public DateTime? NotBefore()
-            {
-                XmlNamespaceManager manager = new XmlNamespaceManager(xmlDoc.NameTable);
-                manager.AddNamespace("saml", "urn:oasis:names:tc:SAML:2.0:assertion");
-                manager.AddNamespace("samlp", "urn:oasis:names:tc:SAML:2.0:protocol");
-
-                var nodes = xmlDoc.SelectNodes("/samlp:Response/saml:Assertion/saml:Conditions", manager);
-                string value = null;
-                if (nodes != null && nodes.Count > 0 && nodes[0] != null && nodes[0].Attributes != null && nodes[0].Attributes["NotBefore"] != null)
-                {
-                    value = nodes[0].Attributes["NotBefore"].Value;
-                }
-                return value != null ? DateTime.Parse(value) : (DateTime?)null;
-            }
-
-            public DateTime? NotOnOrAfter()
-            {
-                XmlNamespaceManager manager = new XmlNamespaceManager(xmlDoc.NameTable);
-                manager.AddNamespace("saml", "urn:oasis:names:tc:SAML:2.0:assertion");
-                manager.AddNamespace("samlp", "urn:oasis:names:tc:SAML:2.0:protocol");
-
-                var nodes = xmlDoc.SelectNodes("/samlp:Response/saml:Assertion/saml:Conditions", manager);
-                string value = null;
-                if (nodes != null && nodes.Count > 0 && nodes[0] != null && nodes[0].Attributes != null && nodes[0].Attributes["NotOnOrAfter"] != null)
-                {
-                    value = nodes[0].Attributes["NotOnOrAfter"].Value;
-                }
-                return value != null ? DateTime.Parse(value) : (DateTime?)null;
-            }
-
-            public string GetEmail()
+            public User Check()
             {
                 XmlNamespaceManager manager = new XmlNamespaceManager(xmlDoc.NameTable);
                 manager.AddNamespace("ds", SignedXml.XmlDsigNamespaceUrl);
                 manager.AddNamespace("saml", "urn:oasis:names:tc:SAML:2.0:assertion");
                 manager.AddNamespace("samlp", "urn:oasis:names:tc:SAML:2.0:protocol");
+                manager.AddNamespace("saml2p", "urn:oasis:names:tc:SAML:2.0:protocol");
+                manager.AddNamespace("xenc", "http://www.w3.org/2001/04/xmlenc#");
+                manager.AddNamespace("ds", "http://www.w3.org/2000/09/xmldsig#");
 
-                XmlNode node = xmlDoc.SelectSingleNode("/samlp:Response/saml:Assertion/saml:AttributeStatement/saml:Attribute/saml:AttributeValue", manager);
-                return node.InnerText;
+                // Is saml2p
+                node = xmlDoc.SelectSingleNode("samlp:Response", manager);
+                var ns = node.Prefix;
+
+                // Check for status
+                node = xmlDoc.SelectSingleNode("/" + ns + ":Response/" + ns + ":Status/" + ns + ":StatusCode", manager);
+                bool xmlStatus = node.Attributes["Value"].Value == "urn:oasis:names:tc:SAML:2.0:status:Success" ? true : false;
+
+                if (!xmlStatus)
+                    return user;
+
+                // Check if Assertion is encrypted
+                node = xmlDoc.SelectSingleNode("/" + ns + ":Response/saml2:EncryptedAssertion", manager);
+                if (node != null)
+                {
+                    // Get encKey
+                    node = xmlDoc.SelectSingleNode("/" + ns + ":Response/saml2:EncryptedAssertion/xenc:EncryptedData/ds:KeyInfo/xenc:EncryptedKey/xenc:CipherData/xenc:CipherValue", manager);
+                    string encKey = node.InnerText;
+                    // Get encXml
+                    node = xmlDoc.SelectSingleNode("/" + ns + ":Response/saml2:EncryptedAssertion/xenc:EncryptedData/xenc:CipherData/xenc:CipherValue", manager);
+                    string encXml = node.InnerText;
+
+                    var secretKey = Utils.DecryptKey(Convert.FromBase64String(encKey));
+
+                        string decryptedXml = DecryptAssertion(Convert.FromBase64String(encXml), secretKey);
+                        // seek start and end of xml
+                        int startXml = decryptedXml.IndexOf("<");
+                        int endXml = decryptedXml.LastIndexOf(">") + 1;
+                        string xml = decryptedXml.Substring(startXml, endXml - startXml);
+
+                        XmlDocument doc = new XmlDocument();
+                        doc.LoadXml(xml);
+
+                        nodes = doc.SelectNodes("/saml2:Assertion/saml2:AttributeStatement/saml2:Attribute", manager);
+                }
+                else
+                {
+                    nodes = xmlDoc.SelectNodes("/" + ns + ":Response/saml:Assertion/saml:AttributeStatement/saml:Attribute", manager);
+                }
+
+                foreach (XmlNode item in nodes)
+                {
+                    if (item.ChildNodes.Count == 0)
+                        continue;
+
+                    if (item.Attributes["Name"].Value == "urn:oid:0.9.2342.19200300.100.1.3")
+                        user.Email = item.SelectSingleNode("saml:AttributeValue", manager).InnerText;
+                    if (item.Attributes["Name"].Value == "urn:oid:2.16.840.1.113730.3.1.241")
+                        user.Name = item.SelectSingleNode("saml:AttributeValue", manager).InnerText;
+                }
+
+                return user;
+            }
+
+            private string DecryptAssertion(byte[] cipherText, byte[] Key)
+            {
+                string plaintext = null;
+                byte[] iv = new byte[16];
+
+                // Create AesManaged    
+                using (AesManaged aes = new AesManaged())
+                {
+                    aes.Padding = PaddingMode.None;
+
+                    ICryptoTransform decryptor = aes.CreateDecryptor(Key, iv);
+
+                    using MemoryStream ms = new MemoryStream(cipherText);
+                    using CryptoStream cs = new CryptoStream(ms, decryptor, CryptoStreamMode.Read);
+                    using StreamReader reader = new StreamReader(cs);
+                    plaintext = reader.ReadToEnd();
+                }
+                return plaintext;
             }
         }
 
@@ -241,7 +266,7 @@ namespace PEES.Classes
                     xw.WriteEndElement();
 
                     xw.WriteStartElement("md", "Organization", "urn:oasis:names:tc:SAML:2.0:metadata");
-                    
+
                     xw.WriteStartElement("md", "OrganizationName", "urn:oasis:names:tc:SAML:2.0:metadata");
                     xw.WriteAttributeString("xml", "lang", null, "pt");
                     xw.WriteString("ISEL-PS-1920");
