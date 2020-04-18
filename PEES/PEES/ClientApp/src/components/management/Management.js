@@ -10,14 +10,14 @@ export class Management extends React.Component {
         super();
 
         this.state = {
-            managementToken: Cookies.get('managementToken')
+            managementToken: Cookies.get('ManagementToken')
         };
 
         this.handleStateChange = this.handleStateChange.bind(this);
     }
 
     handleStateChange(value) {
-        Cookies.set('managementToken', value)
+        Cookies.set('ManagementToken', value)
         this.setState({ managementToken: value })
     }
 

@@ -35,7 +35,7 @@ namespace PEES.Controllers
             }
             catch (Exception)
             {
-                Response.StatusCode = 500;
+                return new UnauthorizedResult();
             }
 
             var token = result ? Guid.NewGuid().ToString() : "";
@@ -54,17 +54,15 @@ namespace PEES.Controllers
 
                 if (!Request.Cookies.TryGetValue("managementToken", out string cookieToken) || sessionToken == null || cookieToken != sessionToken)
                 {
-                    Response.StatusCode = 401;
-                    return Content("Falta de autenticação");
+                    return new UnauthorizedResult();
                 }
             }
             catch (Exception)
             {
-                Response.StatusCode = 500;
-                throw;
+                return new UnauthorizedResult();
             }
 
-            Configuration result;
+            Configuration result = new Configuration();
 
             try
             {
@@ -72,11 +70,39 @@ namespace PEES.Controllers
             }
             catch (Exception)
             {
-                Response.StatusCode = 500;
-                throw;
+                return new UnauthorizedResult();
             }
 
-            return new JsonResult(Response.StatusCode != 500 ? result :  null);
+            return new JsonResult(result);
+        }
+
+        [HttpPost]
+        public ActionResult Post([FromBody] Configuration conf)
+        {
+            // check for cookie
+            try
+            {
+                string sessionToken = HttpContext.Session.GetString("ManagementToken");
+
+                if (!Request.Cookies.TryGetValue("managementToken", out string cookieToken) || sessionToken == null || cookieToken != sessionToken)
+                {
+                    return new UnauthorizedResult();
+                }
+            }
+            catch (Exception)
+            {
+                return new UnauthorizedResult();
+            }
+
+            try
+            {
+            }
+            catch (Exception)
+            {
+                return new UnauthorizedResult();
+            }
+
+            return Ok();
         }
 
         /*

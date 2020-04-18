@@ -1,18 +1,42 @@
 ﻿a.navbar-brand {
-  white-space: normal;
-  text-align: center;
-  word-break: break-all;
+    white-space: normal;
+    text-align: center;
+    word-break: break-all;
 }
 
-html {
-  font-size: 14px;
+header {
+    background: #f1efef;
+    border-bottom: 1px solid #e8e9ed;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+    clear: both;
+    padding: 0 21px;
+    height: 55px;
+    position: fixed;
+    left: 280px;
+    left: 0;
+    right: 0;
+    top: 0;
+    z-index: 999;
 }
+
+.header .container {
+    margin-left: 0;
+    margin-right: 0;
+    max-width: 100%;
+}
+.header .container .nav-link {
+    font-size: x-large;
+    padding-top: 0px;
+    padding-bottom: 0px;
+}
+
+.border-bottom {
+    border-bottom: none !important;
+}
+
 @media (min-width: 768px) {
   html {
     font-size: 16px;
   }
-}
-
-.box-shadow {
-  box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
 }

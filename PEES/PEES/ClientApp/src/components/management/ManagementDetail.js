@@ -1,6 +1,10 @@
 ﻿import React from 'react'
+import { Link } from 'react-router-dom';
 import { Container, Row, Col, CardDeck } from "reactstrap"
 import ContentEditable from 'react-contenteditable'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faCloudUploadAlt } from '@fortawesome/free-solid-svg-icons'
+
 
 import ManagementCard from './ManagementCard'
 import Toast from '../Toast'
@@ -16,12 +20,13 @@ export default class ManagementDetail extends React.Component {
             isLoading: true,
             toast: {
                 visible: false,
-                msg: ""
+                msg: "Validar os campos assinalados"
             }
         }
 
         this.handleSchoolNameChange = this.handleSchoolNameChange.bind(this)
         this.handleStateChange = this.handleStateChange.bind(this)
+        this.handleSaveConfiguration = this.handleSaveConfiguration.bind(this)
     }
 
     componentDidMount() {
@@ -40,22 +45,63 @@ export default class ManagementDetail extends React.Component {
 
     handleSchoolNameChange(e) {
 
-        let toast
-        if (e.target.value.length === 0)
-            toast = { visible: true, msg: "Validar os campos assinalados" }
-        else
-            toast = { visible: false, msg: "" }
-
         this.setState(prevState => {
             let newConfig = prevState.configuration
             newConfig.schoolName = e.target.value
 
-            return { configuration: newConfig, toast: toast }
+            return {
+                configuration: newConfig, toast: { visible: this.checkForErrors(), msg: prevState.toast.msg } }
         })
     }
 
     handleStateChange() {
         this.setState(prevState => { return { configuration: prevState.configuration } })
+        this.setState(prevState => { return { toast: { visible: this.checkForErrors(), msg: prevState.toast.msg } } })
+    }
+
+    checkForErrors() {
+        let result = true
+
+        result = this.state.configuration.schoolName.length === 0
+        if (this.state.configuration.curricularYears.find(item => item.gotError)) result = true
+        if (this.state.configuration.curricularYears.find(item => isNaN(item.value) || !Number.isInteger(+item.value) || (+item.value <= 0))) result = true // check if is integer
+        if (this.state.configuration.semesters.find(item => item.gotError)) result = true
+        if (this.state.configuration.seasons.find(item => item.gotError)) result = true
+        if (this.state.configuration.instructionTypes.find(item => item.gotError)) result = true
+        if (this.state.configuration.curricularUnits.find(item => item.gotError)) result = true
+
+        return result
+    }
+
+    handleSaveConfiguration(e) {
+        if (this.state.toast.visible) {
+            alert('Falta resolver os alertas pendentes')
+            return
+        }
+
+        let conf = Object.create(null)
+        conf.curricularYears = this.state.configuration.curricularYears
+        conf.curricularUnits = this.state.configuration.curricularUnits
+        conf.instructionTypes = this.state.configuration.instructionTypes
+        conf.numeringTypes = this.state.configuration.numeringTypes
+        conf.seasons = this.state.configuration.seasons
+        conf.semesters = this.state.configuration.semesters
+        conf.schoolName = this.state.configuration.schoolName
+
+        const requestOptions = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(conf)
+        };
+
+        fetch('/api/management', requestOptions)
+            .then(response => response.json())
+            .then(data => {
+                alert('done')
+            })
+            .catch(error => {
+                alert(error)
+            })
     }
 
     render() {
@@ -102,48 +148,54 @@ export default class ManagementDetail extends React.Component {
             handleStateChange={this.handleStateChange} />)
 
         return (
-            <Container>
-                <Row>
-                    <Col><Toast msg={this.state.toast.msg} visible={this.state.toast.visible} /></Col>
-                </Row>
-                <Row className="main-card-border">
-                    <Col><h4>Estabelecimento escolar</h4></Col>
-                </Row>
-                <Row style={{ marginBottom: 20 + 'px' }}>
-                    <Col>
-                        <ContentEditable
-                            html={this.state.configuration.schoolName}
-                            onChange={this.handleSchoolNameChange}
-                            tagName='span'
-                            className='input-text'
-                        />
-                    </Col>
-                </Row>
-                <Row className="main-card-border">
-                    <Col><h4>Anos curriculares</h4></Col>
-                </Row>
-                <Row style={{ marginBottom: 20 + 'px' }}><Col><CardDeck style={{ display: 'flex', flexDirection: 'row' }}>{cardCurricularYears}</CardDeck></Col></Row>
-                <Row className="main-card-border">
-                    <Col><h4>Semestres</h4></Col>
-                </Row>
-                <Row style={{ marginBottom: 20 + 'px' }}><Col><CardDeck style={{ display: 'flex', flexDirection: 'row' }}>{cardSemesters}</CardDeck></Col></Row>
-                <Row className="main-card-border">
-                    <Col><h4>Épocas</h4></Col>
-                </Row>
-                <Row style={{ marginBottom: 20 + 'px' }}><Col><CardDeck style={{ display: 'flex', flexDirection: 'row' }}>{cardSeasons}</CardDeck></Col></Row>
-                <Row className="main-card-border">
-                    <Col><h4>Tipos de pergunta</h4></Col>
-                </Row>
-                <Row style={{ marginBottom: 20 + 'px' }}><Col><CardDeck style={{ display: 'flex', flexDirection: 'row' }}>{cardNumeringTypes}</CardDeck></Col></Row>
-                <Row className="main-card-border">
-                    <Col><h4>Tipos de enunciado</h4></Col>
-                </Row>
-                <Row style={{ marginBottom: 20 + 'px' }}><Col><CardDeck style={{ display: 'flex', flexDirection: 'row' }}>{cardInstructionTypes}</CardDeck></Col></Row>
-                <Row className="main-card-border">
-                    <Col><h4>Disciplinas</h4></Col>
-                </Row>
-                <Row><Col><CardDeck style={{ display: 'flex', flexDirection: 'row' }}>{cardCurricularUnits}</CardDeck></Col></Row>
-            </Container>
+            <>
+                <Link to="#" title="Gravar" onClick={this.handleSaveConfiguration}>
+                    <FontAwesomeIcon icon={faCloudUploadAlt} />
+                </Link>
+
+                <Container>
+                    <Row>
+                        <Col><Toast msg={this.state.toast.msg} visible={this.state.toast.visible} /></Col>
+                    </Row>
+                    <Row className="main-card-border">
+                        <Col><h4>Estabelecimento escolar</h4></Col>
+                    </Row>
+                    <Row style={{ marginBottom: 20 + 'px' }}>
+                        <Col className={this.state.configuration.schoolName.length === 0 ? "got-error" : null}>
+                            <ContentEditable
+                                html={this.state.configuration.schoolName}
+                                onChange={this.handleSchoolNameChange}
+                                tagName='span'
+                                className='input-text'
+                            />
+                        </Col>
+                    </Row>
+                    <Row className="main-card-border">
+                        <Col><h4>Anos curriculares</h4></Col>
+                    </Row>
+                    <Row style={{ marginBottom: 20 + 'px' }}><Col><CardDeck style={{ display: 'flex', flexDirection: 'row' }}>{cardCurricularYears}</CardDeck></Col></Row>
+                    <Row className="main-card-border">
+                        <Col><h4>Semestres</h4></Col>
+                    </Row>
+                    <Row style={{ marginBottom: 20 + 'px' }}><Col><CardDeck style={{ display: 'flex', flexDirection: 'row' }}>{cardSemesters}</CardDeck></Col></Row>
+                    <Row className="main-card-border">
+                        <Col><h4>Épocas</h4></Col>
+                    </Row>
+                    <Row style={{ marginBottom: 20 + 'px' }}><Col><CardDeck style={{ display: 'flex', flexDirection: 'row' }}>{cardSeasons}</CardDeck></Col></Row>
+                    <Row className="main-card-border">
+                        <Col><h4>Tipos de pergunta</h4></Col>
+                    </Row>
+                    <Row style={{ marginBottom: 20 + 'px' }}><Col><CardDeck style={{ display: 'flex', flexDirection: 'row' }}>{cardNumeringTypes}</CardDeck></Col></Row>
+                    <Row className="main-card-border">
+                        <Col><h4>Tipos de enunciado</h4></Col>
+                    </Row>
+                    <Row style={{ marginBottom: 20 + 'px' }}><Col><CardDeck style={{ display: 'flex', flexDirection: 'row' }}>{cardInstructionTypes}</CardDeck></Col></Row>
+                    <Row className="main-card-border">
+                        <Col><h4>Disciplinas</h4></Col>
+                    </Row>
+                    <Row><Col><CardDeck style={{ display: 'flex', flexDirection: 'row' }}>{cardCurricularUnits}</CardDeck></Col></Row>
+                </Container>
+            </>
         );
     }
 }

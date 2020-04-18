@@ -4,9 +4,6 @@
     max-width: 10rem !important;
     flex: 1;
     height: 50px;
-    -webkit-box-shadow: 1px 1px 1px 0px rgba(0,0,0,0.25);
-    -moz-box-shadow: 1px 1px 1px 0px rgba(0,0,0,0.25);
-    box-shadow: 1px 1px 1px 0px rgba(0,0,0,0.25);
 }
 
 .card.large {
@@ -54,4 +51,11 @@ span[contenteditable="true"].input-text {
 .main-card-border {
     border-bottom: 1px solid #dee2e6;
     margin-bottom: 5px;
+}
+
+.content.container > a {
+    position: absolute;
+    right: 2em;
+    font-size: x-large;
+    top: 60px;
 }

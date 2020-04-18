@@ -40,9 +40,14 @@ namespace PEES.Classes
 
             public User Check()
             {
+                var user = new User();
+
+                XmlNodeList nodes;
+                XmlNode node;
+
                 XmlNamespaceManager manager = new XmlNamespaceManager(xmlDoc.NameTable);
-                manager.AddNamespace("ds", SignedXml.XmlDsigNamespaceUrl);
                 manager.AddNamespace("saml", "urn:oasis:names:tc:SAML:2.0:assertion");
+                manager.AddNamespace("saml2", "urn:oasis:names:tc:SAML:2.0:assertion");
                 manager.AddNamespace("samlp", "urn:oasis:names:tc:SAML:2.0:protocol");
                 manager.AddNamespace("saml2p", "urn:oasis:names:tc:SAML:2.0:protocol");
                 manager.AddNamespace("xenc", "http://www.w3.org/2001/04/xmlenc#");
@@ -72,16 +77,16 @@ namespace PEES.Classes
 
                     var secretKey = Utils.DecryptKey(Convert.FromBase64String(encKey));
 
-                        string decryptedXml = DecryptAssertion(Convert.FromBase64String(encXml), secretKey);
-                        // seek start and end of xml
-                        int startXml = decryptedXml.IndexOf("<");
-                        int endXml = decryptedXml.LastIndexOf(">") + 1;
-                        string xml = decryptedXml.Substring(startXml, endXml - startXml);
+                    string decryptedXml = DecryptAssertion(Convert.FromBase64String(encXml), secretKey);
+                    // seek start and end of xml
+                    int startXml = decryptedXml.IndexOf("<");
+                    int endXml = decryptedXml.LastIndexOf(">") + 1;
+                    string xml = decryptedXml.Substring(startXml, endXml - startXml);
 
-                        XmlDocument doc = new XmlDocument();
-                        doc.LoadXml(xml);
+                    XmlDocument doc = new XmlDocument();
+                    doc.LoadXml(xml);
 
-                        nodes = doc.SelectNodes("/saml2:Assertion/saml2:AttributeStatement/saml2:Attribute", manager);
+                    nodes = doc.SelectNodes("/saml2:Assertion/saml2:AttributeStatement/saml2:Attribute", manager);
                 }
                 else
                 {

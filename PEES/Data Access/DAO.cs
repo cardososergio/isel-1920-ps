@@ -21,6 +21,13 @@ namespace DataAccess.DAO
         public string Salt { get; set; }
     }
 
+    public struct User
+    {
+        public string UserId { get; set; }
+        public string Name { get; set; }
+        public string Email { get; set; }
+    }
+
     public class Configuration
     {
         public string SchoolName { get; set; }

@@ -1,0 +1,21 @@
+﻿@import url("https://fonts.googleapis.com/css?family=Open+Sans:400,600,700");
+
+body {
+    display: table;
+    font-family: "Open Sans", sans-serif !important;
+    font-size: 14px;
+    width: 100%;
+}
+
+.content .container {
+    margin-top: 80px;
+}
+
+a {
+    text-decoration: none;
+    outline: none !important;
+    color: #007bff;
+    -webkit-transition: all 0.25s ease;
+    transition: all 0.25s ease;
+    cursor: pointer;
+}

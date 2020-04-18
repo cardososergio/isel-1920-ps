@@ -5,10 +5,10 @@ export class Home extends React.Component {
     static displayName = Home.name;
 
     render() {
-        if (Cookies.get('AccessToken') === undefined) {
+        /*if (Cookies.get('AccessToken') === undefined) {
             window.location.href = "/auth"
             return (<></>)
-        }
+        }*/
 
         return (
             <div>
