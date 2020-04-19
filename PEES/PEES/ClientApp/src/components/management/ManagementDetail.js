@@ -87,6 +87,7 @@ export default class ManagementDetail extends React.Component {
         conf.seasons = this.state.configuration.seasons
         conf.semesters = this.state.configuration.semesters
         conf.schoolName = this.state.configuration.schoolName
+        conf.configurationId = this.state.configuration.configurationId
 
         const requestOptions = {
             method: 'POST',
@@ -95,9 +96,11 @@ export default class ManagementDetail extends React.Component {
         };
 
         fetch('/api/management', requestOptions)
-            .then(response => response.json())
-            .then(data => {
-                alert('done')
+            .then(response => {
+                if (response.status === 200)
+                    alert('Dados gravados!')
+                else
+                    alert(response.statusText)
             })
             .catch(error => {
                 alert(error)

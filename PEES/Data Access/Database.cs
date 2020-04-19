@@ -19,6 +19,34 @@ namespace DataAccess
             if (conn == null) conn = new SqlConnection(connectionString);
         }
 
+        public DataSet ExecSPDataSet(string sp, List<SqlParameter> parameters = null)
+        {
+            DataSet result = new DataSet();
+
+            try
+            {
+                // Check if closed, then open it
+                if (conn.State == ConnectionState.Closed) conn.Open();
+
+                SqlCommand Cmd = new SqlCommand(sp, conn);
+                Cmd.CommandType = CommandType.StoredProcedure;
+                if (parameters != null) Cmd.Parameters.AddRange(parameters.ToArray());
+
+                SqlDataAdapter da = new SqlDataAdapter(Cmd);
+                da.Fill(result);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                if (conn.State == ConnectionState.Open) conn.Close();
+            }
+
+            return result;
+        }
+
         public DataTable ExecSPDataTable(string sp, List<SqlParameter> parameters = null)
         {
             DataTable Result = new DataTable();
@@ -68,6 +96,29 @@ namespace DataAccess
             }
 
             return Result;
+        }
+
+        public void ExecSPNonQuery(string sp, List<SqlParameter> parameters)
+        {
+            try
+            {
+                // Check if closed, then open it
+                if (conn.State == ConnectionState.Closed) conn.Open();
+
+                SqlCommand Cmd = new SqlCommand(sp, conn);
+                Cmd.CommandType = CommandType.StoredProcedure;
+                Cmd.Parameters.AddRange(parameters.ToArray());
+
+                Cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+            finally
+            {
+                if (conn.State == ConnectionState.Open) conn.Close();
+            }
         }
 
         #region "dispose"

@@ -16,7 +16,7 @@ export class NavMenu extends Component {
             <header className="header">
                 <Navbar className="navbar-expand-sm navbar-toggleable-sm ng-white border-bottom box-shadow mb-3" light>
                     <Container>
-                        <NavbarBrand tag={Link} to="/">Plataforma de Edição de Enunciados Escolares</NavbarBrand>
+                        <NavbarBrand tag={Link} to="/">Plataforma de Enunciados Escolares</NavbarBrand>
                     </Container>
                 </Navbar>
             </header>

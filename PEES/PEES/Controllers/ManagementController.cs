@@ -96,6 +96,7 @@ namespace PEES.Controllers
 
             try
             {
+                var r = Management.SetConfiguration(conf);
             }
             catch (Exception)
             {

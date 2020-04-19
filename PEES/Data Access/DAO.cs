@@ -30,12 +30,13 @@ namespace DataAccess.DAO
 
     public class Configuration
     {
+        public string ConfigurationId { get; set; }
         public string SchoolName { get; set; }
-        public List<DefaultIntValue> CurricularYears { get; set; }
-        public List<DefaultIntValue> Semesters { get; set; }
-        public List<DefaultIntValue> Seasons { get; set; }
+        public List<DefaultStringValue> CurricularYears { get; set; }
+        public List<DefaultStringValue> Semesters { get; set; }
+        public List<DefaultStringValue> Seasons { get; set; }
         public List<DefaultIntValue> NumeringTypes { get; set; }
-        public List<DefaultIntValue> InstructionTypes { get; set; }
+        public List<DefaultStringValue> InstructionTypes { get; set; }
         public List<DefaultStringValue> CurricularUnits { get; set; }
 
         public struct DefaultIntValue
