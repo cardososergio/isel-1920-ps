@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Container, Row, Col, CardDeck } from "reactstrap"
 import ContentEditable from 'react-contenteditable'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCloudUploadAlt } from '@fortawesome/free-solid-svg-icons'
+import { faCloudUploadAlt, faPlus } from '@fortawesome/free-solid-svg-icons'
 
 
 import ManagementCard from './ManagementCard'
@@ -27,6 +27,7 @@ export default class ManagementDetail extends React.Component {
         this.handleSchoolNameChange = this.handleSchoolNameChange.bind(this)
         this.handleStateChange = this.handleStateChange.bind(this)
         this.handleSaveConfiguration = this.handleSaveConfiguration.bind(this)
+        this.handleNewItem = this.handleNewItem.bind(this)
     }
 
     componentDidMount() {
@@ -50,27 +51,45 @@ export default class ManagementDetail extends React.Component {
             newConfig.schoolName = e.target.value
 
             return {
-                configuration: newConfig, toast: { visible: this.checkForErrors(), msg: prevState.toast.msg } }
+                configuration: newConfig, toast: { visible: this.checkForErrors(), msg: prevState.toast.msg }
+            }
         })
     }
 
     handleStateChange() {
-        this.setState(prevState => { return { configuration: prevState.configuration } })
-        this.setState(prevState => { return { toast: { visible: this.checkForErrors(), msg: prevState.toast.msg } } })
+        this.setState(prevState => { return { configuration: prevState.configuration, toast: { visible: this.checkForErrors(), msg: prevState.toast.msg } } })
     }
 
     checkForErrors() {
         let result = true
 
         result = this.state.configuration.schoolName.length === 0
-        if (this.state.configuration.curricularYears.find(item => item.gotError)) result = true
-        if (this.state.configuration.curricularYears.find(item => isNaN(item.value) || !Number.isInteger(+item.value) || (+item.value <= 0))) result = true // check if is integer
-        if (this.state.configuration.semesters.find(item => item.gotError)) result = true
-        if (this.state.configuration.seasons.find(item => item.gotError)) result = true
-        if (this.state.configuration.instructionTypes.find(item => item.gotError)) result = true
-        if (this.state.configuration.curricularUnits.find(item => item.gotError)) result = true
+        if (!result && this.state.configuration.curricularYears.find(item => item.gotError)) result = true
+        if (!result && this.state.configuration.curricularYears.find(item => !item.isDelete && (isNaN(item.value) || !Number.isInteger(+item.value) || (+item.value <= 0)))) result = true // check if is integer
+        if (!result && this.state.configuration.semesters.find(item => item.gotError)) result = true
+        if (!result && this.state.configuration.seasons.find(item => item.gotError)) result = true
+        if (!result && this.state.configuration.instructionTypes.find(item => item.gotError)) result = true
+        if (!result && this.state.configuration.curricularUnits.find(item => item.gotError)) result = true
 
         return result
+    }
+
+    generateGuid() {
+        var result, i, j;
+        result = '';
+        for (j = 0; j < 32; j++) {
+            if (j === 8 || j === 12 || j === 16 || j === 20)
+                result = result + '-';
+            i = Math.floor(Math.random() * 16).toString(16).toUpperCase();
+            result = result + i;
+        }
+        return result;
+    }
+
+    handleNewItem(e) {
+        let prev = this.state.configuration
+        eval("prev." + e).push({ id: this.generateGuid(), value: "", isNew: true, isChange: false, isDelete: false, gotError: true })
+        this.setState(prevState => { return { configuration: prev, toast: { visible: true, msg: prevState.toast.msg } } })
     }
 
     handleSaveConfiguration(e) {
@@ -99,8 +118,11 @@ export default class ManagementDetail extends React.Component {
             .then(response => {
                 if (response.status === 200)
                     alert('Dados gravados!')
-                else
-                    alert(response.statusText)
+
+                return response.json()
+            })
+            .then(data => {
+                console.log(data)
             })
             .catch(error => {
                 alert(error)
@@ -174,27 +196,44 @@ export default class ManagementDetail extends React.Component {
                         </Col>
                     </Row>
                     <Row className="main-card-border">
-                        <Col><h4>Anos curriculares</h4></Col>
+                        <Col>
+                            <h4>Anos curriculares</h4>
+                            <FontAwesomeIcon icon={faPlus} onClick={() => this.handleNewItem("curricularYears")} />
+                        </Col>
                     </Row>
                     <Row style={{ marginBottom: 20 + 'px' }}><Col><CardDeck style={{ display: 'flex', flexDirection: 'row' }}>{cardCurricularYears}</CardDeck></Col></Row>
                     <Row className="main-card-border">
-                        <Col><h4>Semestres</h4></Col>
+                        <Col>
+                            <h4>Semestres</h4>
+                            <FontAwesomeIcon icon={faPlus} onClick={() => this.handleNewItem("semesters")} />
+                        </Col>
                     </Row>
                     <Row style={{ marginBottom: 20 + 'px' }}><Col><CardDeck style={{ display: 'flex', flexDirection: 'row' }}>{cardSemesters}</CardDeck></Col></Row>
                     <Row className="main-card-border">
-                        <Col><h4>Épocas</h4></Col>
+                        <Col>
+                            <h4>Épocas</h4>
+                            <FontAwesomeIcon icon={faPlus} onClick={() => this.handleNewItem("seasons")} />
+                        </Col>
                     </Row>
                     <Row style={{ marginBottom: 20 + 'px' }}><Col><CardDeck style={{ display: 'flex', flexDirection: 'row' }}>{cardSeasons}</CardDeck></Col></Row>
                     <Row className="main-card-border">
-                        <Col><h4>Tipos de pergunta</h4></Col>
+                        <Col>
+                            <h4>Tipos de pergunta</h4>
+                        </Col>
                     </Row>
                     <Row style={{ marginBottom: 20 + 'px' }}><Col><CardDeck style={{ display: 'flex', flexDirection: 'row' }}>{cardNumeringTypes}</CardDeck></Col></Row>
                     <Row className="main-card-border">
-                        <Col><h4>Tipos de enunciado</h4></Col>
+                        <Col>
+                            <h4>Tipos de enunciado</h4>
+                            <FontAwesomeIcon icon={faPlus} onClick={() => this.handleNewItem("instructionTypes")} />
+                        </Col>
                     </Row>
                     <Row style={{ marginBottom: 20 + 'px' }}><Col><CardDeck style={{ display: 'flex', flexDirection: 'row' }}>{cardInstructionTypes}</CardDeck></Col></Row>
                     <Row className="main-card-border">
-                        <Col><h4>Disciplinas</h4></Col>
+                        <Col>
+                            <h4>Disciplinas</h4>
+                            <FontAwesomeIcon icon={faPlus} onClick={() => this.handleNewItem("curricularUnits")} />
+                        </Col>
                     </Row>
                     <Row><Col><CardDeck style={{ display: 'flex', flexDirection: 'row' }}>{cardCurricularUnits}</CardDeck></Col></Row>
                 </Container>

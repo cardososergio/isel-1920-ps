@@ -14,7 +14,7 @@ export default class ManagementCad extends React.Component {
         this.handleDelete = this.handleDelete.bind(this)
     }
 
-    handleDelete(e) {
+    handleDelete() {
         let newItem = this.props.item
         newItem.isDelete = true
         newItem.gotError = false
@@ -27,6 +27,9 @@ export default class ManagementCad extends React.Component {
         newItem.value = e.target.value
         newItem.isChange = true
         newItem.gotError = e.target.value.length === 0
+
+        if (!newItem.gotError && this.props.card === "curricularYears")
+            newItem.gotError =  isNaN(e.target.value) || !Number.isInteger(+e.target.value) || (+e.target.value <= 0)
 
         this.props.handleStateChange()
     }

@@ -5,6 +5,7 @@ body {
     font-family: "Open Sans", sans-serif !important;
     font-size: 14px;
     width: 100%;
+    color: #606060;
 }
 
 .content .container {
@@ -14,8 +15,12 @@ body {
 a {
     text-decoration: none;
     outline: none !important;
-    color: #007bff;
+    color: #4da3ff;
     -webkit-transition: all 0.25s ease;
     transition: all 0.25s ease;
     cursor: pointer;
+}
+
+.card-body svg {
+    color: #4da3ff;
 }

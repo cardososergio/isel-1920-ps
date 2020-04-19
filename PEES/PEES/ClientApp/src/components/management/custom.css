@@ -59,3 +59,13 @@ span[contenteditable="true"].input-text {
     font-size: x-large;
     top: 60px;
 }
+
+.main-card-border h4 {
+    float: left;
+}
+.main-card-border svg {
+    float: right;
+    margin-top: 10px;
+    cursor: pointer;
+    color: #4da3ff;
+}

@@ -86,7 +86,7 @@ namespace DataAccess.DAL
 
                 foreach (var item in configuration.CurricularYears)
                 {
-                    if (!item.isNew && !item.isChange && !item.isDelete) continue;
+                    if ((!item.isNew && !item.isChange && !item.isDelete) || (item.isNew && item.isDelete)) continue;
 
                     parameters = new List<SqlParameter>();
 
@@ -99,7 +99,7 @@ namespace DataAccess.DAL
 
                 foreach (var item in configuration.Semesters)
                 {
-                    if (!item.isNew && !item.isChange && !item.isDelete) continue;
+                    if ((!item.isNew && !item.isChange && !item.isDelete) || (item.isNew && item.isDelete)) continue;
 
                     parameters = new List<SqlParameter>();
 
@@ -112,7 +112,7 @@ namespace DataAccess.DAL
 
                 foreach (var item in configuration.Seasons)
                 {
-                    if (!item.isNew && !item.isChange && !item.isDelete) continue;
+                    if ((!item.isNew && !item.isChange && !item.isDelete) || (item.isNew && item.isDelete)) continue;
 
                     parameters = new List<SqlParameter>();
 
@@ -125,7 +125,7 @@ namespace DataAccess.DAL
 
                 foreach (var item in configuration.InstructionTypes)
                 {
-                    if (!item.isNew && !item.isChange && !item.isDelete) continue;
+                    if ((!item.isNew && !item.isChange && !item.isDelete) || (item.isNew && item.isDelete)) continue;
 
                     parameters = new List<SqlParameter>();
 
@@ -138,7 +138,7 @@ namespace DataAccess.DAL
 
                 foreach (var item in configuration.CurricularUnits)
                 {
-                    if (!item.isNew && !item.isChange && !item.isDelete) continue;
+                    if ((!item.isNew && !item.isChange && !item.isDelete) || (item.isNew && item.isDelete)) continue;
 
                     parameters = new List<SqlParameter>();
 
