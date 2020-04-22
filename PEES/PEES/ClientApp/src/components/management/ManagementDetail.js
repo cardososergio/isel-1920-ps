@@ -116,16 +116,17 @@ export default class ManagementDetail extends React.Component {
 
         fetch('/api/management', requestOptions)
             .then(response => {
-                if (response.status === 200)
-                    alert('Dados gravados!')
+                if (response.status === 200) return response.json();
 
-                return response.json()
+                return Promise.reject(response.statusText)
             })
             .then(data => {
-                console.log(data)
+                alert('Dados gravados')
+                this.setState({ configuration: data, isLoading: false })
+                console.log("done")
             })
             .catch(error => {
-                alert(error)
+                console.error(error)
             })
     }
 

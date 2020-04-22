@@ -35,7 +35,7 @@ namespace PEES.Controllers
             }
             catch (Exception)
             {
-                return new UnauthorizedResult();
+                return new BadRequestResult();
             }
 
             var token = result ? Guid.NewGuid().ToString() : "";
@@ -54,12 +54,12 @@ namespace PEES.Controllers
 
                 if (!Request.Cookies.TryGetValue("managementToken", out string cookieToken) || sessionToken == null || cookieToken != sessionToken)
                 {
-                    return new UnauthorizedResult();
+                    return new BadRequestResult();
                 }
             }
             catch (Exception)
             {
-                return new UnauthorizedResult();
+                return new BadRequestResult();
             }
 
             Configuration result = new Configuration();
@@ -70,7 +70,7 @@ namespace PEES.Controllers
             }
             catch (Exception)
             {
-                return new UnauthorizedResult();
+                return new BadRequestResult();
             }
 
             return new JsonResult(result);
@@ -86,52 +86,29 @@ namespace PEES.Controllers
 
                 if (!Request.Cookies.TryGetValue("managementToken", out string cookieToken) || sessionToken == null || cookieToken != sessionToken)
                 {
-                    return new UnauthorizedResult();
+                    return new BadRequestResult();
                 }
             }
             catch (Exception)
             {
-                return new UnauthorizedResult();
+                return new BadRequestResult();
             }
+
+            var result = new Configuration();
 
             try
             {
-                var r = Management.SetConfiguration(conf);
+                if (Management.SetConfiguration(conf))
+                    result = Management.GetConfiguration();
+                else
+                    throw new Exception("Not able to save");
             }
             catch (Exception)
             {
-                return new UnauthorizedResult();
+                return new BadRequestResult();
             }
 
-            return Ok();
+            return new JsonResult(result);
         }
-
-        /*
-        // GET: api/Management
-        [HttpGet]
-        public IEnumerable<string> Get()
-        {
-            return new string[] { "value1", "value2" };
-        }
-
-        // GET: api/Management/5
-        [HttpGet("{id}", Name = "Get")]
-        public string Get(int id)
-        {
-            return "value";
-        }
-
-        // PUT: api/Management/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
-
-        // DELETE: api/ApiWithActions/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
-        }
-        */
     }
 }

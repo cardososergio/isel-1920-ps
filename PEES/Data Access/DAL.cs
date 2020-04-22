@@ -80,7 +80,6 @@ namespace DataAccess.DAL
             using (Database db = new Database(connectionString))
             {
                 List<SqlParameter> parameters = new List<SqlParameter>();
-                parameters.Add(new SqlParameter("@ApplicationId", configuration.ConfigurationId));
                 parameters.Add(new SqlParameter("@SchoolName", configuration.SchoolName));
                 db.ExecSPNonQuery("dbo.spSetSchoolName", parameters);
 
