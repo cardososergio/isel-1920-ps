@@ -7,7 +7,7 @@ import ManagementDetail from './ManagementDetail'
 export class Management extends React.Component {
 
     constructor() {
-        super();
+        super()
 
         this.state = {
             managementToken: Cookies.get('ManagementToken')
@@ -16,16 +16,16 @@ export class Management extends React.Component {
         this.handleStateChange = this.handleStateChange.bind(this);
     }
 
-    handleStateChange(value) {
-        Cookies.set('ManagementToken', value)
-        this.setState({ managementToken: value })
+    handleStateChange() {
+        this.setState({ managementToken: "" })
     }
 
     render() {
         return (
             <>
                 {(this.state.managementToken === undefined ?
-                    <Login header="Administração" handleStateChange={this.handleStateChange} /> :
+                    <Login header="Administração" handleStateChange={this.handleStateChange} />
+                    :
                     <ManagementDetail />)}
             </>
         );

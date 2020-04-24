@@ -5,7 +5,6 @@ import ContentEditable from 'react-contenteditable'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCloudUploadAlt, faPlus } from '@fortawesome/free-solid-svg-icons'
 
-
 import ManagementCard from './ManagementCard'
 import Toast from '../Toast'
 
@@ -24,40 +23,28 @@ export default class ManagementDetail extends React.Component {
             }
         }
 
-        this.handleSchoolNameChange = this.handleSchoolNameChange.bind(this)
         this.handleStateChange = this.handleStateChange.bind(this)
         this.handleSaveConfiguration = this.handleSaveConfiguration.bind(this)
         this.handleNewItem = this.handleNewItem.bind(this)
+        this.handleKeyDown = this.handleKeyDown.bind(this)
+        this.handleBlur = this.handleBlur.bind(this)
     }
 
     componentDidMount() {
         this.setState({ isLoading: true })
 
         fetch('/api/management')
-            .then(response => response.json())
+            .then(response => { if (response.status === 200) return response.json(); return Promise.reject(response.statusText) })
             .then(data => {
-                this.setState({ configuration: data, isLoading: false });
+                this.setState({ configuration: data, isLoading: false })
             })
             .catch(error => {
-                this.setState({ errorMessage: error });
-                console.error('There was an error!', error);
+                alert('Não foi possível ligar à base de dados!')
             })
-    }
-
-    handleSchoolNameChange(e) {
-
-        this.setState(prevState => {
-            let newConfig = prevState.configuration
-            newConfig.schoolName = e.target.value
-
-            return {
-                configuration: newConfig, toast: { visible: this.checkForErrors(), msg: prevState.toast.msg }
-            }
-        })
     }
 
     handleStateChange() {
-        this.setState(prevState => { return { configuration: prevState.configuration, toast: { visible: this.checkForErrors(), msg: prevState.toast.msg } } })
+        this.setState(prevState => { return { ...prevState, toast: { ...prevState.toast, visible: this.checkForErrors() } } })
     }
 
     checkForErrors() {
@@ -75,21 +62,65 @@ export default class ManagementDetail extends React.Component {
     }
 
     generateGuid() {
-        var result, i, j;
+        let result, j
         result = '';
+
         for (j = 0; j < 32; j++) {
             if (j === 8 || j === 12 || j === 16 || j === 20)
-                result = result + '-';
-            i = Math.floor(Math.random() * 16).toString(16).toUpperCase();
-            result = result + i;
+                result = result + '-'
+
+            result += Math.floor(Math.random() * 16).toString(16).toUpperCase()
         }
-        return result;
+
+        return result
     }
 
     handleNewItem(e) {
         let prev = this.state.configuration
-        eval("prev." + e).push({ id: this.generateGuid(), value: "", isNew: true, isChange: false, isDelete: false, gotError: true })
+
+        switch (e) {
+            case "curricularYears":
+                prev.curricularYears.push({ id: this.generateGuid(), value: "", isNew: true, isChange: false, isDelete: false, gotError: true })
+                break;
+            case "semesters":
+                prev.semesters.push({ id: this.generateGuid(), value: "", isNew: true, isChange: false, isDelete: false, gotError: true })
+                break;
+            case "seasons":
+                prev.seasons.push({ id: this.generateGuid(), value: "", isNew: true, isChange: false, isDelete: false, gotError: true })
+                break;
+            case "instructionTypes":
+                prev.instructionTypes.push({ id: this.generateGuid(), value: "", isNew: true, isChange: false, isDelete: false, gotError: true })
+                break;
+            case "curricularUnits":
+                prev.curricularUnits.push({ id: this.generateGuid(), value: "", isNew: true, isChange: false, isDelete: false, gotError: true })
+                break;
+            default:
+        }
+
         this.setState(prevState => { return { configuration: prev, toast: { visible: true, msg: prevState.toast.msg } } })
+    }
+
+    handleKeyDown(e) {
+        if (e.keyCode === 13) {
+            e.preventDefault()
+        }
+    }
+
+    handleBlur(e) {
+        const schoolName = e.target.innerText
+
+        this.setState(prevState => {
+            let newConfig = prevState.configuration
+
+            if (newConfig.schoolName === schoolName)
+                return null
+
+            newConfig.schoolName = schoolName
+
+            return {
+                configuration: newConfig, toast: { visible: this.checkForErrors(), msg: prevState.toast.msg }
+            }
+        })
     }
 
     handleSaveConfiguration(e) {
@@ -114,6 +145,8 @@ export default class ManagementDetail extends React.Component {
             body: JSON.stringify(conf)
         };
 
+        this.setState({ isLoading: true })
+
         fetch('/api/management', requestOptions)
             .then(response => {
                 if (response.status === 200) return response.json();
@@ -122,51 +155,51 @@ export default class ManagementDetail extends React.Component {
             })
             .then(data => {
                 alert('Dados gravados')
+
                 this.setState({ configuration: data, isLoading: false })
-                console.log("done")
+
             })
             .catch(error => {
-                console.error(error)
+                alert('Houve problemas ao gravar os dados!')
             })
     }
 
     render() {
-        if (this.state.isLoading) {
-            return <p>Loading ...</p>;
-        }
+        if (this.state.isLoading)
+            return <p className="content container">A carregar os dados...</p>
 
-        const cardCurricularYears = this.state.configuration.curricularYears.map(year => !year.isDelete && <ManagementCard
-            key={'curricularYears' + year.id}
+        const cardCurricularYears = this.state.configuration.curricularYears.map((year, index) => !year.isDelete && <ManagementCard
+            key={"curricularYears" + index}
             value={year.value}
             item={year}
             card='curricularYears'
             handleStateChange={this.handleStateChange} />)
-        const cardSemesters = this.state.configuration.semesters.map(semester => !semester.isDelete && <ManagementCard
-            key={'semesters' + semester.id}
+        const cardSemesters = this.state.configuration.semesters.map((semester, index) => !semester.isDelete && <ManagementCard
+            key={'semesters' + index}
             value={semester.value}
             item={semester}
             card='semesters'
             handleStateChange={this.handleStateChange} />)
-        const cardSeasons = this.state.configuration.seasons.map(season => !season.isDelete && <ManagementCard
-            key={'seasons' + season.id}
+        const cardSeasons = this.state.configuration.seasons.map((season, index) => !season.isDelete && <ManagementCard
+            key={'seasons' + index}
             value={season.value}
             item={season}
             card='seasons'
             handleStateChange={this.handleStateChange} />)
-        const cardNumeringTypes = this.state.configuration.numeringTypes.map(numeringType => !numeringType.isDelete && <ManagementCard
-            key={'numeringTypes' + numeringType.id}
+        const cardNumeringTypes = this.state.configuration.numeringTypes.map((numeringType, index) => !numeringType.isDelete && <ManagementCard
+            key={'numeringTypes' + index}
             value={numeringType.value}
             item={numeringType}
             card='numeringTypes'
             handleStateChange={this.handleStateChange} disabled={true} />)
-        const cardInstructionTypes = this.state.configuration.instructionTypes.map(instructionType => !instructionType.isDelete && <ManagementCard
-            key={'instructionTypes' + instructionType.id}
+        const cardInstructionTypes = this.state.configuration.instructionTypes.map((instructionType, index) => !instructionType.isDelete && <ManagementCard
+            key={'instructionTypes' + index}
             value={instructionType.value}
             item={instructionType}
             card='instructionsTypes'
             handleStateChange={this.handleStateChange} />)
-        const cardCurricularUnits = this.state.configuration.curricularUnits.map(unit => !unit.isDelete && <ManagementCard
-            key={'curricularUnits' + unit.id}
+        const cardCurricularUnits = this.state.configuration.curricularUnits.map((unit, index) => !unit.isDelete && <ManagementCard
+            key={'curricularUnits' + index}
             value={unit.value}
             item={unit}
             large={true}
@@ -175,9 +208,7 @@ export default class ManagementDetail extends React.Component {
 
         return (
             <>
-                <Link to="#" title="Gravar" onClick={this.handleSaveConfiguration}>
-                    <FontAwesomeIcon icon={faCloudUploadAlt} />
-                </Link>
+                <Link to="#" title="Gravar" onClick={this.handleSaveConfiguration}><FontAwesomeIcon icon={faCloudUploadAlt} /></Link>
 
                 <Container>
                     <Row>
@@ -190,9 +221,9 @@ export default class ManagementDetail extends React.Component {
                         <Col className={this.state.configuration.schoolName.length === 0 ? "got-error" : null}>
                             <ContentEditable
                                 html={this.state.configuration.schoolName}
-                                onChange={this.handleSchoolNameChange}
                                 tagName='span'
                                 className='input-text'
+                                onKeyDown={this.handleKeyDown} onBlur={this.handleBlur}
                             />
                         </Col>
                     </Row>

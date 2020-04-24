@@ -9,12 +9,6 @@ namespace DataAccess.DAO
         public string Password { get; set; }
     }
 
-    public struct ManagementStatus
-    {
-        public bool Status { get; set; }
-        public string Token { get; set; }
-    }
-
     public struct PasswordSalt
     {
         public string Password { get; set; }

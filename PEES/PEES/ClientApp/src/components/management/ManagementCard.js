@@ -8,10 +8,11 @@ import './custom.css'
 
 export default class ManagementCad extends React.Component {
     constructor(props) {
-        super(props);
+        super(props)
 
-        this.handleChange = this.handleChange.bind(this)
         this.handleDelete = this.handleDelete.bind(this)
+        this.handleKeyDown = this.handleKeyDown.bind(this)
+        this.handleBlur = this.handleBlur.bind(this)
     }
 
     handleDelete() {
@@ -22,14 +23,25 @@ export default class ManagementCad extends React.Component {
         this.props.handleStateChange()
     }
 
-    handleChange(e) {
+    handleKeyDown(e) {
+        if (e.keyCode === 13) {
+            e.preventDefault()
+        }
+    }
+
+    handleBlur(e) {
+        const value = e.target.innerText
         let newItem = this.props.item
-        newItem.value = e.target.value
+
+        if (value === newItem.value)
+            return
+
+        newItem.value = value
         newItem.isChange = true
-        newItem.gotError = e.target.value.length === 0
+        newItem.gotError = value.length === 0
 
         if (!newItem.gotError && this.props.card === "curricularYears")
-            newItem.gotError =  isNaN(e.target.value) || !Number.isInteger(+e.target.value) || (+e.target.value <= 0)
+            newItem.gotError = isNaN(value) || !Number.isInteger(+value) || (+value <= 0)
 
         this.props.handleStateChange()
     }
@@ -43,9 +55,9 @@ export default class ManagementCad extends React.Component {
                         <ContentEditable
                             html={this.props.value.toString()}
                             disabled={this.props.disabled ? true : false}
-                            onChange={this.handleChange}
                             tagName='span'
                             className={this.props.large ? 'large' : null}
+                            onKeyDown={this.handleKeyDown} onBlur={this.handleBlur}
                         />
                     </CardText>
                 </CardBody>

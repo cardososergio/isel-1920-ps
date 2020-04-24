@@ -1,24 +1,24 @@
-﻿import React, { Component } from 'react';
+﻿import React from 'react';
 import { Form, Button, FormGroup, Input, Label, Container, Row, Col } from "reactstrap";
 
-export default class Login extends Component {
+export default class Login extends React.Component {
     constructor(props) {
-        super(props);
+        super(props)
 
-        this.email = '';
-        this.password = '';
+        this.email = ''
+        this.password = ''
 
         this.state = {
-            enableButton: false,
+            enableButton: false
         }
     }
 
     validateForm = () => {
-        this.setState({ enableButton: this.email.length > 0 && this.password.length > 0 });
+        this.setState({ enableButton: this.email.length > 0 && this.password.length > 0 })
     }
 
     handleSubmit = event => {
-        event.preventDefault();
+        event.preventDefault()
 
         const requestOptions = {
             method: 'POST',
@@ -27,14 +27,17 @@ export default class Login extends Component {
         };
 
         fetch('/api/management/login', requestOptions)
-            .then(response => response.json())
-            .then(data => {
-                if (data.status)
-                    this.props.handleStateChange(data.token);
+            .then(response => {
+                
+                if (response.status === 200) {
+                    this.props.handleStateChange()
+                    return
+                }
+                    
+                return Promise.reject(response.statusText)
             })
             .catch(error => {
-                this.setState({ errorMessage: error });
-                console.error('There was an error!', error);
+                alert("Não foi possível autenticar!")
             });
     }
 

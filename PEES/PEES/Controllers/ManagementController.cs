@@ -40,8 +40,9 @@ namespace PEES.Controllers
 
             var token = result ? Guid.NewGuid().ToString() : "";
             HttpContext.Session.SetString("ManagementToken", token);
+            Response.Cookies.Append("ManagementToken", token, new CookieOptions() { SameSite = SameSiteMode.Strict, IsEssential = true });
             
-            return new JsonResult(new ManagementStatus() { Status = result, Token = token });
+            return new OkResult();
         }
 
         [HttpGet]
@@ -52,7 +53,7 @@ namespace PEES.Controllers
             {
                 string sessionToken = HttpContext.Session.GetString("ManagementToken");
 
-                if (!Request.Cookies.TryGetValue("managementToken", out string cookieToken) || sessionToken == null || cookieToken != sessionToken)
+                if (!Request.Cookies.TryGetValue("ManagementToken", out string cookieToken) || sessionToken == null || cookieToken != sessionToken)
                 {
                     return new BadRequestResult();
                 }
