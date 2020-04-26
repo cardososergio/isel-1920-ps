@@ -2,8 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DataAccess.DAL;
+using DataAccess.DAO;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using PEES.Classes;
 
 namespace PEES.Controllers
 {
@@ -11,45 +15,85 @@ namespace PEES.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
-        // GET: api/Users
+        public UsersController(IConfiguration configuration)
+        {
+            Global.connectionString = configuration.GetConnectionString("SqlServer");
+            Management.connectionString = configuration.GetConnectionString("SqlServer");
+        }
+
+        [Route("/api/[controller]/[action]")]
         [HttpGet]
-        public IEnumerable<string> Get()
+        public IActionResult Check()
         {
-            return new string[] { "value1", "value2" };
+            try
+            {
+                string sessionToken = HttpContext.Session.GetString("AccessToken");
+                bool valid = Request.Cookies.TryGetValue("AccessToken", out string cookieToken) && sessionToken != null && sessionToken == cookieToken;
+
+                return new JsonResult(valid);
+            }
+            catch (Exception)
+            {
+                return new BadRequestResult();
+            }
         }
 
-        // GET: api/Users/5
-        [HttpGet("{id}", Name = "Get")]
-        public string Get(int id)
-        {
-            return "value";
-        }
-
-        // POST: api/Users
+        [Route("/api/[controller]/[action]")]
         [HttpPost]
-        public void Post([FromBody] string value)
+        public ActionResult Login([FromBody] RequestLogin login)
         {
+            bool result = false;
+
+            try
+            {
+                var passwordSalt = Global.GetPasswordSlat(login.Email);
+
+                if (passwordSalt.Password != "" && passwordSalt.Salt != "")
+                    result = (Utils.CreatePasswordHash(login.Password, passwordSalt.Salt) == passwordSalt.Password);
+            }
+            catch (Exception)
+            {
+                return new BadRequestResult();
+            }
+
+            var token = result ? Guid.NewGuid().ToString() : "";
+            HttpContext.Session.SetString("AccessToken", token);
+            Response.Cookies.Append("AccessToken", token, new CookieOptions() { SameSite = SameSiteMode.Strict, IsEssential = true });
+
+            return new OkResult();
         }
 
-        // PUT: api/Users/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        [Route("/api/[controller]/[action]")]
+        [HttpGet]
+        public ActionResult Configuration()
         {
-        }
+            // check for cookie
+            try
+            {
+                string sessionToken = HttpContext.Session.GetString("AccessToken");
 
-        // DELETE: api/ApiWithActions/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
-        }
+                if (!Request.Cookies.TryGetValue("AccessToken", out string cookieToken) || sessionToken == null || cookieToken != sessionToken)
+                {
+                    return new BadRequestResult();
+                }
+            }
+            catch (Exception)
+            {
+                return new BadRequestResult();
+            }
 
-        private string GetEncPassword(string password, string salt)
-        {
-            string encPassword = "";
+            Configuration result = new Configuration();
 
+            try
+            {
+                result = Management.GetConfiguration();
+            }
+            catch (Exception)
+            {
+                return new BadRequestResult();
+            }
 
-
-            return encPassword;
+            return new JsonResult(result);
         }
     }
 }

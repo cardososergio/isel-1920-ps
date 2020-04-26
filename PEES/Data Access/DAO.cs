@@ -41,6 +41,7 @@ namespace DataAccess.DAO
             public bool isChange { get; set; }
             public bool isDelete { get; set; }
             public bool gotError { get; set; }
+            public int revisionId { get; set; }
         }
 
         public struct DefaultStringValue
@@ -51,6 +52,7 @@ namespace DataAccess.DAO
             public bool isChange { get; set; }
             public bool isDelete { get; set; }
             public bool gotError { get; set; }
+            public int revisionId { get; set; }
         }
     }
 }

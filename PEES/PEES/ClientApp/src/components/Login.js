@@ -9,7 +9,9 @@ export default class Login extends React.Component {
         this.password = ''
 
         this.state = {
-            enableButton: false
+            enableButton: false,
+            header: this.props.header !== undefined ? this.props.header : "Login",
+            normalLogin: this.props.header === undefined
         }
     }
 
@@ -26,11 +28,17 @@ export default class Login extends React.Component {
             body: JSON.stringify({ 'email': this.email, 'password': this.password })
         };
 
-        fetch('/api/management/login', requestOptions)
+        const url = this.state.normalLogin ? "/api/users/login" : "/api/management/login"
+        fetch(url, requestOptions)
             .then(response => {
                 
                 if (response.status === 200) {
-                    this.props.handleStateChange()
+                    if (this.state.normalLogin) {
+                        this.props.history.push("/")
+                        localStorage.setItem("isOffline", false)
+                    }
+                    else
+                        this.props.handleStateChange()
                     return
                 }
                     
@@ -46,7 +54,7 @@ export default class Login extends React.Component {
             <Container>
                 <Row>
                     <Col sm="12" md={{ size: 4, offset: 4 }} className="text-center" style={{marginTop: 50 + 'px'}}>
-                        <h2>{this.props.header}</h2>
+                        <h2>{this.state.header}</h2>
                     </Col>
                 </Row>
                 <Row>

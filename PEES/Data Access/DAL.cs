@@ -7,7 +7,7 @@ using DataAccess.DAO;
 
 namespace DataAccess.DAL
 {
-    public static class Management
+    public static class Global
     {
         public static string connectionString;
 
@@ -31,6 +31,11 @@ namespace DataAccess.DAL
 
             return result;
         }
+    }
+
+    public static class Management
+    {
+        public static string connectionString;
 
         public static Configuration GetConfiguration()
         {
@@ -52,23 +57,23 @@ namespace DataAccess.DAL
                     // Curricular Years
                     result.CurricularYears = new List<Configuration.DefaultStringValue>();
                     foreach (DataRow item in ds.Tables[1].Rows)
-                        result.CurricularYears.Add(new Configuration.DefaultStringValue() { id = item["CurricularYearId"].ToString(), value = (string)item["CurricularYear"] });
+                        result.CurricularYears.Add(new Configuration.DefaultStringValue() { id = item["CurricularYearId"].ToString(), value = (string)item["CurricularYear"], revisionId = (int)item["Revision"] });
                     // Semesters
                     result.Semesters = new List<Configuration.DefaultStringValue>();
                     foreach (DataRow item in ds.Tables[2].Rows)
-                        result.Semesters.Add(new Configuration.DefaultStringValue() { id = item["SemesterId"].ToString(), value = (string)item["Semester"] });
+                        result.Semesters.Add(new Configuration.DefaultStringValue() { id = item["SemesterId"].ToString(), value = (string)item["Semester"], revisionId = (int)item["Revision"] });
                     // Seasons
                     result.Seasons = new List<Configuration.DefaultStringValue>();
                     foreach (DataRow item in ds.Tables[3].Rows)
-                        result.Seasons.Add(new Configuration.DefaultStringValue() { id = item["SeasonId"].ToString(), value = (string)item["Season"] });
+                        result.Seasons.Add(new Configuration.DefaultStringValue() { id = item["SeasonId"].ToString(), value = (string)item["Season"], revisionId = (int)item["Revision"] });
                     // Instruction Types
                     result.InstructionTypes = new List<Configuration.DefaultStringValue>();
                     foreach (DataRow item in ds.Tables[4].Rows)
-                        result.InstructionTypes.Add(new Configuration.DefaultStringValue() { id = item["InstructionTypeId"].ToString(), value = (string)item["InstructionType"] });
+                        result.InstructionTypes.Add(new Configuration.DefaultStringValue() { id = item["InstructionTypeId"].ToString(), value = (string)item["InstructionType"], revisionId = (int)item["Revision"] });
                     // Curricular Units
                     result.CurricularUnits = new List<Configuration.DefaultStringValue>();
                     foreach (DataRow item in ds.Tables[5].Rows)
-                        result.CurricularUnits.Add(new Configuration.DefaultStringValue() { id = item["CurricularUnitId"].ToString(), value = (string)item["CurricularUnit"] });
+                        result.CurricularUnits.Add(new Configuration.DefaultStringValue() { id = item["CurricularUnitId"].ToString(), value = (string)item["CurricularUnit"], revisionId = (int)item["Revision"] });
                 }
             }
 

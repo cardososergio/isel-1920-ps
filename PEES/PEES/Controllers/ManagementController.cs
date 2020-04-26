@@ -18,6 +18,7 @@ namespace PEES.Controllers
         public ManagementController(IConfiguration configuration)
         {
             Management.connectionString = configuration.GetConnectionString("SqlServer");
+            Global.connectionString = configuration.GetConnectionString("SqlServer");
         }
 
         [Route("/api/[controller]/[action]")]
@@ -28,7 +29,7 @@ namespace PEES.Controllers
 
             try
             {
-                var passwordSalt = Management.GetPasswordSlat(login.Email);
+                var passwordSalt = Global.GetPasswordSlat(login.Email);
 
                 if (passwordSalt.Password != "" && passwordSalt.Salt != "")
                     result = (Utils.CreatePasswordHash(login.Password, passwordSalt.Salt) == passwordSalt.Password);
