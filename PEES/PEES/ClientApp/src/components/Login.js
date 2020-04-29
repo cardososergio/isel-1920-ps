@@ -1,5 +1,6 @@
 ﻿import React from 'react';
 import { Form, Button, FormGroup, Input, Label, Container, Row, Col } from "reactstrap";
+import { Redirect } from 'react-router-dom';
 
 export default class Login extends React.Component {
     constructor(props) {
@@ -11,7 +12,8 @@ export default class Login extends React.Component {
         this.state = {
             enableButton: false,
             header: this.props.header !== undefined ? this.props.header : "Login",
-            normalLogin: this.props.header === undefined
+            normalLogin: this.props.header === undefined,
+            loginDone: false
         }
     }
 
@@ -31,17 +33,17 @@ export default class Login extends React.Component {
         const url = this.state.normalLogin ? "/api/users/login" : "/api/management/login"
         fetch(url, requestOptions)
             .then(response => {
-                
+
                 if (response.status === 200) {
                     if (this.state.normalLogin) {
-                        this.props.history.push("/")
                         localStorage.setItem("isOffline", false)
+                        this.setState({ loginDone: true })
                     }
                     else
                         this.props.handleStateChange()
                     return
                 }
-                    
+
                 return Promise.reject(response.statusText)
             })
             .catch(error => {
@@ -50,10 +52,13 @@ export default class Login extends React.Component {
     }
 
     render() {
+        if (this.state.loginDone)
+            return (<Redirect to="/" />)
+
         return (
             <Container>
                 <Row>
-                    <Col sm="12" md={{ size: 4, offset: 4 }} className="text-center" style={{marginTop: 50 + 'px'}}>
+                    <Col sm="12" md={{ size: 4, offset: 4 }} className="text-center" style={{ marginTop: 50 + 'px' }}>
                         <h2>{this.state.header}</h2>
                     </Col>
                 </Row>

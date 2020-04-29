@@ -34,7 +34,9 @@ export default class App extends React.Component {
                             .then(response => { if (response.status === 200) return response.json(); return Promise.reject(response.statusText) })
                             .then(data => {
 
-                                if (localStorage.getItem("configuration") === null)
+                                localStorage.setItem("configuration", JSON.stringify(data))
+
+                                /*if (localStorage.getItem("configuration") === null)
                                     localStorage.setItem("configuration", JSON.stringify(data))
                                 else {
                                     // compare
@@ -73,7 +75,7 @@ export default class App extends React.Component {
                                     else {
                                         console.log("conf ==")
                                     }
-                                }
+                                }*/
                             })
                             .catch(error => {
                                 console.error(error)
