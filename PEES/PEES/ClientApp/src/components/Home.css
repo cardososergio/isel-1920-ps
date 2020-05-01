@@ -14,11 +14,19 @@
     margin-right: 15px;
     margin-bottom: 5px !important;
     height: 10em !important;
+    cursor: pointer;
 }
+    .card2:hover {
+        background-color: #A9B9FA;
+    }
 
 .card-body {
-    top: 50%;
-    left: 50%;
-    position: absolute;
-    transform: translate(-50%, -50%)
+    line-height: 7.5em;
+    height: 10em;
+    text-align: center;
+}
+.card-body p {
+    vertical-align: middle;
+    display: inline-block;
+    line-height: 1.5;
 }

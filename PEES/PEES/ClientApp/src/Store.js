@@ -7,7 +7,8 @@ const initialState = {
         semester: { id: "", value: "Todos" },
         unit: { id: "", value: "Todas" },
         season: { id: "", value: "Todas" }
-    }
+    },
+    unitsView: "card"
 };
 
 function reducer(state = initialState, action) {
@@ -16,6 +17,8 @@ function reducer(state = initialState, action) {
             return { ...state, login: true }
         case "FILTER":
             return { ...state, filter: action.payload }
+        case "UNITS_VIEW":
+            return {...state, unitsView: action.payload}
         default:
             return state;
     }
