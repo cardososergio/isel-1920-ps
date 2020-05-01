@@ -29,7 +29,7 @@ namespace PEES.Controllers
 
             try
             {
-                var passwordSalt = Global.GetPasswordSlat(login.Email);
+                var passwordSalt = Global.GetUser(login.Email);
 
                 if (passwordSalt.Password != "" && passwordSalt.Salt != "")
                     result = (Utils.CreatePasswordHash(login.Password, passwordSalt.Salt) == passwordSalt.Password);

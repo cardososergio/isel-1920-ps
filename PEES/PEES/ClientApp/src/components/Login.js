@@ -35,16 +35,20 @@ export default class Login extends React.Component {
             .then(response => {
 
                 if (response.status === 200) {
-                    if (this.state.normalLogin) {
-                        localStorage.setItem("isOffline", false)
-                        this.setState({ loginDone: true })
-                    }
-                    else
-                        this.props.handleStateChange()
-                    return
+                    return response.json()
                 }
 
                 return Promise.reject(response.statusText)
+            })
+            .then(json => {
+                if (json.userId !== undefined) {
+                    localStorage.setItem("isOffline", false)
+                    localStorage.setItem("user", JSON.stringify({ userId: json.userId, name: json.name }))
+
+                    this.setState({ loginDone: true })
+                }
+                else
+                    this.props.handleStateChange()
             })
             .catch(error => {
                 alert("Não foi possível autenticar!")

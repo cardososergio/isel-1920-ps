@@ -11,21 +11,25 @@ namespace DataAccess.DAL
     {
         public static string connectionString;
 
-        public static PasswordSalt GetPasswordSlat(string email)
+        public static User GetUser(string email)
         {
-            var result = new PasswordSalt();
+            var result = new User();
 
             using (Database db = new Database(connectionString))
             {
                 List<SqlParameter> parameters = new List<SqlParameter>();
                 parameters.Add(new SqlParameter("@Email", email));
 
-                using (SqlDataReader reader = db.ExecSPDataReader("dbo.spGetUserPassword", parameters))
+                using (SqlDataReader reader = db.ExecSPDataReader("dbo.spGetUser", parameters))
                 {
                     reader.Read();
 
+                    result.UserId = reader["UserId"].ToString();
+                    result.Name = (string)reader["Name"];
+                    result.Email = email;
                     result.Password = (string)reader["Password"];
                     result.Salt = (string)reader["Salt"];
+                    result.ProfileId = (int)reader["ProfileId"];
                 }
             }
 

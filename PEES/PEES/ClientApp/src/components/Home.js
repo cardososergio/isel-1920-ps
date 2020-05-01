@@ -1,24 +1,76 @@
-import React from 'react';
-import { Container, Row, Col, UncontrolledDropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
+import React from 'react'
+import { Container, Row, Col, CardBody, CardDeck } from 'reactstrap'
+import { Filter } from './Filter'
+import PouchDB from 'pouchdb'
+import PouchdbFind from 'pouchdb-find'
+import "./Home.css"
+import { connect } from "react-redux"
 
-export class Home extends React.Component {
+class Home extends React.Component {
     static displayName = Home.name;
 
     constructor(props) {
         super(props)
 
+        PouchDB.plugin(PouchdbFind)
+
         this.state = {
-            curricularYears: [],
-            semesters: [],
-            curricularUnits: [],
-            seasons: []
+            lstUnits: []
         }
     }
 
     componentDidMount() {
-        const conf = JSON.parse(localStorage.getItem("configuration"))
+        this.searchDB()
+    }
 
-        this.setState({ curricularYears: conf.curricularYears, semesters: conf.semesters, curricularUnits: conf.curricularUnits, seasons: conf.seasons })
+    componentDidUpdate(prevProps) {
+
+        if (prevProps.filter.year.id !== this.props.filter.year.id || prevProps.filter.semester.id !== this.props.filter.semester.id ||
+            prevProps.filter.unit.id !== this.props.filter.unit.id || prevProps.filter.season.id !== this.props.filter.season.id) {
+            
+            this.searchDB()
+        }
+    }
+
+    searchDB() {
+
+        const units = JSON.parse(localStorage.getItem("configuration")).curricularUnits
+        const db = new PouchDB("http://127.0.0.1:5984/pees")
+
+        let find = { user_id: JSON.parse(localStorage.getItem("user")).userId }
+        if (this.props.filter.year.id !== "")
+            find = { ...find, curricular_year: this.props.filter.year.id }
+        if (this.props.filter.semester.id !== "")
+            find = { ...find, semester: this.props.filter.semester.id }
+        if (this.props.filter.unit.id !== "")
+            find = { ...find, curricular_unit: this.props.filter.unit.id }
+        if (this.props.filter.season.id !== "")
+            find = { ...find, season: this.props.filter.season.id }
+        
+        db.find({ selector: find })
+            .then((result) => {
+                if (result.docs.length !== 0) {
+                    return result.docs.map(doc => {
+                        const unit = units.find(unit => unit.id === doc.curricular_unit)
+
+                        return { id: unit.id, value: unit.value }
+                    })
+                }
+            })
+            .then(docs => {
+                if (docs === undefined) {
+                    this.setState({ lstUnits: [] })
+                    return
+                }
+
+                this.setState({
+                    lstUnits: Array.from([...new Set(docs.map(doc => doc.id))])
+                        .map(id => { return { id: id, value: docs.find(doc => doc.id === id).value } })
+                })
+            })
+            .catch(function (err) {
+                console.log(err)
+            })
     }
 
     render() {
@@ -26,63 +78,35 @@ export class Home extends React.Component {
             <Container>
                 <Row>
                     <Col>
-                        <div style={{ border: "1px solid gray" }}>
-                            <Container style={{ marginTop: 0 }}>
-                                <Row>
-                                    <Col>
-                                        <span className="align-middle">Ano:</span>
-                                        <UncontrolledDropdown setActiveFromChild style={{ float: "right" }}>
-                                            <DropdownToggle tag="a" className="nav-link" caret>Todos</DropdownToggle>
-                                            <DropdownMenu>
-                                                <DropdownItem>Todos</DropdownItem>
-                                                {
-                                                    this.state.curricularYears.map(year => <DropdownItem key={year.id}>{year.value}</DropdownItem>)
-                                                }
-                                            </DropdownMenu>
-                                        </UncontrolledDropdown>
-                                    </Col>
-                                    <Col>
-                                        <span className="align-middle">Semestre:</span>
-                                        <UncontrolledDropdown setActiveFromChild style={{ float: "right" }}>
-                                            <DropdownToggle tag="a" className="nav-link" caret>Todos</DropdownToggle>
-                                            <DropdownMenu>
-                                                <DropdownItem>Todos</DropdownItem>
-                                                {
-                                                    this.state.semesters.map(semester => <DropdownItem key={semester.id}>{semester.value}</DropdownItem>)
-                                                }
-                                            </DropdownMenu>
-                                        </UncontrolledDropdown>
-                                    </Col>
-                                    <Col>
-                                        <span className="align-middle">Disciplina:</span>
-                                        <UncontrolledDropdown setActiveFromChild style={{ float: "right" }}>
-                                            <DropdownToggle tag="a" className="nav-link" caret>Todas</DropdownToggle>
-                                            <DropdownMenu>
-                                                <DropdownItem>Todas</DropdownItem>
-                                                {
-                                                    this.state.curricularUnits.map(unit => <DropdownItem key={unit.id}>{unit.value}</DropdownItem>)
-                                                }
-                                            </DropdownMenu>
-                                        </UncontrolledDropdown>
-                                    </Col>
-                                    <Col>
-                                        <span className="align-middle">Época:</span>
-                                        <UncontrolledDropdown setActiveFromChild style={{ float: "right" }}>
-                                            <DropdownToggle tag="a" className="nav-link" caret>Todas</DropdownToggle>
-                                            <DropdownMenu>
-                                                <DropdownItem>Todas</DropdownItem>
-                                                {
-                                                    this.state.seasons.map(season => <DropdownItem key={season.id}>{season.value}</DropdownItem>)
-                                                }
-                                            </DropdownMenu>
-                                        </UncontrolledDropdown>
-                                    </Col>
-                                </Row>
-                            </Container>
-                        </div>
+                        <Filter />
+                    </Col>
+                </Row>
+                <Row>
+                    <Col>
+                        <CardDeck style={{ display: 'flex', flexDirection: 'row' }}>
+                            {
+                                this.state.lstUnits.map(unit => {
+                                    return (
+                                        <div key={unit.id} className="card2">
+                                            <CardBody>
+                                                {unit.value}
+                                            </CardBody>
+                                        </div>
+                                    )
+                                })
+                            }
+                        </CardDeck>
                     </Col>
                 </Row>
             </Container>
         );
     }
 }
+
+function mapStateToProps(state) {
+    return {
+        filter: state.filter
+    }
+}
+
+export default connect(mapStateToProps)(Home)

@@ -2,7 +2,7 @@ import React from 'react';
 import { Route, Switch } from 'react-router';
 import { Redirect } from 'react-router-dom';
 import { Layout } from './components/Layout';
-import { Home } from './components/Home';
+import Home from './components/Home';
 import { Management } from './components/management/Management'
 import Login from './components/Login';
 import { PageNotFound } from "./components/PageNotFound"

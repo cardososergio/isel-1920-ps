@@ -42,25 +42,26 @@ namespace PEES.Controllers
         [HttpPost]
         public ActionResult Login([FromBody] RequestLogin login)
         {
-            bool result = false;
+            User user;
+            bool valid = false;
 
             try
             {
-                var passwordSalt = Global.GetPasswordSlat(login.Email);
+                user = Global.GetUser(login.Email);
 
-                if (passwordSalt.Password != "" && passwordSalt.Salt != "")
-                    result = (Utils.CreatePasswordHash(login.Password, passwordSalt.Salt) == passwordSalt.Password);
+                if (user.Password != "" && user.Salt != "")
+                    valid = (Utils.CreatePasswordHash(login.Password, user.Salt) == user.Password);
             }
             catch (Exception)
             {
                 return new BadRequestResult();
             }
 
-            var token = result ? Guid.NewGuid().ToString() : "";
+            var token = valid ? Guid.NewGuid().ToString() : "";
             HttpContext.Session.SetString("AccessToken", token);
             Response.Cookies.Append("AccessToken", token, new CookieOptions() { SameSite = SameSiteMode.Strict, IsEssential = true });
 
-            return new OkResult();
+            return new JsonResult(user);
         }
 
         [Route("/api/[controller]/[action]")]

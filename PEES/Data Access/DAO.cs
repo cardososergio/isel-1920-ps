@@ -9,17 +9,14 @@ namespace DataAccess.DAO
         public string Password { get; set; }
     }
 
-    public struct PasswordSalt
-    {
-        public string Password { get; set; }
-        public string Salt { get; set; }
-    }
-
     public struct User
     {
         public string UserId { get; set; }
         public string Name { get; set; }
         public string Email { get; set; }
+        public string Password { get; set; }
+        public string Salt { get; set; }
+        public int ProfileId { get; set; }
     }
 
     public class Configuration
