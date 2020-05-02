@@ -51,7 +51,12 @@ export const UnitsCard = (props) => {
                 lstUnits.map(unit => {
                     return (
                         <div key={unit.id} className="card2">
-                            <CardBody onClick={() => dispatch({ type: "UNITS_VIEW", payload: "list" })}>
+                            <CardBody onClick={() => {
+                                dispatch({ type: "UNIT_ID", payload: unit.id })
+                                dispatch({ type: "FILTER_UNIT", payload: { id: unit.id, value: unit.value } })
+                                dispatch({ type: "UNITS_VIEW", payload: "list" })
+                            }
+                            }>
                                 <CardText>{unit.value}</CardText>
                             </CardBody>
                         </div>

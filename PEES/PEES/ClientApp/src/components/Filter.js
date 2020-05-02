@@ -6,12 +6,13 @@ import "./Filter.css"
 export const Filter = (props) => {
     const dispatch = useDispatch()
     const unitsView = useSelector(state => state.unitsView)
+    const unitSelected = useSelector(state => state.filter.unit)
     const conf = JSON.parse(localStorage.getItem("configuration"))
 
     const [selCurricularYear, setSelCurricularYear] = useState({ id: "", value: "Todos" })
     const [selSemester, setSelSemester] = useState({ id: "", value: "Todos" })
+    const [selCurricularUnit, setselCurricularUnit] = useState((unitSelected.id === "" ? { id: "", value: "Todas" } : { id: unitSelected.id, value: unitSelected.value }))
     const [selSeason, setselSeason] = useState({ id: "", value: "Todas" })
-    const [selCurricularUnit, setselCurricularUnit] = useState({ id: "", value: "Todas" })
 
     const cssLabels = { lineHeight: 37 + "px" }
 
@@ -77,7 +78,7 @@ export const Filter = (props) => {
                             <li className="nav-item" style={cssLabels}>Disciplina:</li>
                             <li className="nav-item">
                                 <UncontrolledDropdown setActiveFromChild style={{ float: "right", maxWidth: 18 + "em" }}>
-                                    <DropdownToggle tag="a" className="nav-link" caret>{selCurricularUnit.value}</DropdownToggle>
+                                    <DropdownToggle tag="a" className="nav-link" caret>{unitSelected.id === "" ? selCurricularUnit.value : unitSelected.value}</DropdownToggle>
                                     <DropdownMenu className="dropdown">
                                         <DropdownItem onClick={() => handleFilter("unit", "", "Todas")} className="dropdown-item">Todas</DropdownItem>
                                         {conf.curricularUnits.map(unit => <DropdownItem key={unit.id} onClick={() => handleFilter("unit", unit.id, unit.value)}>{unit.value}</DropdownItem>)}

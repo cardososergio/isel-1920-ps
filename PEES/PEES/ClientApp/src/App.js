@@ -95,13 +95,14 @@ export default class App extends React.Component {
     render() {
         return (
             <Layout>
+                {!this.state.validAccessToken ? <Redirect to="/login" /> : null}
                 <Switch>
                     <Route exact path='/' component={Home} />
+                    <Route exact path='/list' component={Home} />
                     <Route exact path='/login' component={Login} />
                     <Route exact path='/management' component={Management} />
                     <Route component={PageNotFound} />
                 </Switch>
-                {!this.state.validAccessToken ? <Redirect to="/login" /> : null}
             </Layout>
         );
     }

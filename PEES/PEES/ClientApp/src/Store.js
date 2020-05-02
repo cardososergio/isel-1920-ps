@@ -8,7 +8,8 @@ const initialState = {
         unit: { id: "", value: "Todas" },
         season: { id: "", value: "Todas" }
     },
-    unitsView: "card"
+    unitsView: "card",
+    unitId: ""
 };
 
 function reducer(state = initialState, action) {
@@ -17,8 +18,14 @@ function reducer(state = initialState, action) {
             return { ...state, login: true }
         case "FILTER":
             return { ...state, filter: action.payload }
+        case "FILTER_UNIT":
+            return {
+                ...state, filter: { ...state.filter, unit: action.payload }
+            }
         case "UNITS_VIEW":
-            return {...state, unitsView: action.payload}
+            return { ...state, unitsView: action.payload }
+        case "UNIT_ID":
+            return { ...state, unitId: action.payload }
         default:
             return state;
     }
