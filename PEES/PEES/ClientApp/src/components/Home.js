@@ -7,6 +7,8 @@ import { UnitsList } from "./UnitsList"
 import "./Home.css"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPlus } from '@fortawesome/free-solid-svg-icons'
+import PouchDB from 'pouchdb'
+import { Redirect } from 'react-router-dom'
 
 const conf = JSON.parse(localStorage.getItem("configuration"))
 
@@ -24,7 +26,8 @@ class Home extends React.Component {
             unit: "",
             season: "",
             type: "",
-            firstSubmit: false
+            firstSubmit: false,
+            docId: ""
         }
 
         this.handleToggle = this.handleToggle.bind(this)
@@ -38,13 +41,47 @@ class Home extends React.Component {
     handleCreateDocument(e) {
         e.preventDefault()
 
-        this.setState({firstSubmit: true})
+        if (this.state.docName === "" || this.state.year === "" || this.state.semester === "" || this.state.unit === "" || this.state.season === "" || this.state.type === "") {
+            this.setState({ firstSubmit: true })
+            return
+        }
+
+        var doc = {
+            user_id: JSON.parse(localStorage.getItem("user")).userId,
+            instruction_type: this.state.type,
+            name: this.state.docName,
+            is_draft: true,
+            is_public: false,
+            curricular_year: this.state.year,
+            semester: this.state.semester,
+            curricular_unit: this.state.unit,
+            season: this.state.season,
+            header: {
+                school_name: conf.schoolName
+            },
+            questions: []
+        }
+
+        const db = new PouchDB("http://127.0.0.1:5984/pees")
+        db.post(doc)
+            .then(response => {
+                if (!response.ok) {
+                    alert("Ocorreu um erro ao criar o enunciado")
+                    return
+                }
+
+                this.setState({ docId: response.id })
+            })
+            .catch(err => {
+                console.error(err)
+            })
     }
 
     render() {
 
         return (
             <>
+                {this.state.docId !== "" ? <Redirect to={`/document?id=${this.state.docId}`} /> : null}
                 <Container>
                     <Row>
                         <Col>
@@ -69,7 +106,7 @@ class Home extends React.Component {
                             <FormGroup row>
                                 <Label for="txtDocName" sm={2}>Nome</Label>
                                 <Col sm={10}>
-                                    <Input type="text" id="txtDocName" onChange={(e) => this.setState({ docName: e.target.value })} invalid={this.state.docName === "" && this.state.firstSubmit}/>
+                                    <Input type="text" id="txtDocName" onChange={(e) => this.setState({ docName: e.target.value })} invalid={this.state.docName === "" && this.state.firstSubmit} />
                                 </Col>
                             </FormGroup>
                             <FormGroup row>

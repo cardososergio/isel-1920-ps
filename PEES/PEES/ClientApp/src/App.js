@@ -6,6 +6,7 @@ import Home from './components/Home';
 import { Management } from './components/management/Management'
 import Login from './components/Login';
 import { PageNotFound } from "./components/PageNotFound"
+import Document from './components/document/Document';
 
 import './custom.css'
 
@@ -98,7 +99,7 @@ export default class App extends React.Component {
                 {!this.state.validAccessToken ? <Redirect to="/login" /> : null}
                 <Switch>
                     <Route exact path='/' component={Home} />
-                    <Route exact path='/list' component={Home} />
+                    <Route exact path='/document' component={Document} />
                     <Route exact path='/login' component={Login} />
                     <Route exact path='/management' component={Management} />
                     <Route component={PageNotFound} />
