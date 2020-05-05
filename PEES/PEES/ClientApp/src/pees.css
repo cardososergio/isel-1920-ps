@@ -8,7 +8,7 @@ body {
     color: #606060;
 }
 
-.content .container {
+.content .container, .container-fluid {
     margin-top: 80px;
 }
 
