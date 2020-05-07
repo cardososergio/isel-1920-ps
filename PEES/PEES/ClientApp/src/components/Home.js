@@ -56,6 +56,7 @@ class Home extends React.Component {
             semester: this.state.semester,
             curricular_unit: this.state.unit,
             season: this.state.season,
+            duration: null,
             header: {
                 school_name: conf.schoolName
             },
