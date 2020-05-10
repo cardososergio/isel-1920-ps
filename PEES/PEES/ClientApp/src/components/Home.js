@@ -58,7 +58,8 @@ class Home extends React.Component {
             season: this.state.season,
             duration: null,
             header: {
-                school_name: conf.schoolName
+                school_name: conf.schoolName,
+                courses: []
             },
             questions: []
         }

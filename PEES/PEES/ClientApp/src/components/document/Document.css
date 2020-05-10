@@ -2,3 +2,16 @@
     padding-left: 0.8em;
     font-size: 1.5em;
 }
+
+.document .form-control-plaintext {
+    padding: 0;
+    color: inherit;
+    font-family: inherit;
+    font-size: inherit;
+    margin-right: 10px;
+}
+
+.document .question-options svg {
+    margin-left: 5px;
+    margin-right: 5px;
+}

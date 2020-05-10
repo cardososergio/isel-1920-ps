@@ -1,12 +1,12 @@
 {
     "user_id": "id do docente",
-    "statement_type": "se é exame, teste ou trabalho",
+    "instruction_type": "se é exame, teste ou trabalho",
     "name": "nome para visualmente identificar",
     "is_draft": "indicar se já o finalizou",
     "is_public": "indicar se outros docentes e alunos o podem consultar",
     "release_date": "data em que o exame/teste será feito. Se for trabalho, data em que foi disponibilizado",
     "duration": "duração do exame/teste",
-    "available_date": "data em que o enunciado é disponibilizado para consulta",
+    "public_date": "data em que o enunciado é disponibilizado para consulta",
     "delivery_date": "Se for trabalho, a data limite de entrega",
     "synch": "indicar se o enunciado já foi sincronizado com o servidor",
     "curricular_year": "ano letivo",
@@ -15,7 +15,7 @@
     "season": "época",
     "header": {
         "school_name": "Nome da universidade",
-        "courses_fullname": [
+        "courses": [
             "Cada entrada corresponde a uma disciplina"
         ],
         "curricular_unit": "ano letivo",
@@ -30,7 +30,8 @@
             "grade": "Indica a pontuação da pergunta",
             "text": "Pergunta",
             "footer_text": "Caso haja necessidade de incluir texto numa pergunta que tenha sub-perguntas",
-            "position": "qual a sua posição relativamente ao enunciado"
+            "position": "qual a sua posição relativamente ao enunciado",
+            "questions": []
         }
     ],
     "references": [
