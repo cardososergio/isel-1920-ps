@@ -1,10 +1,10 @@
 ﻿import React from "react"
 import { connect } from "react-redux"
 import { Link } from "react-router-dom"
-import { Container, Row, Col, Modal, ModalHeader, ModalBody, Form, FormGroup, Label, Input, CustomInput, Collapse, InputGroup, InputGroupAddon, InputGroupText } from "reactstrap"
+import { Container, Row, Col, Modal, ModalHeader, ModalBody, Form, FormGroup, Label, Input, CustomInput, Collapse, InputGroup, InputGroupAddon, InputGroupText, ModalFooter, Button } from "reactstrap"
 import "./Document.css"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faInfo, faBars, faEye, faPlus, faTimes, faEllipsisV, faCaretUp, faCaretDown, faCircle } from "@fortawesome/free-solid-svg-icons"
+import { faInfo, faBars, faEye, faPlus, faTimes, faEllipsisV, faCaretUp, faCaretDown, faTrash, faCheck } from "@fortawesome/free-solid-svg-icons"
 import PouchDB from 'pouchdb'
 import DatePicker from "react-datepicker"
 import { registerLocale } from "react-datepicker"
@@ -27,6 +27,16 @@ class Document extends React.Component {
             modal: {
                 isOpen: false
             },
+            modalQuestion: {
+                isOpen: false,
+                id: 0,
+                fields: {
+                    numeringType: 1,
+                    numering: 0,
+                    grade: 0,
+                    footerNote: ""
+                }
+            },
             header: {
                 isOpen: false
             },
@@ -36,15 +46,20 @@ class Document extends React.Component {
         }
 
         this.toggle = this.toggle.bind(this)
+        this.toggleQuestion = this.toggleQuestion.bind(this)
         this.handleDetail = this.handleDetail.bind(this)
         this.handleNewCourse = this.handleNewCourse.bind(this)
         this.handleRemoveCourse = this.handleRemoveCourse.bind(this)
 
         this.handleNewQuestion = this.handleNewQuestion.bind(this)
+        this.handleChangeQuestion = this.handleChangeQuestion.bind(this)
     }
 
     toggle() {
         this.setState({ modal: { ...this.state.modal, isOpen: !this.state.modal.isOpen } })
+    }
+    toggleQuestion() {
+        this.setState({ modalQuestion: { ...this.state.modalQuestion, isOpen: !this.state.modalQuestion.isOpen } })
     }
 
     handleDetail = (e) => {
@@ -107,6 +122,38 @@ class Document extends React.Component {
 
         this.setState({ doc: { ...this.state.doc, questions: [...this.state.doc.questions, question] } })
         document.getElementById("txtNewQuestion").value = ""
+    }
+
+    handleOpenQuestion(id) {
+
+        const question = this.state.doc.questions.find(item => item.question_id === id)
+
+        const modal = {
+            isOpen: true,
+            id: id,
+            fields: {
+                numeringType: question.numering_type,
+                numering: question.numering,
+                grade: question.grade,
+                footerNote: question.footer_note !== undefined ? question.footer_note : null
+            }
+        }
+
+        this.setState({ modalQuestion: modal })
+    }
+
+    handleChangeQuestion() {
+        const pos = this.state.doc.questions.findIndex(item => item.question_id === this.state.modalQuestion.id)
+        let update = this.state.doc.questions
+        update[pos].numering_type = this.state.modalQuestion.fields.numeringType * 1
+        update[pos].numering = this.state.modalQuestion.fields.numering
+        update[pos].grade = this.state.modalQuestion.fields.grade
+        update[pos].footer_note = this.state.modalQuestion.fields.footerNote
+
+        console.log(update[pos])
+
+        this.setState({ doc: { ...this.state.doc, question: update }, default: { ...this.state.default, numeringType: update[pos].numering_type } })
+        this.toggleQuestion()
     }
 
     createMarkup(text) {
@@ -174,7 +221,7 @@ class Document extends React.Component {
                                                         item.numering_type === 2 ?
                                                             item.numering + "."
                                                             :
-                                                            <ul><li></li></ul>
+                                                            <ul style={{ marginBottom: 0}}><li></li></ul>
                                                     }
                                                 </div>
                                                 <div style={{ marginRight: 5 + "px" }}>
@@ -189,7 +236,7 @@ class Document extends React.Component {
                                                 <div className="question-options" style={{ display: "inherit", cursor: "pointer" }}>
                                                     <FontAwesomeIcon icon={faCaretUp} style={{ color: item.position !== 1 ? "#4da3ff" : null }} />
                                                     <FontAwesomeIcon icon={faCaretDown} style={{ color: item.position !== totalQuestions ? "#4da3ff" : null }} />
-                                                    <FontAwesomeIcon icon={faEllipsisV} style={{ color: "#4da3ff" }} />
+                                                    <FontAwesomeIcon icon={faEllipsisV} style={{ color: "#4da3ff" }} onClick={() => this.handleOpenQuestion(item.question_id)} />
                                                 </div>
                                             </div>
                                             <div style={{ marginLeft: 50 + "px" }}>
@@ -293,6 +340,46 @@ class Document extends React.Component {
                             </FormGroup>
                         </Form>
                     </ModalBody>
+                </Modal>
+
+                <Modal isOpen={this.state.modalQuestion.isOpen} toggle={this.toggleQuestion} backdrop="static" keyboard={false} size="lg">
+                    <ModalHeader toggle={this.toggleQuestion}>Detalhe da pergunta</ModalHeader>
+                    <ModalBody>
+                        <Form autoComplete="off">
+                            <FormGroup row>
+                                <Label for="lstNumeringType" sm={2}>Tipo</Label>
+                                <Col sm={4}>
+                                    <Input type="select" id="lstNumeringType" defaultValue={this.state.modalQuestion.fields.numeringType}
+                                        onChange={(e) => this.setState({ modalQuestion: { ...this.state.modalQuestion, fields: { ...this.state.modalQuestion.fields, numeringType: e.target.value } } })}>
+                                        {conf.numeringTypes.map(item => { return (<option key={item.id} value={item.id}>{item.value}</option>) })}
+                                    </Input>
+                                </Col>
+                                <Label for="txtNumering" sm={2}>Número</Label>
+                                <Col sm={4}>
+                                    <Input type="number" id="txtNumering" defaultValue={this.state.modalQuestion.fields.numering}
+                                        onChange={(e) => this.setState({ modalQuestion: { ...this.state.modalQuestion, fields: { ...this.state.modalQuestion.fields, numering: e.target.value } } })} />
+                                </Col>
+                            </FormGroup>
+                            <FormGroup row>
+                                <Label for="txtGrade" sm={2}>Cotação</Label>
+                                <Col sm={4}>
+                                    <Input type="text" id="txtGrade" defaultValue={this.state.modalQuestion.fields.grade}
+                                        onChange={(e) => this.setState({ modalQuestion: { ...this.state.modalQuestion, fields: { ...this.state.modalQuestion.fields, grade: e.target.value } } })} />
+                                </Col>
+                            </FormGroup>
+                            <FormGroup row>
+                                <Label for="txtFooteNote" sm={2}>Texto de rodapé</Label>
+                                <Col sm={10}>
+                                    <Input type="textarea" id="txtFooteNote" defaultValue={this.state.modalQuestion.fields.footerNote}
+                                        onChange={(e) => this.setState({ modalQuestion: { ...this.state.modalQuestion, fields: { ...this.state.modalQuestion.fields, footerNote: e.target.value } } })} />
+                                </Col>
+                            </FormGroup>
+                        </Form>
+                    </ModalBody>
+                    <ModalFooter style={{ justifyContent: "space-between" }}>
+                        <Button color="danger"><FontAwesomeIcon icon={faTrash} style={{ marginRight: 10 + "px" }} />Eliminar</Button>
+                        <Button color="primary" onClick={this.handleChangeQuestion}><FontAwesomeIcon icon={faCheck} style={{ marginRight: 10 + "px" }} />Alterar</Button>
+                    </ModalFooter>
                 </Modal>
             </>
         )
