@@ -10,6 +10,8 @@ import DatePicker from "react-datepicker"
 import { registerLocale } from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css"
 import pt from 'date-fns/locale/pt'
+import uuid4 from 'uuid4'
+
 registerLocale('pt', pt)
 
 const conf = JSON.parse(localStorage.getItem("configuration"))
@@ -53,6 +55,7 @@ class Document extends React.Component {
 
         this.handleNewQuestion = this.handleNewQuestion.bind(this)
         this.handleChangeQuestion = this.handleChangeQuestion.bind(this)
+        this.handleDeleteQuestion = this.handleDeleteQuestion.bind(this)
     }
 
     toggle() {
@@ -110,15 +113,13 @@ class Document extends React.Component {
         if (text === "") return
 
         const question = {
-            question_id: this.state.doc.questions.length + 1,
+            question_id: uuid4(),
             numering_type: this.state.default.numeringType,
             numering: "0",
-            grade: 0,
+            grade: "0",
             text: text,
             position: this.state.doc.questions.length + 1
         }
-
-        console.log(question)
 
         this.setState({ doc: { ...this.state.doc, questions: [...this.state.doc.questions, question] } })
         document.getElementById("txtNewQuestion").value = ""
@@ -134,8 +135,8 @@ class Document extends React.Component {
             fields: {
                 numeringType: question.numering_type,
                 numering: question.numering,
-                grade: question.grade,
-                footerNote: question.footer_note !== undefined ? question.footer_note : null
+                grade: question.grade.replace(",", "."),
+                footerNote: question.footer_note !== undefined ? question.footer_note : ""
             }
         }
 
@@ -143,16 +144,52 @@ class Document extends React.Component {
     }
 
     handleChangeQuestion() {
+
+        const numeringType = this.state.modalQuestion.fields.numeringType
+        let numering = 0
+        let grade = 0
+
+        if (numeringType === 2) {
+            numering = this.state.modalQuestion.fields.numering * 1
+            if (Number.isNaN(numering) || numering < 0) {
+                alert("Numeração inválida!")
+                return
+            }
+
+            if (numering.toString().indexOf(".") !== -1) {
+                if (numering.toString().split(".")[1].length > 2)
+                    numering = parseFloat(numering).toFixed(2)
+            }
+        }
+
+        grade = this.state.modalQuestion.fields.grade * 1
+        if (Number.isNaN(grade) || grade < 0) {
+            alert("Cotação inválida!")
+            return
+        }
+
+        if (grade.toString().indexOf(".") !== -1) {
+            if (grade.toString().split(".")[1].length > 2)
+                grade = parseFloat(grade).toFixed(2)
+        }
+
         const pos = this.state.doc.questions.findIndex(item => item.question_id === this.state.modalQuestion.id)
         let update = this.state.doc.questions
-        update[pos].numering_type = this.state.modalQuestion.fields.numeringType * 1
-        update[pos].numering = this.state.modalQuestion.fields.numering
-        update[pos].grade = this.state.modalQuestion.fields.grade
+        update[pos].numering_type = numeringType
+        update[pos].numering = numering === 0 && numeringType === 1 ? "" : numering.toString()
+        update[pos].grade = grade === 0 ? "" : grade.toString()
         update[pos].footer_note = this.state.modalQuestion.fields.footerNote
 
-        console.log(update[pos])
+        this.setState({ doc: { ...this.state.doc, questions: update }, default: { ...this.state.default, numeringType: update[pos].numering_type } })
+        this.toggleQuestion()
+    }
 
-        this.setState({ doc: { ...this.state.doc, question: update }, default: { ...this.state.default, numeringType: update[pos].numering_type } })
+    handleDeleteQuestion() {
+        if (!window.confirm("A pergunta será eliminada. Deseja continuar?"))
+            return
+
+        const update = this.state.doc.questions.filter(item => item.question_id !== this.state.modalQuestion.id)
+        this.setState({ doc: { ...this.state.doc, questions: update }})
         this.toggleQuestion()
     }
 
@@ -221,7 +258,7 @@ class Document extends React.Component {
                                                         item.numering_type === 2 ?
                                                             item.numering + "."
                                                             :
-                                                            <ul style={{ marginBottom: 0}}><li></li></ul>
+                                                            <ul style={{ marginBottom: 0 }}><li></li></ul>
                                                     }
                                                 </div>
                                                 <div style={{ marginRight: 5 + "px" }}>
@@ -350,20 +387,21 @@ class Document extends React.Component {
                                 <Label for="lstNumeringType" sm={2}>Tipo</Label>
                                 <Col sm={4}>
                                     <Input type="select" id="lstNumeringType" defaultValue={this.state.modalQuestion.fields.numeringType}
-                                        onChange={(e) => this.setState({ modalQuestion: { ...this.state.modalQuestion, fields: { ...this.state.modalQuestion.fields, numeringType: e.target.value } } })}>
+                                        onChange={(e) => this.setState({ modalQuestion: { ...this.state.modalQuestion, fields: { ...this.state.modalQuestion.fields, numeringType: e.target.value * 1 } } })}>
                                         {conf.numeringTypes.map(item => { return (<option key={item.id} value={item.id}>{item.value}</option>) })}
                                     </Input>
                                 </Col>
-                                <Label for="txtNumering" sm={2}>Número</Label>
+                                <Label for="txtNumering" sm={2}>Numeração</Label>
                                 <Col sm={4}>
-                                    <Input type="number" id="txtNumering" defaultValue={this.state.modalQuestion.fields.numering}
+                                    <Input type="number" id="txtNumering" defaultValue={this.state.modalQuestion.fields.numering} min="0" max="50" step=".01"
+                                        disabled={this.state.modalQuestion.fields.numeringType === 1 ? true : false}
                                         onChange={(e) => this.setState({ modalQuestion: { ...this.state.modalQuestion, fields: { ...this.state.modalQuestion.fields, numering: e.target.value } } })} />
                                 </Col>
                             </FormGroup>
                             <FormGroup row>
                                 <Label for="txtGrade" sm={2}>Cotação</Label>
                                 <Col sm={4}>
-                                    <Input type="text" id="txtGrade" defaultValue={this.state.modalQuestion.fields.grade}
+                                    <Input type="number" id="txtGrade" defaultValue={this.state.modalQuestion.fields.grade} min="0" max="20" step=".01"
                                         onChange={(e) => this.setState({ modalQuestion: { ...this.state.modalQuestion, fields: { ...this.state.modalQuestion.fields, grade: e.target.value } } })} />
                                 </Col>
                             </FormGroup>
@@ -377,7 +415,7 @@ class Document extends React.Component {
                         </Form>
                     </ModalBody>
                     <ModalFooter style={{ justifyContent: "space-between" }}>
-                        <Button color="danger"><FontAwesomeIcon icon={faTrash} style={{ marginRight: 10 + "px" }} />Eliminar</Button>
+                        <Button color="danger" onClick={this.handleDeleteQuestion}><FontAwesomeIcon icon={faTrash} style={{ marginRight: 10 + "px" }} />Eliminar</Button>
                         <Button color="primary" onClick={this.handleChangeQuestion}><FontAwesomeIcon icon={faCheck} style={{ marginRight: 10 + "px" }} />Alterar</Button>
                     </ModalFooter>
                 </Modal>
