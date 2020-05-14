@@ -29,7 +29,7 @@
             "numering": "se for númerica, qual o número",
             "grade": "Indica a pontuação da pergunta",
             "text": "Pergunta",
-            "footer_text": "Caso haja necessidade de incluir texto numa pergunta que tenha sub-perguntas",
+            "footer_note": "Caso haja necessidade de incluir texto numa pergunta que tenha sub-perguntas",
             "position": "qual a sua posição relativamente ao enunciado",
             "questions": []
         }

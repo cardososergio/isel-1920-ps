@@ -2,7 +2,6 @@
 import { connect } from "react-redux"
 import { Link } from "react-router-dom"
 import { Container, Row, Col, Modal, ModalHeader, ModalBody, Form, FormGroup, Label, Input, CustomInput, Collapse, InputGroup, InputGroupAddon, InputGroupText, ModalFooter, Button } from "reactstrap"
-import "./Document.css"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faInfo, faBars, faEye, faPlus, faTimes, faEllipsisV, faCaretUp, faCaretDown, faTrash, faCheck } from "@fortawesome/free-solid-svg-icons"
 import PouchDB from 'pouchdb'
@@ -11,6 +10,7 @@ import { registerLocale } from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css"
 import pt from 'date-fns/locale/pt'
 import uuid4 from 'uuid4'
+import "./Document.css"
 
 registerLocale('pt', pt)
 
@@ -38,7 +38,8 @@ class Document extends React.Component {
                     grade: 0,
                     footerNote: ""
                 },
-                subQuestion: false
+                subQuestion: false,
+                mainId: 0
             },
             header: {
                 isOpen: false
@@ -135,7 +136,7 @@ class Document extends React.Component {
             numering_type: this.state.default.numeringType,
             numering: "0",
             grade: "0",
-            text: text,
+            text: String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'),
             position: position
         }
 
@@ -163,13 +164,13 @@ class Document extends React.Component {
             document.getElementById("txtSubNewQuestion" + id).value = ""
     }
 
-    handleOpenQuestion(id, subQuestion) {
+    handleOpenQuestion(id, subQuestion, mainId) {
 
         let question
         if (!subQuestion)
             question = this.state.doc.questions.find(item => item.question_id === id)
         else
-            question = this.state.doc.questions.find(item => item.question_id === id).questions.find(item => item.question_id === id)
+            question = this.state.doc.questions.find(item => item.question_id === mainId).questions.find(item => item.question_id === id)
 
         const modal = {
             isOpen: true,
@@ -180,7 +181,8 @@ class Document extends React.Component {
                 grade: question.grade.replace(",", "."),
                 footerNote: question.footer_note !== undefined ? question.footer_note : ""
             },
-            subQuestion: subQuestion
+            subQuestion: subQuestion,
+            mainId: mainId
         }
 
         this.setState({ modalQuestion: modal })
@@ -216,14 +218,36 @@ class Document extends React.Component {
                 grade = parseFloat(grade).toFixed(2)
         }
 
-        const pos = this.state.doc.questions.findIndex(item => item.question_id === this.state.modalQuestion.id)
-        let update = this.state.doc.questions
-        update[pos].numering_type = numeringType
-        update[pos].numering = numering === 0 && numeringType === 1 ? "" : numering.toString()
-        update[pos].grade = grade === 0 ? "" : grade.toString()
-        update[pos].footer_note = this.state.modalQuestion.fields.footerNote
+        const pos = !this.state.modalQuestion.subQuestion ?
+            this.state.doc.questions.findIndex(item => item.question_id === this.state.modalQuestion.id)
+            :
+            this.state.doc.questions.find(item => item.question_id === this.state.modalQuestion.mainId).questions.findIndex(item => item.question_id === this.state.modalQuestion.id)
 
-        this.setState({ doc: { ...this.state.doc, questions: update }, default: { ...this.state.default, numeringType: update[pos].numering_type } })
+        if (!this.state.modalQuestion.subQuestion) {
+            let update = this.state.doc.questions
+            update[pos].numering_type = numeringType
+            update[pos].numering = numering === 0 && numeringType === 1 ? "" : numering.toString()
+            update[pos].grade = grade === 0 ? "" : grade.toString()
+            update[pos].footer_note = this.state.modalQuestion.fields.footerNote
+
+            this.setState({ doc: { ...this.state.doc, questions: update }, default: { ...this.state.default, numeringType: update[pos].numering_type } })
+        }
+        else {
+            let update = this.state.doc.questions.find(item => item.question_id === this.state.modalQuestion.mainId)
+            let subUpdate = update.questions
+
+            subUpdate[pos].numering_type = numeringType
+            subUpdate[pos].numering = numering === 0 && numeringType === 1 ? "" : numering.toString()
+            subUpdate[pos].grade = grade === 0 ? "" : grade.toString()
+            update.questions = subUpdate
+
+            const x = this.state.doc.questions.findIndex(item => item.question_id === this.state.modalQuestion.mainId)
+            let xx = this.state.doc.questions
+            xx[x] = update
+
+            this.setState({ doc: { ...this.state.doc, questions: xx }, default: { ...this.state.default, numeringType: numeringType } })
+        }
+
         this.toggleQuestion()
     }
 
@@ -231,8 +255,40 @@ class Document extends React.Component {
         if (!window.confirm("A pergunta será eliminada. Deseja continuar?"))
             return
 
-        const update = this.state.doc.questions.filter(item => item.question_id !== this.state.modalQuestion.id)
-        this.setState({ doc: { ...this.state.doc, questions: update } })
+        if (!this.state.modalQuestion.subQuestion) {
+            const delPosition = this.state.doc.questions.find(item => item.question_id === this.state.modalQuestion.id).position
+
+            let update = this.state.doc.questions.filter(item => item.question_id !== this.state.modalQuestion.id).map(item => {
+                if (item.position > delPosition) {
+                    const newPos = item.position - 1
+                    return { ...item, position: newPos }
+                }
+
+                return item
+            })
+
+            this.setState({ doc: { ...this.state.doc, questions: update } })
+        }
+        else {
+            let update = this.state.doc.questions
+
+            const pos = update.findIndex(item => item.question_id === this.state.modalQuestion.mainId)
+            const delPosition = update[pos].questions.find(item => item.question_id === this.state.modalQuestion.id).position
+
+            const subUpdate = update[pos].questions.filter(item => item.question_id !== this.state.modalQuestion.id).map(item => {
+                if (item.position > delPosition) {
+                    const newPos = item.position - 1
+                    return { ...item, position: newPos }
+                }
+
+                return item
+            })
+
+            update[pos].questions = subUpdate
+
+            this.setState({ doc: { ...this.state.doc, questions: update } })
+        }
+
         this.toggleQuestion()
     }
 
@@ -271,6 +327,53 @@ class Document extends React.Component {
         this.setState({ doc: { ...this.state.doc, questions: update } })
     }
 
+    handleMoveSubQuestionUp(mainId, id) {
+
+        let current = this.state.doc.questions.find(item => item.question_id === mainId).questions.find(item => item.question_id === id)
+        if (current.position === 1) return
+
+        let prev = this.state.doc.questions.find(item => item.question_id === mainId).questions.find(item => item.position === (current.position - 1))
+        prev.position++
+
+        current.position--
+
+        let subUpdate = this.state.doc.questions.find(item => item.question_id === mainId).questions.filter(item => item.question_id !== current.question_id && item.question_id !== prev.question_id)
+        subUpdate.push(current)
+        subUpdate.push(prev)
+
+        const update = this.state.doc.questions.map(item => {
+            if (item.question_id === mainId)
+                return { ...item, questions: subUpdate }
+            return item
+        })
+
+        this.setState({ doc: { ...this.state.doc, questions: update } })
+    }
+
+    handleMoveSubQuestionDown(mainId, id) {
+
+        const totalQuestions = this.state.doc.questions.find(item => item.question_id === mainId).questions.length
+        let current = this.state.doc.questions.find(item => item.question_id === mainId).questions.find(item => item.question_id === id)
+        if (current.position === totalQuestions) return
+
+        let next = this.state.doc.questions.find(item => item.question_id === mainId).questions.find(item => item.position === (current.position + 1))
+        next.position--
+
+        current.position++
+
+        let subUpdate = this.state.doc.questions.find(item => item.question_id === mainId).questions.filter(item => item.question_id !== current.question_id && item.question_id !== next.question_id)
+        subUpdate.push(current)
+        subUpdate.push(next)
+
+        const update = this.state.doc.questions.map(item => {
+            if (item.question_id === mainId)
+                return { ...item, questions: subUpdate }
+            return item
+        })
+
+        this.setState({ doc: { ...this.state.doc, questions: update } })
+    }
+
     render() {
         if (this.state.loading)
             return (<></>)
@@ -286,7 +389,7 @@ class Document extends React.Component {
                             <Link to="#" onClick={this.handlePreview}><FontAwesomeIcon icon={faEye} /></Link>
                         </Col>
                     </Row>
-                    <Collapse isOpen={this.state.header.isOpen} className="row text-center" style={{ fontFamily: "Garamond", fontSize: 13 + "pt" }}>
+                    <Collapse isOpen={this.state.header.isOpen} className="row text-center font">
                         <Col xs={{ size: 6, offset: 3 }} style={{ fontWeight: "bold" }}>
                             {this.state.doc.header.school_name}
                         </Col>
@@ -318,46 +421,53 @@ class Document extends React.Component {
                                 onChange={(e) => this.setState({ doc: { ...this.state.doc, header: { ...this.state.doc.header, delivery_note: e.target.value } } })} />
                         </Col>
                     </Collapse>
-                    <Row style={{ marginTop: 20 + "px", marginBottom: 10 + "px", fontFamily: "Garamond", fontSize: 13 + "pt" }}>
+                    <Row className="font row-margin">
                         <Col>
                             {
                                 this.state.doc.questions.sort((a, b) => a.position - b.position).map(item => {
                                     const totalQuestions = this.state.doc.questions.length
 
                                     return (
-                                        <div key={item.question_id} style={{ display: "flex", marginTop: 5 + "px", marginBottom: 5 + "px", flexDirection: "column" }}>
-                                            <div style={{ display: "flex", flexDirection: "row" }}>
-                                                <div style={{ width: 25 + "px", textAlign: "end", marginRight: 5 + "px" }}>
+                                        <div key={item.question_id} className="row-question">
+                                            <div className="row-flex">
+                                                <div className="div-numering">
                                                     {item.numering_type === 2 ? item.numering + "." : <ul style={{ marginBottom: 0 }}><li></li></ul>}
                                                 </div>
                                                 <div style={{ marginRight: 5 + "px" }}>
                                                     {item.grade !== "" ? "(" + item.grade.toString().replace(".", ",") + ")" : null}
                                                 </div>
                                                 <div contentEditable="true" className="form-control-plaintext text-justify" spellCheck="false" dangerouslySetInnerHTML={this.createMarkup(item.text)}></div>
-                                                <div className="question-options" style={{ display: "inherit", cursor: "pointer" }}>
-                                                    <FontAwesomeIcon icon={faCaretUp} style={{ color: item.position !== 1 ? "#4da3ff" : null }} onClick={() => this.handleMoveQuestionUp(item.question_id)} />
-                                                    <FontAwesomeIcon icon={faCaretDown} style={{ color: item.position !== totalQuestions ? "#4da3ff" : null }} onClick={() => this.handleMoveQuestionDown(item.question_id)} />
-                                                    <FontAwesomeIcon icon={faEllipsisV} style={{ color: "#4da3ff" }} onClick={() => this.handleOpenQuestion(item.question_id, false)} />
+                                                <div className="question-options" style={{ display: "inherit" }}>
+                                                    <FontAwesomeIcon icon={faCaretUp} style={{ color: item.position !== 1 ? "#4da3ff" : null, cursor: "pointer" }}
+                                                        onClick={() => this.handleMoveQuestionUp(item.question_id)} />
+                                                    <FontAwesomeIcon icon={faCaretDown} style={{ color: item.position !== totalQuestions ? "#4da3ff" : null, cursor: "pointer" }}
+                                                        onClick={() => this.handleMoveQuestionDown(item.question_id)} />
+                                                    <FontAwesomeIcon icon={faEllipsisV} style={{ color: "#4da3ff", cursor: "pointer" }} onClick={() => this.handleOpenQuestion(item.question_id, false)} />
                                                 </div>
                                             </div>
                                             <div style={{ marginLeft: 50 + "px" }}>
                                                 {
                                                     item.questions !== undefined ?
                                                         item.questions.sort((a, b) => a.position - b.position).map(subItem => {
+                                                            const totalSubQuestions = item.questions.length
+
                                                             return (
-                                                                <div key={subItem.question_id} style={{ display: "flex", marginTop: 5 + "px", marginBottom: 5 + "px", flexDirection: "column" }}>
-                                                                    <div style={{ display: "flex", flexDirection: "row" }}>
-                                                                        <div style={{ width: 25 + "px", textAlign: "end", marginRight: 5 + "px" }}>
+                                                                <div key={subItem.question_id} className="row-question">
+                                                                    <div className="row-flex">
+                                                                        <div className="div-numering">
                                                                             {subItem.numering_type === 2 ? subItem.numering + "." : <ul style={{ marginBottom: 0 }}><li></li></ul>}
                                                                         </div>
                                                                         <div style={{ marginRight: 5 + "px" }}>
                                                                             {subItem.grade !== "" ? "(" + subItem.grade.toString().replace(".", ",") + ")" : null}
                                                                         </div>
                                                                         <div contentEditable="true" className="form-control-plaintext text-justify" spellCheck="false" dangerouslySetInnerHTML={this.createMarkup(subItem.text)}></div>
-                                                                        <div className="question-options" style={{ display: "inherit", cursor: "pointer" }}>
-                                                                            <FontAwesomeIcon icon={faCaretUp} style={{ color: subItem.position !== 1 ? "#4da3ff" : null }} onClick={() => this.handleMoveQuestionUp(subItem.question_id)} />
-                                                                            <FontAwesomeIcon icon={faCaretDown} style={{ color: subItem.position !== totalQuestions ? "#4da3ff" : null }} onClick={() => this.handleMoveQuestionDown(subItem.question_id)} />
-                                                                            <FontAwesomeIcon icon={faEllipsisV} style={{ color: "#4da3ff" }} onClick={() => this.handleOpenQuestion(subItem.question_id, true)} />
+                                                                        <div className="question-options" style={{ display: "inherit" }}>
+                                                                            <FontAwesomeIcon icon={faCaretUp} style={{ color: subItem.position !== 1 ? "#4da3ff" : null, cursor: "pointer" }}
+                                                                                onClick={() => this.handleMoveSubQuestionUp(item.question_id, subItem.question_id)} />
+                                                                            <FontAwesomeIcon icon={faCaretDown} style={{ color: subItem.position !== totalSubQuestions ? "#4da3ff" : null, cursor: "pointer" }}
+                                                                                onClick={() => this.handleMoveSubQuestionDown(item.question_id, subItem.question_id)} />
+                                                                            <FontAwesomeIcon icon={faEllipsisV} style={{ color: "#4da3ff", cursor: "pointer" }}
+                                                                                onClick={() => this.handleOpenQuestion(subItem.question_id, true, item.question_id)} />
                                                                         </div>
                                                                     </div>
                                                                 </div>)
@@ -371,6 +481,14 @@ class Document extends React.Component {
                                                         <InputGroupText><FontAwesomeIcon icon={faPlus} /></InputGroupText>
                                                     </InputGroupAddon>
                                                 </InputGroup>
+
+                                                {
+                                                    item.footer_note !== undefined && item.footer_note !== "" ?
+                                                        <div style={{ marginTop: 5 + "px" }}>
+                                                            <div contentEditable="true" className="form-control-plaintext text-justify" spellCheck="false" dangerouslySetInnerHTML={this.createMarkup(item.footer_note)}></div>
+                                                        </div>
+                                                        : null
+                                                }
                                             </div>
                                         </div>
                                     )
@@ -388,6 +506,7 @@ class Document extends React.Component {
                         <Col>References</Col>
                     </Row>
                 </Container>
+
                 <Modal isOpen={this.state.modal.isOpen} toggle={this.toggle} backdrop="static" keyboard={false} size="lg">
                     <ModalHeader toggle={this.toggle}>Detalhe</ModalHeader>
                     <ModalBody>
@@ -493,13 +612,17 @@ class Document extends React.Component {
                                         onChange={(e) => this.setState({ modalQuestion: { ...this.state.modalQuestion, fields: { ...this.state.modalQuestion.fields, grade: e.target.value } } })} />
                                 </Col>
                             </FormGroup>
-                            <FormGroup row>
-                                <Label for="txtFooteNote" sm={2}>Texto de rodapé</Label>
-                                <Col sm={10}>
-                                    <Input type="textarea" id="txtFooteNote" defaultValue={this.state.modalQuestion.fields.footerNote}
-                                        onChange={(e) => this.setState({ modalQuestion: { ...this.state.modalQuestion, fields: { ...this.state.modalQuestion.fields, footerNote: e.target.value } } })} />
-                                </Col>
-                            </FormGroup>
+                            {
+                                !this.state.modalQuestion.subQuestion ?
+                                    <FormGroup row>
+                                        <Label for="txtFooteNote" sm={2}>Texto de rodapé</Label>
+                                        <Col sm={10}>
+                                            <Input type="textarea" id="txtFooteNote" defaultValue={this.state.modalQuestion.fields.footerNote}
+                                                onChange={(e) => this.setState({ modalQuestion: { ...this.state.modalQuestion, fields: { ...this.state.modalQuestion.fields, footerNote: e.target.value } } })} />
+                                        </Col>
+                                    </FormGroup>
+                                    : null
+                            }
                         </Form>
                     </ModalBody>
                     <ModalFooter style={{ justifyContent: "space-between" }}>
