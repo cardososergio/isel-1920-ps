@@ -1,9 +1,12 @@
 ﻿import React from "react"
 import { connect } from "react-redux"
 import { Link } from "react-router-dom"
-import { Container, Row, Col, Modal, ModalHeader, ModalBody, Form, FormGroup, Label, Input, CustomInput, Collapse, InputGroup, InputGroupAddon, InputGroupText, ModalFooter, Button } from "reactstrap"
+import {
+    Container, Row, Col, Modal, ModalHeader, ModalBody, Form, FormGroup, Label, Input, CustomInput, Collapse, InputGroup,
+    InputGroupAddon, InputGroupText, ModalFooter, Button, UncontrolledPopover, PopoverBody
+} from "reactstrap"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faInfo, faBars, faEye, faPlus, faTimes, faEllipsisV, faCaretUp, faCaretDown, faTrash, faCheck } from "@fortawesome/free-solid-svg-icons"
+import { faInfo, faBars, faEye, faPlus, faTimes, faEllipsisV, faCaretUp, faCaretDown, faTrash, faCheck, faFont } from "@fortawesome/free-solid-svg-icons"
 import PouchDB from 'pouchdb'
 import DatePicker from "react-datepicker"
 import { registerLocale } from "react-datepicker"
@@ -46,6 +49,14 @@ class Document extends React.Component {
             },
             default: {
                 numeringType: 2
+            },
+            popover: {
+                isOpen: false,
+                control: "body",
+                startSel: 0,
+                endSel: 0,
+                id: 0,
+                type: "main"
             }
         }
 
@@ -58,6 +69,9 @@ class Document extends React.Component {
         this.handleNewQuestion = this.handleNewQuestion.bind(this)
         this.handleChangeQuestion = this.handleChangeQuestion.bind(this)
         this.handleDeleteQuestion = this.handleDeleteQuestion.bind(this)
+
+        this.handleMouseUp = this.handleMouseUp.bind(this)
+        this.handleFormat = this.handleFormat.bind(this)
     }
 
     toggle() {
@@ -374,6 +388,95 @@ class Document extends React.Component {
         this.setState({ doc: { ...this.state.doc, questions: update } })
     }
 
+    handleMouseUp(e, id, type, mainId) {
+
+        if (window.getSelection().toString()) {
+
+            console.log(e.target.innerHTML)
+            console.log(window.getSelection())
+
+            let startSel, endSel
+            //if ()
+
+            this.setState({
+                popover: {
+                    isOpen: true,
+                    control: e.target.id,
+                    startSel: window.getSelection().anchorOffset > window.getSelection().focusOffset ? window.getSelection().focusOffset : window.getSelection().anchorOffset,
+                    endSel: window.getSelection().focusOffset < window.getSelection().anchorOffset ? window.getSelection().anchorOffset : window.getSelection().focusOffset,
+                    id: id,
+                    type: type,
+                    mainId: mainId === undefined ? id : mainId
+                }
+            })
+        }
+        else {
+            if (this.state.popover.isOpen) {
+                window.getSelection().empty()
+
+                this.setState({ popover: { ...this.state.popover, isOpen: false } })
+            }
+        }
+    }
+
+    handleFormat() {
+        const chkItalic = document.getElementById("chkItalic").checked
+        const chkBold = document.getElementById("chkBold").checked
+        const chkSuper = document.getElementById("chkSuper").checked
+        const chkSub = document.getElementById("chkSub").checked
+        const txtOther = document.getElementById("txtOther").value
+
+        if (!chkItalic && !chkBold && !chkSuper && !chkSub && txtOther === "")
+            return
+
+        let special = ""
+        if (chkItalic) special = "i"
+        if (chkBold) special = "b"
+        if (chkSuper) special = "sup"
+        if (chkSub) special = "sub"
+        
+        const startSel = this.state.popover.startSel
+        const endSel = this.state.popover.endSel
+
+        let question = []
+        if (this.state.popover.type === "main" || this.state.popover.type === "footer")
+            question = this.state.doc.questions.find(item => item.question_id === this.state.popover.id)
+        else
+            question = this.state.doc.questions.find(item => item.question_id === this.state.popover.mainId).questions.find(item => item.question_id === this.state.popover.id)
+
+        let text = this.state.popover.type === "footer" ? question.footer_note : question.text
+        let newText
+        if (special === "")
+            newText = text.slice(0, startSel) + txtOther + text.slice(endSel)
+        else
+            newText = text.slice(0, startSel) + "<" + special + ">" + text.slice(startSel, endSel) + "</" + special + ">" + text.slice(endSel)
+
+        if (this.state.popover.type === "footer")
+            question.footer_note = newText
+        else
+            question.text = newText
+
+        let update
+        if (this.state.popover.type !== "sub") {
+            update = this.state.doc.questions.filter(item => item.question_id !== this.state.popover.id)
+            update.push(question)
+        }
+        else {
+            let subUpdate = this.state.doc.questions.find(item => item.question_id === this.state.popover.mainId).questions.filter(item => item.question_id !== this.state.popover.id)
+            subUpdate.push(question)
+
+            update = this.state.doc.questions.map(item => {
+                if (item.question_id === this.state.popover.mainId)
+                    return { ...item, questions: subUpdate }
+                return item
+            })
+        }
+
+        window.getSelection().empty()
+
+        this.setState({ doc: { ...this.state.doc, questions: update }, popover: { isOpen: false, control: "body", startSel: 0, endSel: 0, id: 0, mainId: 0, type: "main" } })
+    }
+
     render() {
         if (this.state.loading)
             return (<></>)
@@ -436,7 +539,9 @@ class Document extends React.Component {
                                                 <div style={{ marginRight: 5 + "px" }}>
                                                     {item.grade !== "" ? "(" + item.grade.toString().replace(".", ",") + ")" : null}
                                                 </div>
-                                                <div contentEditable="true" className="form-control-plaintext text-justify" spellCheck="false" dangerouslySetInnerHTML={this.createMarkup(item.text)}></div>
+                                                <div contentEditable="true" className="form-control-plaintext text-justify" spellCheck="false"
+                                                    onMouseUp={(e) => this.handleMouseUp(e, item.question_id, "main")} id={`divQuestion${item.question_id}`}
+                                                    dangerouslySetInnerHTML={this.createMarkup(item.text)}></div>
                                                 <div className="question-options" style={{ display: "inherit" }}>
                                                     <FontAwesomeIcon icon={faCaretUp} style={{ color: item.position !== 1 ? "#4da3ff" : null, cursor: "pointer" }}
                                                         onClick={() => this.handleMoveQuestionUp(item.question_id)} />
@@ -460,7 +565,9 @@ class Document extends React.Component {
                                                                         <div style={{ marginRight: 5 + "px" }}>
                                                                             {subItem.grade !== "" ? "(" + subItem.grade.toString().replace(".", ",") + ")" : null}
                                                                         </div>
-                                                                        <div contentEditable="true" className="form-control-plaintext text-justify" spellCheck="false" dangerouslySetInnerHTML={this.createMarkup(subItem.text)}></div>
+                                                                        <div contentEditable="true" className="form-control-plaintext text-justify" spellCheck="false"
+                                                                            onMouseUp={(e) => this.handleMouseUp(e, subItem.question_id, "sub", item.question_id)} id={`divQuestion${subItem.question_id}`}
+                                                                            dangerouslySetInnerHTML={this.createMarkup(subItem.text)}></div>
                                                                         <div className="question-options" style={{ display: "inherit" }}>
                                                                             <FontAwesomeIcon icon={faCaretUp} style={{ color: subItem.position !== 1 ? "#4da3ff" : null, cursor: "pointer" }}
                                                                                 onClick={() => this.handleMoveSubQuestionUp(item.question_id, subItem.question_id)} />
@@ -485,7 +592,9 @@ class Document extends React.Component {
                                                 {
                                                     item.footer_note !== undefined && item.footer_note !== "" ?
                                                         <div style={{ marginTop: 5 + "px" }}>
-                                                            <div contentEditable="true" className="form-control-plaintext text-justify" spellCheck="false" dangerouslySetInnerHTML={this.createMarkup(item.footer_note)}></div>
+                                                            <div contentEditable="true" className="form-control-plaintext text-justify" spellCheck="false"
+                                                                onMouseUp={(e) => this.handleMouseUp(e, item.question_id, "footer")} id={`divQuestion${item.question_id}_footer`}
+                                                                dangerouslySetInnerHTML={this.createMarkup(item.footer_note)}></div>
                                                         </div>
                                                         : null
                                                 }
@@ -506,6 +615,39 @@ class Document extends React.Component {
                         <Col>References</Col>
                     </Row>
                 </Container>
+
+                <UncontrolledPopover placement="bottom" target={this.state.popover.control} isOpen={this.state.popover.isOpen}>
+                    <PopoverBody>
+                        <Container>
+                            <Row>
+                                <Col xs="6">
+                                    <Label check><Input type="radio" id="chkItalic" /><i>Itálico</i></Label>
+                                </Col>
+                                <Col xs="6">
+                                    <Label check><Input type="radio" id="chkBold" /><b>Negrito</b></Label>
+                                </Col>
+                            </Row>
+                            <Row>
+                                <Col xs="6">
+                                    <Label check><Input type="radio" id="chkSuper" /><i>"superscript"</i></Label>
+                                </Col>
+                                <Col xs="6">
+                                    <Label check><Input type="radio" id="chkSub" /><i>"subscript"</i></Label>
+                                </Col>
+                            </Row>
+                            <Row>
+                                <Col xs="6">
+                                    <Input type="radio" /><Input type="text" id="txtOther" bsSize="sm" />
+                                </Col>
+                            </Row>
+                            <Row style={{ marginTop: 10 + "px" }}>
+                                <Col xs="12" className="text-center">
+                                    <Button color="info" size="sm" onClick={this.handleFormat}><FontAwesomeIcon icon={faFont} style={{ marginRight: 5 + "px" }} />Escolher</Button>
+                                </Col>
+                            </Row>
+                        </Container>
+                    </PopoverBody>
+                </UncontrolledPopover>
 
                 <Modal isOpen={this.state.modal.isOpen} toggle={this.toggle} backdrop="static" keyboard={false} size="lg">
                     <ModalHeader toggle={this.toggle}>Detalhe</ModalHeader>
