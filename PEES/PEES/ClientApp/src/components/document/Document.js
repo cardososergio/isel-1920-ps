@@ -66,6 +66,8 @@ class Document extends React.Component {
         this.handleNewCourse = this.handleNewCourse.bind(this)
         this.handleRemoveCourse = this.handleRemoveCourse.bind(this)
 
+        this.handleChangeTextQuestion = this.handleChangeTextQuestion.bind(this)
+
         this.handleNewQuestion = this.handleNewQuestion.bind(this)
         this.handleChangeQuestion = this.handleChangeQuestion.bind(this)
         this.handleDeleteQuestion = this.handleDeleteQuestion.bind(this)
@@ -388,6 +390,34 @@ class Document extends React.Component {
         this.setState({ doc: { ...this.state.doc, questions: update } })
     }
 
+    handleChangeTextQuestion(e, id, mainId) {
+
+        if (mainId === undefined) {
+            const update = this.state.doc.questions.map(item => {
+                if (item.question_id === id)
+                    return { ...item, text: e.target.innerHTML }
+                return item
+            })
+
+            this.setState({ doc: { ...this.state.doc, questions: update } })
+        }
+        else {
+            const subUpdate = this.state.doc.questions.find(item => item.question_id === mainId).questions.map(item => {
+                if (item.question_id === id)
+                    return { ...item, text: e.target.innerHTML }
+                return item
+            })
+
+            const update = this.state.doc.questions.map(item => {
+                if (item.question_id === mainId)
+                    return { ...item, questions: subUpdate }
+                return item
+            })
+
+            this.setState({ doc: { ...this.state.doc, questions: update } })
+        }
+    }
+
     handleMouseUp(e, id, type, mainId) {
 
         if (window.getSelection().toString()) {
@@ -434,7 +464,7 @@ class Document extends React.Component {
         if (chkBold) special = "b"
         if (chkSuper) special = "sup"
         if (chkSub) special = "sub"
-        
+
         const startSel = this.state.popover.startSel
         const endSel = this.state.popover.endSel
 
@@ -541,7 +571,7 @@ class Document extends React.Component {
                                                 </div>
                                                 <div contentEditable="true" className="form-control-plaintext text-justify" spellCheck="false"
                                                     onMouseUp={(e) => this.handleMouseUp(e, item.question_id, "main")} id={`divQuestion${item.question_id}`}
-                                                    dangerouslySetInnerHTML={this.createMarkup(item.text)}></div>
+                                                    dangerouslySetInnerHTML={this.createMarkup(item.text)} onBlur={(e) => this.handleChangeTextQuestion(e, item.question_id)}></div>
                                                 <div className="question-options" style={{ display: "inherit" }}>
                                                     <FontAwesomeIcon icon={faCaretUp} style={{ color: item.position !== 1 ? "#4da3ff" : null, cursor: "pointer" }}
                                                         onClick={() => this.handleMoveQuestionUp(item.question_id)} />
@@ -567,6 +597,7 @@ class Document extends React.Component {
                                                                         </div>
                                                                         <div contentEditable="true" className="form-control-plaintext text-justify" spellCheck="false"
                                                                             onMouseUp={(e) => this.handleMouseUp(e, subItem.question_id, "sub", item.question_id)} id={`divQuestion${subItem.question_id}`}
+                                                                            onBlur={(e) => this.handleChangeTextQuestion(e, subItem.question_id, item.question_id)}
                                                                             dangerouslySetInnerHTML={this.createMarkup(subItem.text)}></div>
                                                                         <div className="question-options" style={{ display: "inherit" }}>
                                                                             <FontAwesomeIcon icon={faCaretUp} style={{ color: subItem.position !== 1 ? "#4da3ff" : null, cursor: "pointer" }}
