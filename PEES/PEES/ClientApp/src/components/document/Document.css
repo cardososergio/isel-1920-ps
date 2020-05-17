@@ -47,3 +47,12 @@
 .popover {
     width: 240px;
 }
+
+.format-options {
+    cursor: pointer;
+    padding: 5px;
+    font-size: 25pt;
+    color: #4da3ff;
+    margin-left: 4px;
+    margin-right: 4px;
+}

@@ -6,7 +6,7 @@ import {
     InputGroupAddon, InputGroupText, ModalFooter, Button, UncontrolledPopover, PopoverBody
 } from "reactstrap"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faInfo, faBars, faEye, faPlus, faTimes, faEllipsisV, faCaretUp, faCaretDown, faTrash, faCheck, faFont } from "@fortawesome/free-solid-svg-icons"
+import { faInfo, faBars, faEye, faPlus, faTimes, faEllipsisV, faCaretUp, faCaretDown, faTrash, faCheck, faFont, faBold, faItalic, faUnderline, faSuperscript, faSubscript } from "@fortawesome/free-solid-svg-icons"
 import PouchDB from 'pouchdb'
 import DatePicker from "react-datepicker"
 import { registerLocale } from "react-datepicker"
@@ -422,11 +422,21 @@ class Document extends React.Component {
 
         if (window.getSelection().toString()) {
 
-            console.log(e.target.innerHTML)
-            console.log(window.getSelection())
+            /*const text = document.getElementById("divQuestion" + id).textContent || document.getElementById("divQuestion" + id).innerText
 
-            let startSel, endSel
-            //if ()
+            let sibling = window.getSelection().anchorNode
+            let str = ""
+            do {
+                if (sibling.wholeText !== undefined)
+                    str = sibling.wholeText + str
+                else
+                    str = "<" + sibling.tagName + ">" + sibling.innerHTML + "</" + sibling.tagName + ">" + str
+
+                sibling = sibling.previousSibling
+            }
+            while (sibling !== null)*/
+
+            return
 
             this.setState({
                 popover: {
@@ -449,22 +459,7 @@ class Document extends React.Component {
         }
     }
 
-    handleFormat() {
-        const chkItalic = document.getElementById("chkItalic").checked
-        const chkBold = document.getElementById("chkBold").checked
-        const chkSuper = document.getElementById("chkSuper").checked
-        const chkSub = document.getElementById("chkSub").checked
-        const txtOther = document.getElementById("txtOther").value
-
-        if (!chkItalic && !chkBold && !chkSuper && !chkSub && txtOther === "")
-            return
-
-        let special = ""
-        if (chkItalic) special = "i"
-        if (chkBold) special = "b"
-        if (chkSuper) special = "sup"
-        if (chkSub) special = "sub"
-
+    handleFormat(format) {
         const startSel = this.state.popover.startSel
         const endSel = this.state.popover.endSel
 
@@ -475,11 +470,7 @@ class Document extends React.Component {
             question = this.state.doc.questions.find(item => item.question_id === this.state.popover.mainId).questions.find(item => item.question_id === this.state.popover.id)
 
         let text = this.state.popover.type === "footer" ? question.footer_note : question.text
-        let newText
-        if (special === "")
-            newText = text.slice(0, startSel) + txtOther + text.slice(endSel)
-        else
-            newText = text.slice(0, startSel) + "<" + special + ">" + text.slice(startSel, endSel) + "</" + special + ">" + text.slice(endSel)
+        let newText = text.slice(0, startSel) + "<" + format + ">" + text.slice(startSel, endSel) + "</" + format + ">" + text.slice(endSel)
 
         if (this.state.popover.type === "footer")
             question.footer_note = newText
@@ -571,7 +562,8 @@ class Document extends React.Component {
                                                 </div>
                                                 <div contentEditable="true" className="form-control-plaintext text-justify" spellCheck="false"
                                                     onMouseUp={(e) => this.handleMouseUp(e, item.question_id, "main")} id={`divQuestion${item.question_id}`}
-                                                    dangerouslySetInnerHTML={this.createMarkup(item.text)} onBlur={(e) => this.handleChangeTextQuestion(e, item.question_id)}></div>
+                                                    dangerouslySetInnerHTML={this.createMarkup(item.text)}
+                                                    onBlur={(e) => this.handleChangeTextQuestion(e, item.question_id)}></div>
                                                 <div className="question-options" style={{ display: "inherit" }}>
                                                     <FontAwesomeIcon icon={faCaretUp} style={{ color: item.position !== 1 ? "#4da3ff" : null, cursor: "pointer" }}
                                                         onClick={() => this.handleMoveQuestionUp(item.question_id)} />
@@ -651,29 +643,12 @@ class Document extends React.Component {
                     <PopoverBody>
                         <Container>
                             <Row>
-                                <Col xs="6">
-                                    <Label check><Input type="radio" id="chkItalic" /><i>Itálico</i></Label>
-                                </Col>
-                                <Col xs="6">
-                                    <Label check><Input type="radio" id="chkBold" /><b>Negrito</b></Label>
-                                </Col>
-                            </Row>
-                            <Row>
-                                <Col xs="6">
-                                    <Label check><Input type="radio" id="chkSuper" /><i>"superscript"</i></Label>
-                                </Col>
-                                <Col xs="6">
-                                    <Label check><Input type="radio" id="chkSub" /><i>"subscript"</i></Label>
-                                </Col>
-                            </Row>
-                            <Row>
-                                <Col xs="6">
-                                    <Input type="radio" /><Input type="text" id="txtOther" bsSize="sm" />
-                                </Col>
-                            </Row>
-                            <Row style={{ marginTop: 10 + "px" }}>
-                                <Col xs="12" className="text-center">
-                                    <Button color="info" size="sm" onClick={this.handleFormat}><FontAwesomeIcon icon={faFont} style={{ marginRight: 5 + "px" }} />Escolher</Button>
+                                <Col>
+                                    <FontAwesomeIcon icon={faBold} className="format-options" onClick={() => this.handleFormat("b")} />
+                                    <FontAwesomeIcon icon={faItalic} className="format-options" onClick={() => this.handleFormat("i")} />
+                                    <FontAwesomeIcon icon={faUnderline} className="format-options" onClick={() => this.handleFormat("u")} />
+                                    <FontAwesomeIcon icon={faSuperscript} className="format-options" onClick={() => this.handleFormat("sup")} />
+                                    <FontAwesomeIcon icon={faSubscript} className="format-options" onClick={() => this.handleFormat("sub")} />
                                 </Col>
                             </Row>
                         </Container>
