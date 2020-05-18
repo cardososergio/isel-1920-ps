@@ -80,7 +80,9 @@ class Home extends React.Component {
     }
 
     render() {
-
+        if (localStorage.getItem("isOffline") === "false" && sessionStorage.getItem("doingLogin") === null)
+            return (<></>)
+        
         return (
             <>
                 {this.state.docId !== "" ? <Redirect to={`/document?id=${this.state.docId}`} /> : null}

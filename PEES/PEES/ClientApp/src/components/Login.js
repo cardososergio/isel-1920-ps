@@ -44,6 +44,7 @@ export default class Login extends React.Component {
                 if (json.userId !== undefined) {
                     localStorage.setItem("isOffline", false)
                     localStorage.setItem("user", JSON.stringify({ userId: json.userId, name: json.name }))
+                    sessionStorage.setItem("doingLogin", false)
 
                     this.setState({ loginDone: true })
                 }

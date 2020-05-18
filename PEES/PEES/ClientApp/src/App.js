@@ -17,13 +17,15 @@ export default class App extends React.Component {
         super(props)
 
         this.state = {
-            validAccessToken: true
+            validAccessToken: false
         }
     }
 
     componentDidMount() {
         
         if (localStorage.getItem("isOffline") === null || localStorage.getItem("isOffline") === "false") {
+            sessionStorage.setItem("doingLogin", true)
+
             // Check if AccessToken exist and is valid
             fetch("/api/users/check").then(response => { if (response.status === 200) return response.json(); return Promise.reject(response.statusText) })
                 .then(json => {
@@ -94,6 +96,7 @@ export default class App extends React.Component {
     }
 
     render() {
+
         return (
             <Layout>
                 {!this.state.validAccessToken ? <Redirect to="/login" /> : null}
