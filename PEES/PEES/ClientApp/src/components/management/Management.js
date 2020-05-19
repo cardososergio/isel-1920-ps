@@ -1,7 +1,7 @@
 ﻿import React from 'react';
 import Cookies from 'js-cookie'
 
-import Login from '../Login'
+import Login from '../auth/Login'
 import ManagementDetail from './ManagementDetail'
 
 export class Management extends React.Component {

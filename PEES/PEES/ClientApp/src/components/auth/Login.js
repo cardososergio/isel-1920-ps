@@ -1,6 +1,6 @@
 ﻿import React from 'react';
 import { Form, Button, FormGroup, Input, Label, Container, Row, Col } from "reactstrap";
-import { Redirect } from 'react-router-dom';
+import { Redirect, Link } from 'react-router-dom';
 
 export default class Login extends React.Component {
     constructor(props) {
@@ -80,6 +80,11 @@ export default class Login extends React.Component {
                             </FormGroup>
                             <Button block disabled={!this.state.enableButton} type="submit" color="primary">Login</Button>
                         </Form>
+                    </Col>
+                </Row>
+                <Row style={{ marginTop: 0.5 + "em" }}>
+                    <Col className="text-center">
+                        <Link to="/newuser">novo registo</Link>
                     </Col>
                 </Row>
             </Container>

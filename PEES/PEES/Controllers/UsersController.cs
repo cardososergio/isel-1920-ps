@@ -65,6 +65,34 @@ namespace PEES.Controllers
         }
 
         [Route("/api/[controller]/[action]")]
+        [HttpPost]
+        public ActionResult NewUser([FromBody] User user)
+        {
+            bool valid = false;
+
+            try
+            {
+                var newUser = new User();
+
+                newUser.Name = user.Name;
+                newUser.Email = user.Email;
+                newUser.Salt = Utils.CreateSalt();
+                newUser.Password = Utils.CreatePasswordHash(user.Password, newUser.Salt);
+                newUser.ProfileId = 1;
+
+                Global.SetUser(newUser);
+
+                valid = true;
+            }
+            catch (Exception)
+            {
+                return new BadRequestResult();
+            }
+
+            return new JsonResult(valid);
+        }
+
+        [Route("/api/[controller]/[action]")]
         [HttpGet]
         public ActionResult Configuration()
         {

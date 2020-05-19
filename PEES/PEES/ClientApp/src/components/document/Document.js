@@ -436,7 +436,7 @@ class Document extends React.Component {
             }
             while (sibling !== null)*/
 
-            return
+            //return
 
             this.setState({
                 popover: {

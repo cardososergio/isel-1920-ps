@@ -4,11 +4,11 @@ import { Redirect } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import Home from './components/Home';
 import { Management } from './components/management/Management'
-import Login from './components/Login';
+import Login from './components/auth/Login';
 import { PageNotFound } from "./components/PageNotFound"
 import Document from './components/document/Document';
-
 import './custom.css'
+import NewUser from './components/auth/NewUser';
 
 export default class App extends React.Component {
     static displayName = App.name;
@@ -22,7 +22,7 @@ export default class App extends React.Component {
     }
 
     componentDidMount() {
-        
+
         if (localStorage.getItem("isOffline") === null || localStorage.getItem("isOffline") === "false") {
             sessionStorage.setItem("doingLogin", true)
 
@@ -105,6 +105,7 @@ export default class App extends React.Component {
                     <Route exact path='/document' component={Document} />
                     <Route exact path='/login' component={Login} />
                     <Route exact path='/management' component={Management} />
+                    <Route exact path="/newuser" component={NewUser} />
                     <Route component={PageNotFound} />
                 </Switch>
             </Layout>

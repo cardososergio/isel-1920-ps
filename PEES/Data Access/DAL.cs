@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 using DataAccess.DAO;
 
@@ -34,6 +35,21 @@ namespace DataAccess.DAL
             }
 
             return result;
+        }
+
+        public static void SetUser(User user)
+        {
+            using (Database db = new Database(connectionString))
+            {
+                List<SqlParameter> parameters = new List<SqlParameter>();
+                parameters.Add(new SqlParameter("@Name", user.Name));
+                parameters.Add(new SqlParameter("@Email", user.Email));
+                parameters.Add(new SqlParameter("@Password", user.Password));
+                parameters.Add(new SqlParameter("@Salt", user.Salt));
+                parameters.Add(new SqlParameter("@ProfileId", user.ProfileId));
+
+                db.ExecSPNonQuery("dbo.spSetUser", parameters);
+            }
         }
     }
 
