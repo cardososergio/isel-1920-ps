@@ -56,7 +56,8 @@ class Home extends React.Component {
             semester: this.state.semester,
             curricular_unit: this.state.unit,
             season: this.state.season,
-            duration: null,
+            duration: "",
+            grade: "",
             header: {
                 school_name: conf.schoolName,
                 courses: []
@@ -79,10 +80,7 @@ class Home extends React.Component {
             })
     }
 
-    render() {
-        if (localStorage.getItem("isOffline") === "false" && sessionStorage.getItem("doingLogin") === null)
-            return (<></>)
-        
+    render() {        
         return (
             <>
                 {this.state.docId !== "" ? <Redirect to={`/document?id=${this.state.docId}`} /> : null}

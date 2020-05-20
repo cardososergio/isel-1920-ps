@@ -1,6 +1,5 @@
 import React from 'react';
 import { Route, Switch } from 'react-router';
-import { Redirect } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import Home from './components/Home';
 import { Management } from './components/management/Management'
@@ -17,14 +16,16 @@ export default class App extends React.Component {
         super(props)
 
         this.state = {
-            validAccessToken: false
+            validAccessToken: false,
+            noGo: true
         }
+
+        this.handleAccessToken = this.handleAccessToken.bind(this)
     }
 
     componentDidMount() {
 
         if (localStorage.getItem("isOffline") === null || localStorage.getItem("isOffline") === "false") {
-            sessionStorage.setItem("doingLogin", true)
 
             // Check if AccessToken exist and is valid
             fetch("/api/users/check").then(response => { if (response.status === 200) return response.json(); return Promise.reject(response.statusText) })
@@ -36,55 +37,15 @@ export default class App extends React.Component {
                         fetch('/api/users/configuration')
                             .then(response => { if (response.status === 200) return response.json(); return Promise.reject(response.statusText) })
                             .then(data => {
-
                                 localStorage.setItem("configuration", JSON.stringify(data))
-
-                                /*if (localStorage.getItem("configuration") === null)
-                                    localStorage.setItem("configuration", JSON.stringify(data))
-                                else {
-                                    // compare
-                                    const local = JSON.parse(localStorage.getItem("configuration"))
-                                    const server = data
-
-                                    let gotChanges = false
-                                    gotChanges = !local.curricularYears.every(l => {
-                                        return !(server.curricularYears.find(s => l.id === s.id) === undefined || server.curricularYears.find(s => l.id === s.id && l.revisionId !== s.revisionId) !== undefined)
-                                    })
-
-                                    if (!gotChanges)
-                                        gotChanges = !local.semesters.every(l => {
-                                            return !(server.semesters.find(s => l.id === s.id) === undefined || server.semesters.find(s => l.id === s.id && l.revisionId !== s.revisionId) !== undefined)
-                                        })
-
-                                    if (!gotChanges)
-                                        gotChanges = !local.seasons.every(l => {
-                                            return !(server.seasons.find(s => l.id === s.id) === undefined || server.seasons.find(s => l.id === s.id && l.revisionId !== s.revisionId) !== undefined)
-                                        })
-
-                                    if (!gotChanges)
-                                        gotChanges = !local.instructionTypes.every(l => {
-                                            return !(server.instructionTypes.find(s => l.id === s.id) === undefined || server.instructionTypes.find(s => l.id === s.id && l.revisionId !== s.revisionId) !== undefined)
-                                        })
-
-                                    if (!gotChanges)
-                                        gotChanges = !local.curricularUnits.every(l => {
-                                            return !(server.curricularUnits.find(s => l.id === s.id) === undefined || server.curricularUnits.find(s => l.id === s.id && l.revisionId !== s.revisionId) !== undefined)
-                                        })
-
-                                    if (gotChanges) {
-                                        console.log("conf !=")
-                                        const x = window.confirm("Os registos locais estão diferentes dos do servidor. Deseja atualiza-los?")
-                                    }
-                                    else {
-                                        console.log("conf ==")
-                                    }
-                                }*/
                             })
                             .catch(error => {
                                 console.error(error)
                                 alert('Não foi possível ligar à base de dados!')
                             })
                     }
+
+                    this.setState({ noGo: false })
                 })
                 .catch(error => {
                     console.error(error)
@@ -92,14 +53,28 @@ export default class App extends React.Component {
                 })
         } else {
             console.log("offline")
+            this.setState({ noGo: false })
         }
     }
 
+    handleAccessToken() {
+        this.setState({ validAccessToken: true })
+    }
+
     render() {
+        console.log("render")
+        if (this.state.noGo)
+            return (<></>)
+
+        if (!this.state.validAccessToken)
+            return (
+                <Layout>
+                    <Login handleAccessToken={this.handleAccessToken} />
+                </Layout>
+            )
 
         return (
             <Layout>
-                {!this.state.validAccessToken ? <Redirect to="/login" /> : null}
                 <Switch>
                     <Route exact path='/' component={Home} />
                     <Route exact path='/document' component={Document} />

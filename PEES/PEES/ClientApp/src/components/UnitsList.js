@@ -35,7 +35,7 @@ export const UnitsList = (props) => {
                         semester = semester === undefined ? doc.semester : semester.value
                         season = season === undefined ? doc.season : season.value
 
-                        return { id: doc._id, rev: doc._rev, semester: semester, season: season, name: doc.name, isDraft: doc.is_draft, isPublic: doc.is_public }
+                        return { id: doc._id, rev: doc._rev, semester: semester, season: season, name: doc.name, isDraft: doc.is_draft, isPublic: doc.is_public, grade: doc.grade }
                     })
                 }
             })

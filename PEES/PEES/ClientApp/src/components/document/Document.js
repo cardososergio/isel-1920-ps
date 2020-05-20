@@ -6,7 +6,7 @@ import {
     InputGroupAddon, InputGroupText, ModalFooter, Button, UncontrolledPopover, PopoverBody
 } from "reactstrap"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faInfo, faBars, faEye, faPlus, faTimes, faEllipsisV, faCaretUp, faCaretDown, faTrash, faCheck, faFont, faBold, faItalic, faUnderline, faSuperscript, faSubscript } from "@fortawesome/free-solid-svg-icons"
+import { faInfo, faBars, faEye, faPlus, faTimes, faEllipsisV, faCaretUp, faCaretDown, faTrash, faCheck, faBold, faItalic, faUnderline, faSuperscript, faSubscript } from "@fortawesome/free-solid-svg-icons"
 import PouchDB from 'pouchdb'
 import DatePicker from "react-datepicker"
 import { registerLocale } from "react-datepicker"
@@ -558,7 +558,7 @@ class Document extends React.Component {
                                                     {item.numering_type === 2 ? item.numering + "." : <ul style={{ marginBottom: 0 }}><li></li></ul>}
                                                 </div>
                                                 <div style={{ marginRight: 5 + "px" }}>
-                                                    {item.grade !== "" ? "(" + item.grade.toString().replace(".", ",") + ")" : null}
+                                                    {item.grade !== "" ? "(" + item.grade.toString().replace(".", ",") + "%)" : null}
                                                 </div>
                                                 <div contentEditable="true" className="form-control-plaintext text-justify" spellCheck="false"
                                                     onMouseUp={(e) => this.handleMouseUp(e, item.question_id, "main")} id={`divQuestion${item.question_id}`}
@@ -585,7 +585,7 @@ class Document extends React.Component {
                                                                             {subItem.numering_type === 2 ? subItem.numering + "." : <ul style={{ marginBottom: 0 }}><li></li></ul>}
                                                                         </div>
                                                                         <div style={{ marginRight: 5 + "px" }}>
-                                                                            {subItem.grade !== "" ? "(" + subItem.grade.toString().replace(".", ",") + ")" : null}
+                                                                            {subItem.grade !== "" ? "(" + subItem.grade.toString().replace(".", ",") + "%)" : null}
                                                                         </div>
                                                                         <div contentEditable="true" className="form-control-plaintext text-justify" spellCheck="false"
                                                                             onMouseUp={(e) => this.handleMouseUp(e, subItem.question_id, "sub", item.question_id)} id={`divQuestion${subItem.question_id}`}
@@ -729,6 +729,11 @@ class Document extends React.Component {
                                         {conf.instructionTypes.map(item => { return (<option key={item.id} value={item.id}>{item.value}</option>) })}
                                     </Input>
                                 </Col>
+                                <Label for="txtGrade" sm={2}>Cotação</Label>
+                                <Col sm={4}>
+                                    <Input type="number" id="txtGrade" value={this.state.doc.grade} min="0" max="20" step="0.5"
+                                        onChange={(e) => this.setState({ doc: { ...this.state.doc, grade: e.target.value } })} />
+                                </Col>
                             </FormGroup>
                         </Form>
                     </ModalBody>
@@ -756,7 +761,7 @@ class Document extends React.Component {
                             <FormGroup row>
                                 <Label for="txtGrade" sm={2}>Cotação</Label>
                                 <Col sm={4}>
-                                    <Input type="number" id="txtGrade" defaultValue={this.state.modalQuestion.fields.grade} min="0" max="20" step=".01"
+                                    <Input type="number" id="txtGrade" defaultValue={this.state.modalQuestion.fields.grade} min="0" max="100" step="1"
                                         onChange={(e) => this.setState({ modalQuestion: { ...this.state.modalQuestion, fields: { ...this.state.modalQuestion.fields, grade: e.target.value } } })} />
                                 </Col>
                             </FormGroup>

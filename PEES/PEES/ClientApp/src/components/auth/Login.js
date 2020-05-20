@@ -1,6 +1,7 @@
 ﻿import React from 'react';
 import { Form, Button, FormGroup, Input, Label, Container, Row, Col } from "reactstrap";
-import { Redirect, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import NewUser from './NewUser';
 
 export default class Login extends React.Component {
     constructor(props) {
@@ -13,8 +14,10 @@ export default class Login extends React.Component {
             enableButton: false,
             header: this.props.header !== undefined ? this.props.header : "Login",
             normalLogin: this.props.header === undefined,
-            loginDone: false
+            register: false
         }
+
+        this.handleRegister = this.handleRegister.bind(this)
     }
 
     validateForm = () => {
@@ -44,9 +47,8 @@ export default class Login extends React.Component {
                 if (json.userId !== undefined) {
                     localStorage.setItem("isOffline", false)
                     localStorage.setItem("user", JSON.stringify({ userId: json.userId, name: json.name }))
-                    sessionStorage.setItem("doingLogin", false)
 
-                    this.setState({ loginDone: true })
+                    this.props.handleAccessToken()
                 }
                 else
                     this.props.handleStateChange()
@@ -56,9 +58,13 @@ export default class Login extends React.Component {
             });
     }
 
+    handleRegister() {
+        this.setState({ register: false })
+    }
+
     render() {
-        if (this.state.loginDone)
-            return (<Redirect to="/" />)
+        if (this.state.register)
+            return (<NewUser handleRegister={this.handleRegister} />)
 
         return (
             <Container>
@@ -84,7 +90,7 @@ export default class Login extends React.Component {
                 </Row>
                 <Row style={{ marginTop: 0.5 + "em" }}>
                     <Col className="text-center">
-                        <Link to="/newuser">novo registo</Link>
+                        <Link to="#" onClick={(e) => { e.preventDefault(); this.setState({ register: true }); }}>novo registo</Link>
                     </Col>
                 </Row>
             </Container>
