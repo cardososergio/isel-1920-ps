@@ -121,6 +121,33 @@ namespace DataAccess
             }
         }
 
+        public object ExecSPScalar(string sp, List<SqlParameter> parameters)
+        {
+            object result;
+
+            try
+            {
+                // Check if closed, then open it
+                if (conn.State == ConnectionState.Closed) conn.Open();
+
+                SqlCommand Cmd = new SqlCommand(sp, conn);
+                Cmd.CommandType = CommandType.StoredProcedure;
+                Cmd.Parameters.AddRange(parameters.ToArray());
+
+                result = Cmd.ExecuteScalar();
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+            finally
+            {
+                if (conn.State == ConnectionState.Open) conn.Close();
+            }
+
+            return result;
+        }
+
         #region "dispose"
 
         private bool disposed = false;

@@ -1,11 +1,13 @@
 ﻿import React, { useState } from "react"
 import { Container, Row, Col, Form, FormGroup, Label, Input, Button } from "reactstrap";
+import { Redirect } from "react-router-dom";
 
 const NewUser = (props) => {
     const [name, setName] = useState("")
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [confirm, setConfirm] = useState("")
+    const [registerDone, setRegisterDone] = useState(false)
 
     const handleSubmit = event => {
         event.preventDefault()
@@ -29,12 +31,20 @@ const NewUser = (props) => {
         fetch("/api/users/newuser", requestOptions)
             .then(response => { if (response.status === 200) return response.json(); return Promise.reject(response.statusText); })
             .then(json => {
-                console.log(json)
+                if (!json) {
+                    alert('Endereço de e-mail já existente!')
+                    return
+                }
+
+                setRegisterDone(true)
             })
             .catch(error => {
                 alert("Não foi possível criar o utilizador!")
             });
     }
+
+    if (registerDone)
+        return (<Redirect to="/login" />)
 
     return (
         <Container>
@@ -48,19 +58,19 @@ const NewUser = (props) => {
                     <Form onSubmit={handleSubmit}>
                         <FormGroup>
                             <Label>Nome</Label>
-                            <Input id="txtName" autoFocus type="text" onChange={e => { setName(e.target.value); validateForm() }} />
+                            <Input id="txtName" autoFocus type="text" onChange={e => { setName(e.target.value) }} />
                         </FormGroup>
                         <FormGroup>
                             <Label>Email</Label>
-                            <Input id="txtEmail2" type="email" onChange={e => { setEmail(e.target.value); validateForm() }} />
+                            <Input id="txtEmail2" type="email" onChange={e => { setEmail(e.target.value) }} />
                         </FormGroup>
                         <FormGroup>
                             <Label>Password</Label>
-                            <Input id="txtPassword2" onChange={e => { setPassword(e.target.value); validateForm() }} type="password" />
+                            <Input id="txtPassword2" onChange={e => { setPassword(e.target.value) }} type="password" />
                         </FormGroup>
                         <FormGroup>
                             <Label>Confirmação</Label>
-                            <Input id="txtConfirm" onChange={e => { setConfirm(e.target.value); validateForm() }} type="password" />
+                            <Input id="txtConfirm" onChange={e => { setConfirm(e.target.value) }} type="password" />
                         </FormGroup>
                         <Button block type="submit" color="primary">Criar</Button>
                     </Form>

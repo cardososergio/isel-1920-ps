@@ -80,9 +80,7 @@ namespace PEES.Controllers
                 newUser.Password = Utils.CreatePasswordHash(user.Password, newUser.Salt);
                 newUser.ProfileId = 1;
 
-                Global.SetUser(newUser);
-
-                valid = true;
+                valid = Global.SetUser(newUser);
             }
             catch (Exception)
             {

@@ -37,8 +37,10 @@ namespace DataAccess.DAL
             return result;
         }
 
-        public static void SetUser(User user)
+        public static bool SetUser(User user)
         {
+            bool result = false;
+
             using (Database db = new Database(connectionString))
             {
                 List<SqlParameter> parameters = new List<SqlParameter>();
@@ -48,8 +50,12 @@ namespace DataAccess.DAL
                 parameters.Add(new SqlParameter("@Salt", user.Salt));
                 parameters.Add(new SqlParameter("@ProfileId", user.ProfileId));
 
-                db.ExecSPNonQuery("dbo.spSetUser", parameters);
+                var response = (string)db.ExecSPScalar("dbo.spSetUser", parameters);
+
+                result = response == "new_user";
             }
+
+            return result;
         }
     }
 
