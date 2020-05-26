@@ -27,7 +27,9 @@ class Home extends React.Component {
             season: "",
             type: "",
             firstSubmit: false,
-            docId: ""
+            docId: "",
+            gotBackofficeChanges: false,
+            noGo: true
         }
 
         this.handleToggle = this.handleToggle.bind(this)
@@ -80,10 +82,49 @@ class Home extends React.Component {
             })
     }
 
-    render() {        
+    componentDidMount() {
+
+        const request2 = async () => {
+            const response2 = await fetch('/api/users/configuration')
+            const data = await response2.json()
+
+            // compare Curricular units
+            const localConfig = JSON.parse(localStorage.getItem("configuration"))
+            const serverConfig = data
+
+            let gotChanges = !localConfig.curricularUnits.every(l => {
+                return !(serverConfig.curricularUnits.find(s => l.id === s.id) === undefined || serverConfig.curricularUnits.find(s => l.id === s.id && l.revisionId !== s.revisionId) !== undefined)
+            })
+
+            if (!gotChanges) {
+                localStorage.setItem("configuration", JSON.stringify(serverConfig))
+            }
+            else {
+                this.props.dispatch({ type: "BACKOFFICE_DATA", payload: serverConfig })
+                this.props.dispatch({ type: "BACKOFFICE_VERSION_CONTROL", payload: gotChanges })
+                this.setState({ gotBackofficeChanges: true})
+            }
+
+            this.setState({noGo: false})
+        }
+
+        request2()
+    }
+
+    render() {
+
+        if (this.state.noGo)
+            return (<></>)
+
+        if (this.state.gotBackofficeChanges)
+            return (<Redirect to="/versioncontrol" />)
+
+        if (this.state.docId !== "")
+            return (<Redirect to={`/document?id=${this.state.docId}`} />)
+
+        console.log("home")
         return (
             <>
-                {this.state.docId !== "" ? <Redirect to={`/document?id=${this.state.docId}`} /> : null}
                 <Container>
                     <Row>
                         <Col>
@@ -171,7 +212,8 @@ function mapStateToProps(state) {
     return {
         filter: state.filter,
         unitsView: state.unitsView,
-        unitId: state.unitId
+        unitId: state.unitId,
+        gotBackofficeChanges: state.gotBackofficeChanges
     }
 }
 

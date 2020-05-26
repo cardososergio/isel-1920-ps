@@ -1,23 +1,21 @@
-﻿import React from 'react';
-import { Form, Button, FormGroup, Input, Label, Container, Row, Col } from "reactstrap";
-import { Link } from 'react-router-dom';
-import NewUser from './NewUser';
+﻿import React from 'react'
+import { Form, Button, FormGroup, Input, Label, Container, Row, Col } from "reactstrap"
+import { Link, Redirect, Switch, Route } from 'react-router-dom'
+import Home from '../Home'
 
 export default class Login extends React.Component {
     constructor(props) {
         super(props)
 
-        this.email = ''
-        this.password = ''
+        this.email = ""
+        this.password = ""
 
         this.state = {
             enableButton: false,
             header: this.props.header !== undefined ? this.props.header : "Login",
             normalLogin: this.props.header === undefined,
-            register: false
+            validUser: false
         }
-
-        this.handleRegister = this.handleRegister.bind(this)
     }
 
     validateForm = () => {
@@ -35,36 +33,34 @@ export default class Login extends React.Component {
 
         const url = this.state.normalLogin ? "/api/users/login" : "/api/management/login"
         fetch(url, requestOptions)
-            .then(response => {
-
-                if (response.status === 200) {
-                    return response.json()
-                }
-
-                return Promise.reject(response.statusText)
-            })
+            .then(response => { if (response.status === 200) { return response.json(); } return Promise.reject(response.statusText); })
             .then(json => {
                 if (json.userId !== undefined) {
                     localStorage.setItem("isOffline", false)
                     localStorage.setItem("user", JSON.stringify({ userId: json.userId, name: json.name }))
 
-                    this.props.handleAccessToken()
+                    this.setState({ validUser: true })
                 }
-                else
-                    this.props.handleStateChange()
+                else {
+                    alert("Credenciais inválidas!")
+                }
             })
             .catch(error => {
                 alert("Não foi possível autenticar!")
             });
     }
 
-    handleRegister() {
-        this.setState({ register: false })
-    }
-
     render() {
-        if (this.state.register)
-            return (<NewUser handleRegister={this.handleRegister} />)
+
+        if (this.state.validUser)
+            return (
+                <>
+                    <Switch>
+                        <Route exact path='/' component={Home} />
+                    </Switch>
+                    <Redirect to="/" />
+                </>
+            )
 
         return (
             <Container>
@@ -90,7 +86,7 @@ export default class Login extends React.Component {
                 </Row>
                 <Row style={{ marginTop: 0.5 + "em" }}>
                     <Col className="text-center">
-                        <Link to="#" onClick={(e) => { e.preventDefault(); this.setState({ register: true }); }}>novo registo</Link>
+                        <Link to="/newuser">novo registo</Link>
                     </Col>
                 </Row>
             </Container>

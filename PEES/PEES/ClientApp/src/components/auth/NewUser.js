@@ -1,5 +1,6 @@
-﻿import React, { useState, useEffect } from "react"
+﻿import React, { useState } from "react"
 import { Container, Row, Col, Form, FormGroup, Label, Input, Button } from "reactstrap";
+import { Redirect } from "react-router-dom";
 
 const NewUser = (props) => {
     const [name, setName] = useState("")
@@ -42,10 +43,8 @@ const NewUser = (props) => {
             });
     }
 
-    useEffect(() => {
-        if (registerDone)
-            props.handleRegister()
-    }, [props, registerDone])
+    if (registerDone)
+        return (<Redirect to="/"/>)
         
     return (
         <Container>

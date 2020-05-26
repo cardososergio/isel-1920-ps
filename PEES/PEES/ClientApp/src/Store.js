@@ -9,7 +9,9 @@ const initialState = {
         season: { id: "", value: "Todas" }
     },
     unitsView: "card",
-    unitId: ""
+    unitId: "",
+    gotBackofficeChanges: false,
+    backofficeData: {}
 };
 
 function reducer(state = initialState, action) {
@@ -26,6 +28,10 @@ function reducer(state = initialState, action) {
             return { ...state, unitsView: action.payload }
         case "UNIT_ID":
             return { ...state, unitId: action.payload }
+        case "BACKOFFICE_VERSION_CONTROL":
+            return { ...state, gotBackofficeChanges: action.payload }
+        case "BACKOFFICE_DATA":
+            return { ...state, backofficeData: action.payload }
         default:
             return state;
     }
