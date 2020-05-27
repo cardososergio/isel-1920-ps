@@ -1,18 +1,18 @@
-﻿import React, { useEffect } from "react"
+﻿import React, { useEffect, useState } from "react"
 import { Container, Row, Col } from "reactstrap"
 import { useSelector } from "react-redux"
 import PouchDB from 'pouchdb'
 import PouchdbFind from 'pouchdb-find'
 
 export const Backoffice = (props) => {
-    const backofficeData = useSelector(state => state.backofficeData)
+    const [difCurricularUnits, setCurricularUnits] = useState([])
+
+    const serverConfig = useSelector(state => state.backofficeData)
 
     useEffect(() => {
-
-        // compare Curricular units
         const localConfig = JSON.parse(localStorage.getItem("configuration"))
-        const serverConfig = backofficeData
 
+        // compare Curricular units        
         const dif = localConfig.curricularUnits.filter(l => {
             return (serverConfig.curricularUnits.find(s => l.id === s.id) === undefined || serverConfig.curricularUnits.find(s => l.id === s.id && l.revisionId !== s.revisionId) !== undefined)
         })
@@ -27,27 +27,54 @@ export const Backoffice = (props) => {
             db.find({ selector: find })
                 .then((result) => {
 
-                    return result.docs.forEach(doc => {
+                    let update = []
+
+                    result.docs.forEach(doc => {
                         const r = dif.find(item => item.id === doc.curricular_unit)
+
                         if (r !== undefined) {
-                            console.log(r)
+                            if (update.find(e => e.id === r.id) === undefined)
+                                update.push(r)
                         }
                     })
+
+                    setCurricularUnits(update)
                 })
                 .catch(function (err) {
                     console.log(err)
                 })
         }
+    }, [serverConfig])
 
-    }, [backofficeData])
+    if (difCurricularUnits.length === 0)
+        return(<></>)
 
     return (
         <Container>
             <Row>
-                <Col>
-                    Version Control
+                <Col className="text-center" style={{ marginBottom: 20 + "px" }}>
+                    Existem registos que estão diferentes dos que estão no servidor
                 </Col>
             </Row>
+            <Row>
+                <Col style={{ borderBottom: "1px solid lightgray" }}>
+                    <b>Disciplinas</b>
+                </Col>
+            </Row>
+            <Row>
+                <Col>local</Col>
+                <Col>servidor</Col>
+            </Row>
+            {
+                difCurricularUnits.map(item => {
+                    return (
+                        <Row key={item.id}>
+                            <Col>{item.value}</Col>
+                            <Col></Col>
+                        </Row>
+                    )
+                })
+            }
         </Container>
     )
 }
