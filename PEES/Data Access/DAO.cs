@@ -52,4 +52,12 @@ namespace DataAccess.DAO
             public int revisionId { get; set; }
         }
     }
+
+    public struct VersionControl
+    {
+        public string Value { get; set; }
+        public int Revision { get; set; }
+        public DateTime RevisionDate { get; set; }
+        public bool IsDeleted { get; set; }
+    }
 }

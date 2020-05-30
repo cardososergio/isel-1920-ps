@@ -9,7 +9,7 @@ import Document from './components/document/Document'
 import './custom.css'
 import NewUser from './components/auth/NewUser'
 import { connect } from "react-redux"
-import { Backoffice } from './components/versioning/Backoffice'
+import Backoffice from './components/versioning/Backoffice'
 
 class App extends React.Component {
     static displayName = App.name;

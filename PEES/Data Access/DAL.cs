@@ -183,4 +183,39 @@ namespace DataAccess.DAL
             return true;
         }
     }
+
+    public static class VersionControl
+    {
+        public static string connectionString;
+
+        public static List<DAO.VersionControl> GetRevisions(string id)
+        {
+            var result = new List<DAO.VersionControl>();
+
+            using (Database db = new Database(connectionString))
+            {
+                List<SqlParameter> parameters = new List<SqlParameter>();
+                parameters.Add(new SqlParameter("@Id", id));
+
+                var dt = db.ExecSPDataTable("dbo.spGetCurricularUnitRevisions", parameters);
+
+                foreach (DataRow row in dt.Rows)
+                    result.Add(new DAO.VersionControl() { Value = (string)row["Value"], Revision = (int)row["Revision"], RevisionDate = (DateTime)row["RevisionDate"], IsDeleted = (bool)row["isDelete"] });
+            }
+
+            return result;
+        }
+
+        public static void SetRevision(string id, int revision)
+        {
+            using (Database db = new Database(connectionString))
+            {
+                List<SqlParameter> parameters = new List<SqlParameter>();
+                parameters.Add(new SqlParameter("@Id", id));
+                parameters.Add(new SqlParameter("@Revision", revision));
+
+                db.ExecSPNonQuery("dbo.spSetCurricularUnitRevision", parameters);
+            }
+        }
+    }
 }

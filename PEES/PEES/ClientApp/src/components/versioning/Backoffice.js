@@ -1,16 +1,22 @@
-﻿import React, { useEffect, useState } from "react"
+﻿import React from "react"
 import { Container, Row, Col } from "reactstrap"
-import { useSelector } from "react-redux"
 import PouchDB from 'pouchdb'
 import PouchdbFind from 'pouchdb-find'
+import { connect } from 'react-redux'
 
-export const Backoffice = (props) => {
-    const [difCurricularUnits, setCurricularUnits] = useState([])
+class BackOffice extends React.Component {
+    constructor(props) {
+        super(props)
 
-    const serverConfig = useSelector(state => state.backofficeData)
+        this.state = {
+            difCurricularUnits: [],
+            serverCurricularUnits: []
+        }
+    }
 
-    useEffect(() => {
+    componentDidMount() {
         const localConfig = JSON.parse(localStorage.getItem("configuration"))
+        const serverConfig = this.props.backofficeData
 
         // compare Curricular units        
         const dif = localConfig.curricularUnits.filter(l => {
@@ -38,43 +44,79 @@ export const Backoffice = (props) => {
                         }
                     })
 
-                    setCurricularUnits(update)
+                    let serverUpdate = []
+
+                    dif.forEach(item => {
+                        const request = async () => {
+                            const response = await fetch('/api/versioncontrol/' + item.id)
+                            const data = await response.json()
+
+                            if (data.length !== 0)
+                                data.map(x => serverUpdate.push(x))
+
+                            this.setState({ serverCurricularUnits: serverUpdate, difCurricularUnits: update })
+                        }
+
+                        request()
+                    })
                 })
                 .catch(function (err) {
                     console.log(err)
                 })
         }
-    }, [serverConfig])
+    }
 
-    if (difCurricularUnits.length === 0)
-        return(<></>)
-
-    return (
-        <Container>
-            <Row>
-                <Col className="text-center" style={{ marginBottom: 20 + "px" }}>
-                    Existem registos que estão diferentes dos que estão no servidor
+    render() {
+        console.log(this.state.serverCurricularUnits)
+        return (
+            <Container>
+                <Row>
+                    <Col className="text-center" style={{ marginBottom: 20 + "px" }}>
+                        Existem registos que estão diferentes dos que estão no servidor
                 </Col>
-            </Row>
-            <Row>
-                <Col style={{ borderBottom: "1px solid lightgray" }}>
-                    <b>Disciplinas</b>
-                </Col>
-            </Row>
-            <Row>
-                <Col>local</Col>
-                <Col>servidor</Col>
-            </Row>
-            {
-                difCurricularUnits.map(item => {
-                    return (
-                        <Row key={item.id}>
-                            <Col>{item.value}</Col>
-                            <Col></Col>
-                        </Row>
-                    )
-                })
-            }
-        </Container>
-    )
+                </Row>
+                <Row>
+                    <Col style={{ borderBottom: "1px solid lightgray" }}>
+                        <b>Disciplinas</b>
+                    </Col>
+                </Row>
+                <Row>
+                    <Col>local</Col>
+                    <Col>servidor</Col>
+                </Row>
+                {
+                    this.state.difCurricularUnits.map(item => {
+                        return (
+                            <Row key={item.id}>
+                                <Col>{item.value}</Col>
+                                <Col>
+                                    <Container style={{ marginTop: 0 }}>
+                                        {
+                                            this.state.serverCurricularUnits.map((s, index) => {
+                                                return (
+                                                    <Row key={index}>
+                                                        <Col>{s.value}</Col>
+                                                        <Col xs="1">{s.revision}</Col>
+                                                        <Col>{s.revisionDate}</Col>
+                                                        <Col xs="1">{s.isDeleted ? 1 : 0}</Col>
+                                                    </Row>
+                                                )
+                                            })
+                                        }
+                                    </Container>
+                                </Col>
+                            </Row>
+                        )
+                    })
+                }
+            </Container>
+        )
+    }
 }
+
+function mapStateToProps(state) {
+    return {
+        backofficeData: state.backofficeData,
+    }
+}
+export default connect(mapStateToProps)(BackOffice)
