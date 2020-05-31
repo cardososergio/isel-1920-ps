@@ -188,16 +188,37 @@ namespace DataAccess.DAL
     {
         public static string connectionString;
 
-        public static List<DAO.VersionControl> GetRevisions(string id)
+        public static List<DAO.VersionControl> GetRevisions(string id, string type)
         {
             var result = new List<DAO.VersionControl>();
+
+            string sp = "";
+
+            switch (type)
+            {
+                case "curricularunit":
+                    sp = "spGetCurricularUnitRevisions";
+                    break;
+                case "curricularyear":
+                    sp = "spGetCurricularYearRevisions";
+                    break;
+                case "semester":
+                    sp = "spGetSemesterRevisions";
+                    break;
+                case "season":
+                    sp = "spGetSeasonRevisions";
+                    break;
+                case "instructiontype":
+                    sp = "spGetInstructionTypeRevisions";
+                    break;
+            }
 
             using (Database db = new Database(connectionString))
             {
                 List<SqlParameter> parameters = new List<SqlParameter>();
                 parameters.Add(new SqlParameter("@Id", id));
 
-                var dt = db.ExecSPDataTable("dbo.spGetCurricularUnitRevisions", parameters);
+                var dt = db.ExecSPDataTable(string.Concat("dbo.", sp), parameters);
 
                 foreach (DataRow row in dt.Rows)
                     result.Add(new DAO.VersionControl() { Value = (string)row["Value"], Revision = (int)row["Revision"], RevisionDate = (DateTime)row["RevisionDate"], IsDeleted = (bool)row["isDelete"] });
@@ -206,16 +227,40 @@ namespace DataAccess.DAL
             return result;
         }
 
-        public static void SetRevision(string id, int revision)
+        public static int SetRevision(string id, int revision, string type)
         {
+            int result;
+            string sp = "";
+
+            switch (type)
+            {
+                case "curricularunit":
+                    sp = "spSetCurricularUnitRevisions";
+                    break;
+                case "curricularyear":
+                    sp = "spSetCurricularYearRevisions";
+                    break;
+                case "semester":
+                    sp = "spSetSemesterRevisions";
+                    break;
+                case "season":
+                    sp = "spSetSeasonRevisions";
+                    break;
+                case "instructiontype":
+                    sp = "spSetInstructionTypeRevisions";
+                    break;
+            }
+
             using (Database db = new Database(connectionString))
             {
                 List<SqlParameter> parameters = new List<SqlParameter>();
                 parameters.Add(new SqlParameter("@Id", id));
                 parameters.Add(new SqlParameter("@Revision", revision));
 
-                db.ExecSPNonQuery("dbo.spSetCurricularUnitRevision", parameters);
+                result = (int)db.ExecSPScalar(string.Concat("dbo.", sp), parameters);
             }
+
+            return result;
         }
     }
 }

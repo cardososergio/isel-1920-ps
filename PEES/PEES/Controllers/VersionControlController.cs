@@ -19,7 +19,7 @@ namespace PEES.Controllers
         }
 
         [HttpGet("{id}")]
-        public ActionResult Get(string id)
+        public ActionResult Get(string id, [FromQuery] string type)
         {
             // check for cookie
             try
@@ -36,11 +36,24 @@ namespace PEES.Controllers
                 return new BadRequestResult();
             }
 
+            // check if type is valid
+            switch (type.ToLower())
+            {
+                case "curricularunit":
+                case "curricularyear":
+                case "semester":
+                case "season":
+                case "instructiontype":
+                    break;
+                default:
+                    return new BadRequestResult();
+            }
+
             var result = new List<VersionControl>();
 
             try
             {
-                result = DataAccess.DAL.VersionControl.GetRevisions(id);
+                result = DataAccess.DAL.VersionControl.GetRevisions(id, type.ToLower());
             }
             catch (Exception)
             {
@@ -51,7 +64,7 @@ namespace PEES.Controllers
         }
 
         [HttpPut("{id}")]
-        public ActionResult Put(string id, [FromBody] string revision)
+        public ActionResult Put(string id, [FromBody] string revision, [FromQuery] string type)
         {
             // check for cookie
             try
@@ -68,35 +81,31 @@ namespace PEES.Controllers
                 return new BadRequestResult();
             }
 
+            // check if type is valid
+            switch (type.ToLower())
+            {
+                case "curricularunit":
+                case "curricularyear":
+                case "semester":
+                case "season":
+                case "instructiontype":
+                    break;
+                default:
+                    return new BadRequestResult();
+            }
+
+            int result;
+
             try
             {
-                DataAccess.DAL.VersionControl.SetRevision(id, Convert.ToInt32(revision));
+                result = DataAccess.DAL.VersionControl.SetRevision(id, Convert.ToInt32(revision), type);
             }
             catch (Exception)
             {
                 return new BadRequestResult();
             }
 
-            return new JsonResult(true);
+            return new JsonResult(result);
         }
-
-        //// GET: api/<VersionControlController>
-        //[HttpGet]
-        //public IEnumerable<string> Get()
-        //{
-        //    return new string[] { "value1", "value2" };
-        //}
-
-        //// POST api/<VersionControlController>
-        //[HttpPost]
-        //public void Post([FromBody] string value)
-        //{
-        //}
-
-        //// DELETE api/<VersionControlController>/5
-        //[HttpDelete("{id}")]
-        //public void Delete(int id)
-        //{
-        //}
     }
 }
