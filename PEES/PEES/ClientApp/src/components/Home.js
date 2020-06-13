@@ -9,6 +9,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPlus } from '@fortawesome/free-solid-svg-icons'
 import PouchDB from 'pouchdb'
 import { Redirect } from 'react-router-dom'
+import * as Constants from "../Constants"
 
 const conf = JSON.parse(localStorage.getItem("configuration"))
 
@@ -67,7 +68,7 @@ class Home extends React.Component {
             questions: []
         }
 
-        const db = new PouchDB("http://127.0.0.1:5984/pees")
+        const db = new PouchDB(Constants.URL_COUCHDB)
         db.post(doc)
             .then(response => {
                 if (!response.ok) {
@@ -137,7 +138,7 @@ class Home extends React.Component {
     }
 
     render() {
-
+        console.log("pre-home")
         if (this.state.noGo)
             return (<></>)
 

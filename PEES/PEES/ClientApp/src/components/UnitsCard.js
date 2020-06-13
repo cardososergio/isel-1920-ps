@@ -3,6 +3,7 @@ import { CardBody, CardDeck, CardText } from 'reactstrap'
 import PouchDB from 'pouchdb'
 import PouchdbFind from 'pouchdb-find'
 import { useSelector, useDispatch } from "react-redux"
+import * as Constants from "../Constants"
 
 export const UnitsCard = (props) => {
     const dispatch = useDispatch()
@@ -14,7 +15,7 @@ export const UnitsCard = (props) => {
         const units = JSON.parse(localStorage.getItem("configuration")).curricularUnits
 
         PouchDB.plugin(PouchdbFind)
-        const db = new PouchDB("http://127.0.0.1:5984/pees")
+        const db = new PouchDB(Constants.URL_COUCHDB)
 
         let find = { user_id: JSON.parse(localStorage.getItem("user")).userId }
         if (filter.year.id !== "") find = { ...find, curricular_year: filter.year.id }

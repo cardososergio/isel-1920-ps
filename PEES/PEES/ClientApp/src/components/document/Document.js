@@ -14,6 +14,7 @@ import "react-datepicker/dist/react-datepicker.css"
 import pt from 'date-fns/locale/pt'
 import uuid4 from 'uuid4'
 import "./Document.css"
+import * as Constants from "../../Constants"
 
 registerLocale('pt', pt)
 
@@ -57,11 +58,17 @@ class Document extends React.Component {
                 endSel: 0,
                 id: 0,
                 type: "main"
+            },
+            modalConflit: {
+                isOpen: false,
+                revisions: []
             }
         }
 
         this.toggle = this.toggle.bind(this)
         this.toggleQuestion = this.toggleQuestion.bind(this)
+        this.toggleConflit = this.toggleConflit.bind(this)
+
         this.handleDetail = this.handleDetail.bind(this)
         this.handleNewCourse = this.handleNewCourse.bind(this)
         this.handleRemoveCourse = this.handleRemoveCourse.bind(this)
@@ -74,6 +81,7 @@ class Document extends React.Component {
 
         this.handleMouseUp = this.handleMouseUp.bind(this)
         this.handleFormat = this.handleFormat.bind(this)
+        this.handleSaveDocument = this.handleSaveDocument.bind(this)
     }
 
     toggle() {
@@ -82,6 +90,10 @@ class Document extends React.Component {
     toggleQuestion() {
         this.setState({ modalQuestion: { ...this.state.modalQuestion, isOpen: !this.state.modalQuestion.isOpen } })
     }
+    toggleConflit() {
+        this.setState({ modalConflit: { ...this.state.modalConflit, isOpen: !this.state.modalConflit.isOpen } })
+    }
+
     createMarkup(text) {
         return { __html: text };
     }
@@ -99,7 +111,7 @@ class Document extends React.Component {
     }
 
     componentDidMount() {
-        const db = new PouchDB("http://127.0.0.1:5984/pees")
+        const db = new PouchDB(Constants.URL_COUCHDB)
 
         db.get(this.state.id)
             .then(doc => {
@@ -498,6 +510,42 @@ class Document extends React.Component {
         this.setState({ doc: { ...this.state.doc, questions: update }, popover: { isOpen: false, control: "body", startSel: 0, endSel: 0, id: 0, mainId: 0, type: "main" } })
     }
 
+    handleSaveDocument() {
+        const db = new PouchDB(Constants.URL_COUCHDB)
+        const _this = this
+
+        let doc = this.state.doc
+        doc._rev = "33-abd9520cc0c948460e79262f715f7adf"
+
+        db.put(doc)
+            .then(function (response) {
+                if (response.ok)
+                    _this.setState({ doc: { ...doc, _rev: response.rev } })
+
+            }).catch(function (err) {
+
+                if (err.status === 409) {
+                    db.get(doc._id, { revs: true })
+                        .then(newDoc => {
+                            const currentRev = parseInt(doc._rev.split("-")[0])
+                            const lastRev = newDoc._revisions.start
+
+                            let revs = []
+                            for (let r = 0; r <= (lastRev - currentRev); r++)
+                                revs.push((lastRev - r) + "-" + newDoc._revisions.ids[r])
+
+                            _this.setState({
+                                modalConflit: {
+                                    ..._this.state.modalConflit, revisions: revs
+                                }
+                            })
+
+                            _this.toggleConflit()
+                        })
+                }
+            });
+    }
+
     render() {
         if (this.state.loading)
             return (<></>)
@@ -636,6 +684,11 @@ class Document extends React.Component {
                     </Row>
                     <Row>
                         <Col>References</Col>
+                    </Row>
+                    <Row>
+                        <Col className="text-right">
+                            <Button color="primary" onClick={this.handleSaveDocument}>Gravar</Button>
+                        </Col>
                     </Row>
                 </Container>
 
@@ -782,6 +835,18 @@ class Document extends React.Component {
                         <Button color="danger" onClick={this.handleDeleteQuestion}><FontAwesomeIcon icon={faTrash} style={{ marginRight: 10 + "px" }} />Eliminar</Button>
                         <Button color="primary" onClick={this.handleChangeQuestion}><FontAwesomeIcon icon={faCheck} style={{ marginRight: 10 + "px" }} />Alterar</Button>
                     </ModalFooter>
+                </Modal>
+
+                <Modal isOpen={this.state.modalConflit.isOpen} toggle={this.toggleConflit} backdrop="static" keyboard={false}>
+                    <ModalHeader toggle={this.toggleConflit}>Conflitos</ModalHeader>
+                    <ModalBody>
+                        <div>Existem novas versões do enunciado. Escolha qual a versão que deseja manter</div>
+                        <Container>
+                            {
+                                this.state.modalConflit.revisions.map(item => <Row key={item}><Col>{item}</Col></Row>)
+                            }
+                        </Container>
+                    </ModalBody>
                 </Modal>
             </>
         )

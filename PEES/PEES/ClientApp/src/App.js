@@ -10,6 +10,7 @@ import './custom.css'
 import NewUser from './components/auth/NewUser'
 import { connect } from "react-redux"
 import Backoffice from './components/versioning/Backoffice'
+import * as Constants from "./Constants"
 
 class App extends React.Component {
     static displayName = App.name;
@@ -37,7 +38,7 @@ class App extends React.Component {
                     this.setState({ validAccessToken: json })
 
                 //var localDB = new PouchDB('pees')
-                //var remoteDB = new PouchDB('http://127.0.0.1:5984/pees')
+                //var remoteDB = new PouchDB(Constants.URL_COUCHDB)
                 //localDB.sync(remoteDB)
 
                 if (json) {
@@ -125,6 +126,8 @@ class App extends React.Component {
                         <Route exact path="/" component={Login} />
                         <Route exact path="/login" component={Login} />
                         <Route exact path="/newuser" component={NewUser} />
+                        <Route exact path="/versioncontrol" component={Backoffice} />
+                        <Route exact path='/document' component={Document} />
                     </Switch>
                 </Layout>
             )

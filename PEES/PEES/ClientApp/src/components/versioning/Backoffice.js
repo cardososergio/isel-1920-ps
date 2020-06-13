@@ -4,6 +4,7 @@ import PouchDB from 'pouchdb'
 import PouchdbFind from 'pouchdb-find'
 import { connect } from 'react-redux'
 import { LocalVersion } from "./LocalVersion"
+import { Redirect } from "react-router-dom"
 
 class BackOffice extends React.Component {
     constructor(props) {
@@ -14,7 +15,8 @@ class BackOffice extends React.Component {
             difCurricularYears: [],
             difSemesters: [],
             difSeasons: [],
-            difInstructionTypes: []
+            difInstructionTypes: [],
+            firstTime: true
         }
 
         this.handleOnUpdate = this.handleOnUpdate.bind(this)
@@ -149,16 +151,23 @@ class BackOffice extends React.Component {
                             if (r !== undefined && update.find(e => e.id === r.id) === undefined)
                                 update.push(r)
                         })
-                        
+
                         this.setState({ [auxStateType]: update })
                     })
                     .catch(function (err) {
                         console.eror(err)
                     })
             })
+        this.setState({ firstTime: false })
     }
 
     render() {
+        console.log("pre-backoffice")
+
+        if (!this.state.firstTime && this.state.difCurricularUnits.length === 0 && this.state.difCurricularYears.length === 0 &&
+            this.state.difSemesters.length === 0 && this.state.difSeasons.length === 0 && this.state.difInstructionTypes.length === 0) {
+            return (<Redirect to="/" />)
+        }
 
         return (
             <Container>

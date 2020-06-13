@@ -6,6 +6,7 @@ import { useSelector } from "react-redux"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCheck, faTimes, faFile } from '@fortawesome/free-solid-svg-icons'
 import { Link } from "react-router-dom"
+import * as Constants from "../Constants"
 
 export const UnitsList = (props) => {
     //const dispatch = useDispatch()
@@ -17,7 +18,7 @@ export const UnitsList = (props) => {
         const conf = JSON.parse(localStorage.getItem("configuration"))
 
         PouchDB.plugin(PouchdbFind)
-        const db = new PouchDB("http://127.0.0.1:5984/pees")
+        const db = new PouchDB(Constants.URL_COUCHDB)
 
         let find = { user_id: JSON.parse(localStorage.getItem("user")).userId }
         if (filter.year.id !== "") find = { ...find, curricular_year: filter.year.id }
