@@ -10,7 +10,8 @@ import './custom.css'
 import NewUser from './components/auth/NewUser'
 import { connect } from "react-redux"
 import Backoffice from './components/versioning/Backoffice'
-import * as Constants from "./Constants"
+//import * as Constants from "./Constants"
+import Preview from './components/document/Preview'
 
 class App extends React.Component {
     static displayName = App.name;
@@ -128,6 +129,7 @@ class App extends React.Component {
                         <Route exact path="/newuser" component={NewUser} />
                         <Route exact path="/versioncontrol" component={Backoffice} />
                         <Route exact path='/document' component={Document} />
+                        <Route exact path="/preview" component={Preview} />
                     </Switch>
                 </Layout>
             )
@@ -141,6 +143,7 @@ class App extends React.Component {
                     <Route exact path='/management' component={Management} />
                     <Route exact path="/newuser" component={NewUser} />
                     <Route exact path="/versioncontrol" component={Backoffice} />
+                    <Route exact path="/preview" component={Preview} />
                     <Route component={PageNotFound} />
                 </Switch>
             </Layout>

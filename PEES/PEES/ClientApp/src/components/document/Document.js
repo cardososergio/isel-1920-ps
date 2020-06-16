@@ -82,6 +82,8 @@ class Document extends React.Component {
         this.handleMouseUp = this.handleMouseUp.bind(this)
         this.handleFormat = this.handleFormat.bind(this)
         this.handleSaveDocument = this.handleSaveDocument.bind(this)
+
+        this.handleViewRevision = this.handleViewRevision.bind(this)
     }
 
     toggle() {
@@ -546,6 +548,12 @@ class Document extends React.Component {
             });
     }
 
+    handleViewRevision(e, revisionId) {
+        e.preventDefault()
+
+        window.open("/preview?id=" + this.state.id + "&revision=" + revisionId)
+    }
+
     render() {
         if (this.state.loading)
             return (<></>)
@@ -838,12 +846,24 @@ class Document extends React.Component {
                 </Modal>
 
                 <Modal isOpen={this.state.modalConflit.isOpen} toggle={this.toggleConflit} backdrop="static" keyboard={false}>
-                    <ModalHeader toggle={this.toggleConflit}>Conflitos</ModalHeader>
+                    <ModalHeader toggle={this.toggleConflit}>Conflito no enunciado</ModalHeader>
                     <ModalBody>
-                        <div>Existem novas versões do enunciado. Escolha qual a versão que deseja manter</div>
+                        <div style={{ marginBottom: 20 + "px" }}>Existem novas versões do enunciado que diferem do que está a gravar.</div>
                         <Container>
+                            <Row>
+                                <Col xs="9"><b>Versão</b></Col>
+                                <Col xs="3"></Col>
+                            </Row>
                             {
-                                this.state.modalConflit.revisions.map(item => <Row key={item}><Col>{item}</Col></Row>)
+                                this.state.modalConflit.revisions.map((item, index) =>
+                                    <Row key={item} style={{ paddingTop: 5 + "px", paddingBottom: 5 + "px" }}>
+                                        <Col xs="9">{item}</Col>
+                                        <Col xs="3" className="text-right">
+                                            <Link to="#" onClick={(e) => this.handleViewRevision(e, item)} style={{ padding: 5 + "px" }} title="Visualizar"><FontAwesomeIcon icon={faEye} /></Link>
+                                            <Link to="#" onClick={(e) => this.handleViewRevision(e, item)} style={{ padding: 5 + "px" }} title="Escolher"><FontAwesomeIcon icon={faCheck} /></Link>
+                                        </Col>
+                                    </Row>
+                                )
                             }
                         </Container>
                     </ModalBody>
