@@ -84,6 +84,7 @@ class Document extends React.Component {
         this.handleSaveDocument = this.handleSaveDocument.bind(this)
 
         this.handleViewRevision = this.handleViewRevision.bind(this)
+        this.handleChangeRevision = this.handleChangeRevision.bind(this)
     }
 
     toggle() {
@@ -517,7 +518,7 @@ class Document extends React.Component {
         const _this = this
 
         let doc = this.state.doc
-        doc._rev = "33-abd9520cc0c948460e79262f715f7adf"
+        doc._rev = "33-abd9520cc0c948460e79262f715f7adf" //FORCE FOR TESTING
 
         db.put(doc)
             .then(function (response) {
@@ -552,6 +553,35 @@ class Document extends React.Component {
         e.preventDefault()
 
         window.open("/preview?id=" + this.state.id + "&revision=" + revisionId)
+    }
+
+    handleChangeRevision(e, revisionId) {
+        e.preventDefault()
+
+        const db = new PouchDB(Constants.URL_COUCHDB)
+        const _this = this
+
+        let _doc = _this.state.doc
+
+        db.get(_this.state.id, { rev: revisionId }).then(function (doc) {
+            if (revisionId === _this.state.doc._rev)
+                doc = _doc
+            else
+                _doc = doc
+
+            doc._rev = _this.state.modalConflit.revisions[0]
+
+            return db.put(doc)
+        }).then(function (response) {
+            if (!response.ok) {
+                alert("Não foi possível gravar o enunciado!")
+                return
+            }
+
+            _this.setState({ doc: { ..._doc, _rev: response.rev }, modalConflit: { ..._this.state.modalConflit, isOpen: false } })
+        }).catch(function (err) {
+            console.log(err)
+        });
     }
 
     render() {
@@ -857,10 +887,14 @@ class Document extends React.Component {
                             {
                                 this.state.modalConflit.revisions.map((item, index) =>
                                     <Row key={item} style={{ paddingTop: 5 + "px", paddingBottom: 5 + "px" }}>
-                                        <Col xs="9">{item}</Col>
+                                        <Col xs="9">{index === this.state.modalConflit.revisions.length - 1 ? "local" : item}</Col>
                                         <Col xs="3" className="text-right">
-                                            <Link to="#" onClick={(e) => this.handleViewRevision(e, item)} style={{ padding: 5 + "px" }} title="Visualizar"><FontAwesomeIcon icon={faEye} /></Link>
-                                            <Link to="#" onClick={(e) => this.handleViewRevision(e, item)} style={{ padding: 5 + "px" }} title="Escolher"><FontAwesomeIcon icon={faCheck} /></Link>
+                                            {index === this.state.modalConflit.revisions.length - 1 ?
+                                                null
+                                                :
+                                                <Link to="#" onClick={(e) => this.handleViewRevision(e, item)} style={{ padding: 5 + "px" }} title="Visualizar"><FontAwesomeIcon icon={faEye} /></Link>
+                                            }
+                                            <Link to="#" onClick={(e) => this.handleChangeRevision(e, item)} style={{ padding: 5 + "px" }} title="Escolher"><FontAwesomeIcon icon={faCheck} /></Link>
                                         </Col>
                                     </Row>
                                 )

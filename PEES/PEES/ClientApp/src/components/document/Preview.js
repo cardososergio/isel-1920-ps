@@ -1,14 +1,9 @@
 ﻿import React from "react"
 import { connect } from "react-redux"
-import { Container, Row, Col, Input } from "reactstrap"
+import { Container, Row, Col } from "reactstrap"
 import PouchDB from 'pouchdb'
-import { registerLocale } from "react-datepicker"
-import "react-datepicker/dist/react-datepicker.css"
-import pt from 'date-fns/locale/pt'
 import "./Document.css"
 import * as Constants from "../../Constants"
-
-registerLocale('pt', pt)
 
 const conf = JSON.parse(localStorage.getItem("configuration"))
 
@@ -33,13 +28,11 @@ class Preview extends React.Component {
         return { __html: text };
     }
 
-
     componentDidMount() {
         const db = new PouchDB(Constants.URL_COUCHDB)
 
-        db.get(this.state.id)
+        db.get(this.state.id, { rev: this.state.revision_id })
             .then(doc => {
-                console.log(doc)
                 // change curricular unit id for name
                 doc.header.curricular_unit = conf.curricularUnits.find(item => item.id === doc.curricular_unit).value
 
@@ -69,10 +62,10 @@ class Preview extends React.Component {
                         </Col>
                         <Col xs={{ size: 6, offset: 3 }} style={{ fontWeight: "bold" }}>{conf.curricularUnits.find(item => item.id === this.state.doc.curricular_unit).value}</Col>
                         <Col xs={{ size: 6, offset: 3 }}>
-                            <Input type="text" defaultValue={this.state.doc.header.description} className="text-center" placeholder="descritivo do enunciado" autoComplete="off" />
+                            <div className="text-center">{this.state.doc.header.description}</div>
                         </Col>
                         <Col xs={{ size: 6, offset: 3 }} style={{ marginTop: 5 + "px" }}>
-                            <Input type="text" defaultValue={this.state.doc.header.delivery_note} className="text-center" placeholder="duração do teste/exame/trabalho" autoComplete="off" />
+                            <div className="text-center">{this.state.doc.header.delivery_note}</div>
                         </Col>
                     </Row>
                     <Row className="font row-margin">
@@ -87,8 +80,7 @@ class Preview extends React.Component {
                                             <div style={{ marginRight: 5 + "px" }}>
                                                 {item.grade !== "" ? "(" + item.grade.toString().replace(".", ",") + "%)" : null}
                                             </div>
-                                            <div contentEditable="true" className="form-control-plaintext text-justify" spellCheck="false"
-                                                id={`divQuestion${item.question_id}`} dangerouslySetInnerHTML={this.createMarkup(item.text)}></div>
+                                            <div className="form-control-plaintext text-justify" dangerouslySetInnerHTML={this.createMarkup(item.text)}></div>
                                         </div>
                                         <div style={{ marginLeft: 50 + "px" }}>
                                             {
@@ -102,8 +94,7 @@ class Preview extends React.Component {
                                                                 <div style={{ marginRight: 5 + "px" }}>
                                                                     {subItem.grade !== "" ? "(" + subItem.grade.toString().replace(".", ",") + "%)" : null}
                                                                 </div>
-                                                                <div contentEditable="true" className="form-control-plaintext text-justify" spellCheck="false"
-                                                                    id={`divQuestion${subItem.question_id}`} dangerouslySetInnerHTML={this.createMarkup(subItem.text)}></div>
+                                                                <div className="form-control-plaintext text-justify" dangerouslySetInnerHTML={this.createMarkup(subItem.text)}></div>
                                                             </div>
                                                         </div>
                                                     )
@@ -113,8 +104,7 @@ class Preview extends React.Component {
                                             {
                                                 item.footer_note !== undefined && item.footer_note !== "" ?
                                                     <div style={{ marginTop: 5 + "px" }}>
-                                                        <div contentEditable="true" className="form-control-plaintext text-justify" spellCheck="false"
-                                                            id={`divQuestion${item.question_id}_footer`} dangerouslySetInnerHTML={this.createMarkup(item.footer_note)}></div>
+                                                        <div className="form-control-plaintext text-justify" dangerouslySetInnerHTML={this.createMarkup(item.footer_note)}></div>
                                                     </div>
                                                     : null
                                             }
