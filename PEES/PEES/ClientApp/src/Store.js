@@ -11,7 +11,13 @@ const initialState = {
     unitsView: "card",
     unitId: "",
     gotBackofficeChanges: false,
-    backofficeData: {}
+    backofficeData: {},
+    alert: {
+        show: false,
+        text: "none",
+        color: "primary",
+        fixed: false
+    }
 };
 
 function reducer(state = initialState, action) {
@@ -32,6 +38,10 @@ function reducer(state = initialState, action) {
             return { ...state, gotBackofficeChanges: action.payload }
         case "BACKOFFICE_DATA":
             return { ...state, backofficeData: action.payload }
+        case "ALERT":
+            return { ...state, alert: action.payload }
+        case "UNMOUNT_ALERT":
+            return { ...state, alert: { ...state.alert, show: false } }
         default:
             return state;
     }

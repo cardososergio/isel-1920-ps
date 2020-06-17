@@ -1,6 +1,6 @@
 ﻿.filter {
     border-radius: 5px;
-    background-color: #D4DCFC;
+    background-color: #EFD5BE;
 }
 
 .filter a {
@@ -30,8 +30,8 @@
 }
 
 .dropdown {
-    background-color: #D4DCFC;
+    background-color: #EFD5BE;
 }
 .dropdown-item:hover {
-    background-color: #A9B9FA;
+    background-color: #B39F8E;
 }

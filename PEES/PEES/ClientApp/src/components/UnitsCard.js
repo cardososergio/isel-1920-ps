@@ -47,7 +47,7 @@ export const UnitsCard = (props) => {
     }, [filter.year.id, filter.semester.id, filter.unit.id, filter.season.id]);
 
     return (
-        <CardDeck style={{ display: 'flex', flexDirection: 'row' }}>
+        <CardDeck style={{ display: 'flex', flexDirection: 'row', justifyContent: "center" }}>
             {
                 lstUnits.map(unit => {
                     return (

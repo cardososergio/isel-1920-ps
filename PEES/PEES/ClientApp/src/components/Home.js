@@ -138,7 +138,6 @@ class Home extends React.Component {
     }
 
     render() {
-        console.log("pre-home")
         if (this.state.noGo)
             return (<></>)
 
@@ -148,7 +147,6 @@ class Home extends React.Component {
         if (this.state.docId !== "")
             return (<Redirect to={`/document?id=${this.state.docId}`} />)
 
-        console.log("home")
         return (
             <>
                 <Container>

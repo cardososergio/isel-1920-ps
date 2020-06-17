@@ -518,7 +518,7 @@ class Document extends React.Component {
         const _this = this
 
         let doc = this.state.doc
-        doc._rev = "33-abd9520cc0c948460e79262f715f7adf" //FORCE FOR TESTING
+        //doc._rev = "33-abd9520cc0c948460e79262f715f7adf" //FORCE FOR TESTING
 
         db.put(doc)
             .then(function (response) {

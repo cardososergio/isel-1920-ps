@@ -3,8 +3,8 @@
     display: flex;
     flex: 1 0;
     flex-direction: column;
-    min-width: 20em !important;
-    max-width: 20em !important;
+    min-width: 22em !important;
+    max-width: 22em !important;
     word-wrap: break-word;
     background-color: #fff;
     background-clip: border-box;
@@ -12,12 +12,12 @@
     border-radius: 0.25rem;
     margin-left: 15px;
     margin-right: 15px;
-    margin-bottom: 5px !important;
+    margin-bottom: 15px !important;
     height: 10em !important;
     cursor: pointer;
 }
     .card2:hover {
-        background-color: #A9B9FA;
+        background-color: #EFD5BE;
     }
 
 .card-body {
