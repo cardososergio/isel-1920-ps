@@ -10,6 +10,7 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons'
 import PouchDB from 'pouchdb'
 import { Redirect } from 'react-router-dom'
 import * as Constants from "../Constants"
+import * as Utils from "./global/Utils"
 
 const conf = JSON.parse(localStorage.getItem("configuration"))
 
@@ -68,11 +69,11 @@ class Home extends React.Component {
             questions: []
         }
 
-        const db = new PouchDB(Constants.URL_COUCHDB)
+        const db = new PouchDB(localStorage.getItem("isOffline") === "true" ? Constants.URL_COUCHDB_OFFLINE : Constants.URL_COUCHDB)
         db.post(doc)
             .then(response => {
                 if (!response.ok) {
-                    alert("Ocorreu um erro ao criar o enunciado")
+                    this.props.dispatch(Utils.Toast("Ocorreu um erro ao criar o enunciado", Utils.ToastTypes.Danger, true))
                     return
                 }
 
@@ -80,12 +81,20 @@ class Home extends React.Component {
             })
             .catch(err => {
                 console.error(err)
+                this.props.dispatch(Utils.Toast("Ocorreu uma exceção na aplicação", Utils.ToastTypes.Danger, true))
             })
     }
 
     componentDidMount() {
 
-        const request2 = async () => {
+        if (localStorage.getItem("isOffline") === "true") {
+            this.setState({ noGo: false })
+            return
+        }
+
+        const _this = this;
+
+        (async function () {
             const response2 = await fetch('/api/users/configuration')
             const data = await response2.json()
 
@@ -126,15 +135,16 @@ class Home extends React.Component {
                 localStorage.setItem("configuration", JSON.stringify(serverConfig))
             }
             else {
-                this.props.dispatch({ type: "BACKOFFICE_DATA", payload: serverConfig })
-                this.props.dispatch({ type: "BACKOFFICE_VERSION_CONTROL", payload: gotChanges })
-                this.setState({ gotBackofficeChanges: true})
+                _this.props.dispatch({ type: "BACKOFFICE_DATA", payload: serverConfig })
+                _this.props.dispatch({ type: "BACKOFFICE_VERSION_CONTROL", payload: gotChanges })
+                _this.setState({ gotBackofficeChanges: true})
             }
 
-            this.setState({noGo: false})
-        }
+            PouchDB.replicate(Constants.URL_COUCHDB_OFFLINE, Constants.URL_COUCHDB);
+            PouchDB.replicate(Constants.URL_COUCHDB, Constants.URL_COUCHDB_OFFLINE);
 
-        request2()
+            _this.setState({noGo: false})
+        })()
     }
 
     render() {

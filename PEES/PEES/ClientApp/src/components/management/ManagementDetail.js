@@ -1,16 +1,15 @@
 ﻿import React from 'react'
-import { Link } from 'react-router-dom';
+import { connect } from "react-redux"
+import { Link } from 'react-router-dom'
 import { Container, Row, Col, CardDeck } from "reactstrap"
 import ContentEditable from 'react-contenteditable'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCloudUploadAlt, faPlus } from '@fortawesome/free-solid-svg-icons'
-
 import ManagementCard from './ManagementCard'
-import Toast from '../Toast'
-
+import * as Utils from "../global/Utils"
 import './custom.css'
 
-export default class ManagementDetail extends React.Component {
+class ManagementDetail extends React.Component {
     constructor(props) {
         super(props)
 
@@ -39,7 +38,8 @@ export default class ManagementDetail extends React.Component {
                 this.setState({ configuration: data, isLoading: false })
             })
             .catch(error => {
-                alert('Não foi possível ligar à base de dados!')
+                console.error(error)
+                this.props.dispatch(Utils.Toast("Não foi possível ligar à base de dados!", Utils.ToastTypes.Danger, true))
             })
     }
 
@@ -63,7 +63,7 @@ export default class ManagementDetail extends React.Component {
 
     generateGuid() {
         let result, j
-        result = '';
+        result = ''
 
         for (j = 0; j < 32; j++) {
             if (j === 8 || j === 12 || j === 16 || j === 20)
@@ -101,9 +101,7 @@ export default class ManagementDetail extends React.Component {
     }
 
     handleKeyDown(e) {
-        if (e.keyCode === 13) {
-            e.preventDefault()
-        }
+        if (e.keyCode === 13) e.preventDefault()
     }
 
     handleBlur(e) {
@@ -125,7 +123,7 @@ export default class ManagementDetail extends React.Component {
 
     handleSaveConfiguration(e) {
         if (this.state.toast.visible) {
-            alert('Falta resolver os alertas pendentes')
+            this.props.dispatch(Utils.Toast("Falta resolver os alertas pendentes", Utils.ToastTypes.Warning, false))
             return
         }
 
@@ -154,13 +152,14 @@ export default class ManagementDetail extends React.Component {
                 return Promise.reject(response.statusText)
             })
             .then(data => {
-                alert('Dados gravados')
+                this.props.dispatch(Utils.Toast("Dados gravados", Utils.ToastTypes.Success, false))
 
                 this.setState({ configuration: data, isLoading: false })
 
             })
             .catch(error => {
-                alert('Houve problemas ao gravar os dados!')
+                console.error(error)
+                this.props.dispatch(Utils.Toast("Houve problemas ao gravar os dados!", Utils.ToastTypes.Danger, true))
             })
     }
 
@@ -211,9 +210,6 @@ export default class ManagementDetail extends React.Component {
                 <Link to="#" title="Gravar" onClick={this.handleSaveConfiguration}><FontAwesomeIcon icon={faCloudUploadAlt} /></Link>
 
                 <Container>
-                    <Row>
-                        <Col><Toast msg={this.state.toast.msg} visible={this.state.toast.visible} /></Col>
-                    </Row>
                     <Row className="main-card-border">
                         <Col><h4>Estabelecimento escolar</h4></Col>
                     </Row>
@@ -270,6 +266,8 @@ export default class ManagementDetail extends React.Component {
                     <Row><Col><CardDeck style={{ display: 'flex', flexDirection: 'row' }}>{cardCurricularUnits}</CardDeck></Col></Row>
                 </Container>
             </>
-        );
+        )
     }
 }
+
+export default connect()(ManagementDetail)

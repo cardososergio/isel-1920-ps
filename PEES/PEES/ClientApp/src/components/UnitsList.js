@@ -18,7 +18,7 @@ export const UnitsList = (props) => {
         const conf = JSON.parse(localStorage.getItem("configuration"))
 
         PouchDB.plugin(PouchdbFind)
-        const db = new PouchDB(Constants.URL_COUCHDB)
+        const db = new PouchDB(localStorage.getItem("isOffline") === "true" ? Constants.URL_COUCHDB_OFFLINE : Constants.URL_COUCHDB)
 
         let find = { user_id: JSON.parse(localStorage.getItem("user")).userId }
         if (filter.year.id !== "") find = { ...find, curricular_year: filter.year.id }

@@ -1,10 +1,12 @@
 ﻿import React, { useEffect, useState } from "react"
+import { connect } from "react-redux"
 import { Container, Row, Col } from "reactstrap"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faTrash } from "@fortawesome/free-solid-svg-icons"
 import { Link } from "react-router-dom"
+import * as Utils from "../global/Utils"
 
-export const ServerVersion = (props) => {
+const ServerVersion = (props) => {
     const [serverData, setServerData] = useState([])
 
     useEffect(() => {
@@ -32,7 +34,7 @@ export const ServerVersion = (props) => {
                 if (response.status === 200)
                     return response.json()
 
-                alert("houve um problema ao gravar a alteração!")
+                this.props.dispatch(Utils.Toast("houve um problema ao gravar a alteração!", Utils.ToastTypes.Warning, false))
             })
             .then(newRevision => {
 
@@ -107,3 +109,5 @@ const formatDate = (date) => {
 
     return [[year, month, day].join("-"), [hour, minutes, seconds].join(":")].join(" ");
 }
+
+export default connect()(ServerVersion)

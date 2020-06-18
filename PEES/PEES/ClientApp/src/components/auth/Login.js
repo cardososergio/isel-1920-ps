@@ -1,9 +1,11 @@
 ﻿import React from 'react'
+import { connect } from "react-redux"
 import { Form, Button, FormGroup, Input, Label, Container, Row, Col } from "reactstrap"
 import { Link, Redirect, Switch, Route } from 'react-router-dom'
 import Home from '../Home'
+import * as Utils from "../global/Utils"
 
-export default class Login extends React.Component {
+class Login extends React.Component {
     constructor(props) {
         super(props)
 
@@ -40,13 +42,15 @@ export default class Login extends React.Component {
                     localStorage.setItem("user", JSON.stringify({ userId: json.userId, name: json.name }))
 
                     this.setState({ validUser: true })
+                    //window.location.reload(false)
                 }
                 else {
-                    alert("Credenciais inválidas!")
+                    this.props.dispatch(Utils.Toast("Credenciais inválidas!", Utils.ToastTypes.Warning, false))
                 }
             })
             .catch(error => {
-                alert("Não foi possível autenticar!")
+                console.error(error)
+                this.props.dispatch(Utils.Toast("Não foi possível autenticar!", Utils.ToastTypes.Danger, true))
             });
     }
 
@@ -58,7 +62,7 @@ export default class Login extends React.Component {
                     <Switch>
                         <Route exact path='/' component={Home} />
                     </Switch>
-                    <Redirect to="/" />
+                    <Redirect to="/" push />
                 </>
             )
 
@@ -93,3 +97,5 @@ export default class Login extends React.Component {
         );
     }
 }
+
+export default connect()(Login)

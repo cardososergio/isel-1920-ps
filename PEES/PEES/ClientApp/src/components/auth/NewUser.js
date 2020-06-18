@@ -1,6 +1,8 @@
 ﻿import React, { useState } from "react"
-import { Container, Row, Col, Form, FormGroup, Label, Input, Button } from "reactstrap";
-import { Redirect } from "react-router-dom";
+import { connect } from "react-redux"
+import { Container, Row, Col, Form, FormGroup, Label, Input, Button } from "reactstrap"
+import { Redirect } from "react-router-dom"
+import * as Utils from "../global/Utils"
 
 const NewUser = (props) => {
     const [name, setName] = useState("")
@@ -13,12 +15,12 @@ const NewUser = (props) => {
         event.preventDefault()
 
         if (!(name.length > 0 && email.length > 0 && password.length > 0 && confirm.length > 0)) {
-            alert("Dados incompletos!")
+            this.props.dispatch(Utils.Toast("Dados incompletos!", Utils.ToastTypes.Warning, false))
             return
         }
 
         if (password !== confirm) {
-            alert("Password errada")
+            this.props.dispatch(Utils.Toast("Palavra-chave errada!", Utils.ToastTypes.Warning, false))
             return
         }
 
@@ -32,14 +34,15 @@ const NewUser = (props) => {
             .then(response => { if (response.status === 200) return response.json(); return Promise.reject(response.statusText); })
             .then(json => {
                 if (!json) {
-                    alert('Endereço de e-mail já existente!')
+                    this.props.dispatch(Utils.Toast("Endereço de e-mail já existente!", Utils.ToastTypes.Warning, false))
                     return
                 }
 
                 setRegisterDone(true)
             })
             .catch(error => {
-                alert("Não foi possível criar o utilizador!")
+                console.error(error)
+                this.props.dispatch(Utils.Toast("Não foi possível criar o utilizador!", Utils.ToastTypes.Danger, true))
             });
     }
 
@@ -80,4 +83,4 @@ const NewUser = (props) => {
     )
 }
 
-export default NewUser
+export default connect()(NewUser)

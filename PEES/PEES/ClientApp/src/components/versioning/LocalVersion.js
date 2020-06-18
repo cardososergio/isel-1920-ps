@@ -1,6 +1,6 @@
 ﻿import React from "react"
 import { Row, Col } from "reactstrap"
-import { ServerVersion } from "./ServerVersion"
+import ServerVersion from "./ServerVersion"
 
 export const LocalVersion = (props) => {
 

@@ -2,8 +2,8 @@
 import { connect } from "react-redux"
 import { Container, Row, Col } from "reactstrap"
 import PouchDB from 'pouchdb'
-import "./Document.css"
 import * as Constants from "../../Constants"
+import "./Document.css"
 
 const conf = JSON.parse(localStorage.getItem("configuration"))
 
@@ -25,7 +25,7 @@ class Preview extends React.Component {
     }
 
     createMarkup(text) {
-        return { __html: text };
+        return { __html: text }
     }
 
     componentDidMount() {
@@ -122,4 +122,5 @@ class Preview extends React.Component {
         )
     }
 }
+
 export default connect()(Preview)

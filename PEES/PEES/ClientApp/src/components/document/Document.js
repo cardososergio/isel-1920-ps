@@ -15,6 +15,7 @@ import pt from 'date-fns/locale/pt'
 import uuid4 from 'uuid4'
 import "./Document.css"
 import * as Constants from "../../Constants"
+import * as Utils from "../global/Utils"
 
 registerLocale('pt', pt)
 
@@ -98,7 +99,7 @@ class Document extends React.Component {
     }
 
     createMarkup(text) {
-        return { __html: text };
+        return { __html: text }
     }
 
     handleDetail = (e) => {
@@ -114,7 +115,7 @@ class Document extends React.Component {
     }
 
     componentDidMount() {
-        const db = new PouchDB(Constants.URL_COUCHDB)
+        const db = new PouchDB(localStorage.getItem("isOffline") === "true" ? Constants.URL_COUCHDB_OFFLINE : Constants.URL_COUCHDB)
 
         db.get(this.state.id)
             .then(doc => {
@@ -126,6 +127,7 @@ class Document extends React.Component {
 
             }).catch(error => {
                 console.error(error)
+                this.props.dispatch(Utils.Toast("Houve uma exceção na aplicação!", Utils.ToastTypes.Danger, true))
             })
     }
 
@@ -228,7 +230,7 @@ class Document extends React.Component {
         if (numeringType === 2) {
             numering = this.state.modalQuestion.fields.numering * 1
             if (Number.isNaN(numering) || numering < 0) {
-                alert("Numeração inválida!")
+                this.props.dispatch(Utils.Toast("Numeração inválida!", Utils.ToastTypes.Warning, false))
                 return
             }
 
@@ -240,7 +242,7 @@ class Document extends React.Component {
 
         grade = this.state.modalQuestion.fields.grade * 1
         if (Number.isNaN(grade) || grade < 0) {
-            alert("Cotação inválida!")
+            this.props.dispatch(Utils.Toast("Cotação inválida!", Utils.ToastTypes.Warning, false))
             return
         }
 
@@ -514,7 +516,7 @@ class Document extends React.Component {
     }
 
     handleSaveDocument() {
-        const db = new PouchDB(Constants.URL_COUCHDB)
+        const db = new PouchDB(localStorage.getItem("isOffline") === "true" ? Constants.URL_COUCHDB_OFFLINE : Constants.URL_COUCHDB)
         const _this = this
 
         let doc = this.state.doc
@@ -522,10 +524,14 @@ class Document extends React.Component {
 
         db.put(doc)
             .then(function (response) {
-                if (response.ok)
+                if (response.ok) {
                     _this.setState({ doc: { ...doc, _rev: response.rev } })
 
+                    _this.props.dispatch(Utils.Toast("Enunciado gravado!", Utils.ToastTypes.Info, false))
+                }
+
             }).catch(function (err) {
+                console.error(err)
 
                 if (err.status === 409) {
                     db.get(doc._id, { revs: true })
@@ -558,7 +564,7 @@ class Document extends React.Component {
     handleChangeRevision(e, revisionId) {
         e.preventDefault()
 
-        const db = new PouchDB(Constants.URL_COUCHDB)
+        const db = new PouchDB(localStorage.getItem("isOffline") === "true" ? Constants.URL_COUCHDB_OFFLINE : Constants.URL_COUCHDB)
         const _this = this
 
         let _doc = _this.state.doc
@@ -574,11 +580,13 @@ class Document extends React.Component {
             return db.put(doc)
         }).then(function (response) {
             if (!response.ok) {
-                alert("Não foi possível gravar o enunciado!")
+                _this.props.dispatch(Utils.Toast("Não foi possível gravar o enunciado!", Utils.ToastTypes.Warning, false))
                 return
             }
 
             _this.setState({ doc: { ..._doc, _rev: response.rev }, modalConflit: { ..._this.state.modalConflit, isOpen: false } })
+
+            _this.props.dispatch(Utils.Toast("Enunciado gravado!", Utils.ToastTypes.Info, false))
         }).catch(function (err) {
             console.log(err)
         });
@@ -906,4 +914,5 @@ class Document extends React.Component {
         )
     }
 }
+
 export default connect()(Document)

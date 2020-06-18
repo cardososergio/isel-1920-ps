@@ -3,7 +3,7 @@ import { connect } from "react-redux"
 import { Alert } from 'reactstrap'
 import { HideToast } from "../global/Utils"
 
-const Toast = (props) => {
+const Alerts = (props) => {
 
     if (!props.attr.show)
         return (<></>)
@@ -25,4 +25,4 @@ const Toast = (props) => {
     );
 }
 
-export default connect()(Toast)
+export default connect()(Alerts)

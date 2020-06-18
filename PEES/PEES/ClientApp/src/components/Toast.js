@@ -1,5 +1,5 @@
-﻿import React from 'react';
-import { Alert } from "reactstrap";
+﻿import React from 'react'
+import { Alert } from "reactstrap"
 
 const Toast = (props) => {
     return (
@@ -9,4 +9,4 @@ const Toast = (props) => {
     );
 }
 
-export default Toast;
+export default Toast
