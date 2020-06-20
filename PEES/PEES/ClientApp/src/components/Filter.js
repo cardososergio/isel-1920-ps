@@ -1,17 +1,18 @@
-﻿import React, { useState } from "react"
+﻿import React, { useState, useEffect } from "react"
 import { Container, Row, Col, UncontrolledDropdown, DropdownToggle, DropdownMenu, DropdownItem } from "reactstrap"
-import { useDispatch, useSelector } from "react-redux"
+//import { useDispatch, useSelector } from "react-redux"
 import "./Filter.css"
 
 export const Filter = (props) => {
-    const dispatch = useDispatch()
-    const unitsView = useSelector(state => state.unitsView)
-    const unitSelected = useSelector(state => state.filter.unit)
+    //const dispatch = useDispatch()
+    //const unitSelected = useSelector(state => state.filter.unit)
     const conf = JSON.parse(localStorage.getItem("configuration"))
+    const urlParameters = new URL(document.location.href).searchParams
 
     const [selCurricularYear, setSelCurricularYear] = useState({ id: "", value: "Todos" })
     const [selSemester, setSelSemester] = useState({ id: "", value: "Todos" })
-    const [selCurricularUnit, setselCurricularUnit] = useState((unitSelected.id === "" ? { id: "", value: "Todas" } : { id: unitSelected.id, value: unitSelected.value }))
+    //const [selCurricularUnit, setselCurricularUnit] = useState((unitSelected.id === "" ? { id: "", value: "Todas" } : { id: unitSelected.id, value: unitSelected.value }))
+    const [selCurricularUnit, setselCurricularUnit] = useState({ id: "", value: "Todas" })
     const [selSeason, setselSeason] = useState({ id: "", value: "Todas" })
 
     const cssLabels = { lineHeight: 37 + "px" }
@@ -19,27 +20,62 @@ export const Filter = (props) => {
     const handleFilter = (type, id, value) => {
         switch (type) {
             case "year":
-                dispatch({ type: "FILTER", payload: { year: { id: id, value: value }, semester: selSemester, unit: selCurricularUnit, season: selSeason } })
+                //dispatch({ type: "FILTER", payload: { year: { id: id, value: value }, semester: selSemester, unit: selCurricularUnit, season: selSeason } })
                 setSelCurricularYear({ id: id, value: value })
                 break
             case "semester":
-                dispatch({ type: "FILTER", payload: { year: selCurricularYear, semester: { id: id, value: value }, unit: selCurricularUnit, season: selSeason } })
+                //dispatch({ type: "FILTER", payload: { year: selCurricularYear, semester: { id: id, value: value }, unit: selCurricularUnit, season: selSeason } })
                 setSelSemester({ id: id, value: value })
                 break
             case "unit":
-                dispatch({ type: "FILTER", payload: { year: selCurricularYear, semester: selSemester, unit: { id: id, value: value }, season: selSeason } })
+                //dispatch({ type: "FILTER", payload: { year: selCurricularYear, semester: selSemester, unit: { id: id, value: value }, season: selSeason } })
                 setselCurricularUnit({ id: id, value: value })
                 break
             case "season":
-                dispatch({ type: "FILTER", payload: { year: selCurricularYear, semester: selSemester, unit: selCurricularUnit, season: { id: id, value: value } } })
+                //dispatch({ type: "FILTER", payload: { year: selCurricularYear, semester: selSemester, unit: selCurricularUnit, season: { id: id, value: value } } })
                 setselSeason({ id: id, value: value })
                 break
             default:
         }
 
-        if (unitsView !== "card")
-            dispatch({ type: "UNITS_VIEW", payload: "card" })
+        const url = new URL(document.location.href)
+        let parameters = url.searchParams
+        const prevParameters = parameters.toString()
+
+        if (id === "")
+            parameters.delete(type)
+        else
+            parameters.set(type, id)
+
+        if (prevParameters !== parameters.toString())
+            window.history.pushState({ "unit": type, "value": value }, "", parameters.toString() !== "" ? "?" + parameters.toString() : "")
     }
+
+    useEffect(() => {
+        if (urlParameters.get("year") !== null) {
+            const obj = conf.curricularYears.find(item => item.id === urlParameters.get("year"))
+            if (obj !== undefined)
+                setSelCurricularYear({ id: urlParameters.get("year"), value: obj.value })
+        }
+
+        if (urlParameters.get("semester") !== null) {
+            const obj = conf.semesters.find(item => item.id === urlParameters.get("semester"))
+            if (obj !== undefined)
+                setSelSemester({ id: urlParameters.get("semester"), value: obj.value })
+        }
+
+        if (urlParameters.get("unit") !== null) {
+            const obj = conf.curricularUnits.find(item => item.id === urlParameters.get("unit"))
+            if (obj !== undefined)
+                setselCurricularUnit({ id: urlParameters.get("unit"), value: obj.value })
+        }
+
+        if (urlParameters.get("season") !== null) {
+            const obj = conf.seasons.find(item => item.id === urlParameters.get("season"))
+            if (obj !== undefined)
+                setselSeason({ id: urlParameters.get("season"), value: obj.value })
+        }
+    }, [urlParameters])
 
     return (
         <div className="filter">
@@ -78,7 +114,7 @@ export const Filter = (props) => {
                             <li className="nav-item" style={cssLabels}>Disciplina:</li>
                             <li className="nav-item">
                                 <UncontrolledDropdown setActiveFromChild style={{ float: "right", maxWidth: 18 + "em" }}>
-                                    <DropdownToggle tag="a" className="nav-link" caret>{unitSelected.id === "" ? selCurricularUnit.value : unitSelected.value}</DropdownToggle>
+                                    <DropdownToggle tag="a" className="nav-link" caret>{selCurricularUnit.value}</DropdownToggle>
                                     <DropdownMenu className="dropdown">
                                         <DropdownItem onClick={() => handleFilter("unit", "", "Todas")} className="dropdown-item">Todas</DropdownItem>
                                         {conf.curricularUnits.map(unit => <DropdownItem key={unit.id} onClick={() => handleFilter("unit", unit.id, unit.value)}>{unit.value}</DropdownItem>)}

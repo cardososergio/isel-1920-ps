@@ -167,43 +167,18 @@ class ManagementDetail extends React.Component {
         if (this.state.isLoading)
             return <p className="content container">A carregar os dados...</p>
 
-        const cardCurricularYears = this.state.configuration.curricularYears.map((year, index) => !year.isDelete && <ManagementCard
-            key={"curricularYears" + index}
-            value={year.value}
-            item={year}
-            card='curricularYears'
-            handleStateChange={this.handleStateChange} />)
-        const cardSemesters = this.state.configuration.semesters.map((semester, index) => !semester.isDelete && <ManagementCard
-            key={'semesters' + index}
-            value={semester.value}
-            item={semester}
-            card='semesters'
-            handleStateChange={this.handleStateChange} />)
-        const cardSeasons = this.state.configuration.seasons.map((season, index) => !season.isDelete && <ManagementCard
-            key={'seasons' + index}
-            value={season.value}
-            item={season}
-            card='seasons'
-            handleStateChange={this.handleStateChange} />)
-        const cardNumeringTypes = this.state.configuration.numeringTypes.map((numeringType, index) => !numeringType.isDelete && <ManagementCard
-            key={'numeringTypes' + index}
-            value={numeringType.value}
-            item={numeringType}
-            card='numeringTypes'
-            handleStateChange={this.handleStateChange} disabled={true} />)
-        const cardInstructionTypes = this.state.configuration.instructionTypes.map((instructionType, index) => !instructionType.isDelete && <ManagementCard
-            key={'instructionTypes' + index}
-            value={instructionType.value}
-            item={instructionType}
-            card='instructionsTypes'
-            handleStateChange={this.handleStateChange} />)
-        const cardCurricularUnits = this.state.configuration.curricularUnits.map((unit, index) => !unit.isDelete && <ManagementCard
-            key={'curricularUnits' + index}
-            value={unit.value}
-            item={unit}
-            large={true}
-            card='curricularUnits'
-            handleStateChange={this.handleStateChange} />)
+        const cardCurricularYears = this.state.configuration.curricularYears.filter(item => !item.isDelete).map((year, index) =>
+            <ManagementCard key={"curricularYears" + index} value={year.value} item={year} card='curricularYears' handleStateChange={this.handleStateChange} />)
+        const cardSemesters = this.state.configuration.semesters.filter(item => !item.isDelete).map((semester, index) =>
+            <ManagementCard key={'semesters' + index} value={semester.value} item={semester} card='semesters' handleStateChange={this.handleStateChange} />)
+        const cardSeasons = this.state.configuration.seasons.filter(item => !item.isDelete).map((season, index) =>
+            <ManagementCard key={'seasons' + index} value={season.value} item={season} card='seasons' handleStateChange={this.handleStateChange} />)
+        const cardNumeringTypes = this.state.configuration.numeringTypes.filter(item => !item.isDelete).map((numeringType, index) =>
+            <ManagementCard key={'numeringTypes' + index} value={numeringType.value} item={numeringType} card='numeringTypes' handleStateChange={this.handleStateChange} disabled={true} />)
+        const cardInstructionTypes = this.state.configuration.instructionTypes.filter(item => !item.isDelete).map((instructionType, index) =>
+            <ManagementCard key={'instructionTypes' + index} value={instructionType.value} item={instructionType} card='instructionsTypes' handleStateChange={this.handleStateChange} />)
+        const cardCurricularUnits = this.state.configuration.curricularUnits.filter(item => !item.isDelete).map((unit, index) =>
+            <ManagementCard key={'curricularUnits' + index} value={unit.value} item={unit} large={true} card='curricularUnits' handleStateChange={this.handleStateChange} />)
 
         return (
             <>
@@ -215,12 +190,7 @@ class ManagementDetail extends React.Component {
                     </Row>
                     <Row style={{ marginBottom: 20 + 'px' }}>
                         <Col className={this.state.configuration.schoolName.length === 0 ? "got-error" : null}>
-                            <ContentEditable
-                                html={this.state.configuration.schoolName}
-                                tagName='span'
-                                className='input-text'
-                                onKeyDown={this.handleKeyDown} onBlur={this.handleBlur}
-                            />
+                            <ContentEditable html={this.state.configuration.schoolName} tagName='span' className='input-text' onKeyDown={this.handleKeyDown} onBlur={this.handleBlur} />
                         </Col>
                     </Row>
                     <Row className="main-card-border">

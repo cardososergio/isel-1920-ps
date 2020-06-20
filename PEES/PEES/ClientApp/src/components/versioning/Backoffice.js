@@ -5,6 +5,7 @@ import PouchdbFind from 'pouchdb-find'
 import { connect } from 'react-redux'
 import { LocalVersion } from "./LocalVersion"
 import { Redirect } from "react-router-dom"
+import * as Constants from "../../Constants"
 
 class BackOffice extends React.Component {
     constructor(props) {
@@ -23,6 +24,9 @@ class BackOffice extends React.Component {
     }
 
     componentDidMount() {
+        if (JSON.stringify(this.props.backofficeData) === JSON.stringify({}))
+            return
+
         const localConfig = JSON.parse(localStorage.getItem("configuration"))
         const serverConfig = this.props.backofficeData
 
@@ -49,7 +53,7 @@ class BackOffice extends React.Component {
 
         // check if the change is in use by pouchDB
         PouchDB.plugin(PouchdbFind)
-        const db = new PouchDB("pees")
+        const db = new PouchDB(Constants.URL_COUCHDB_OFFLINE)
 
         const find = { user_id: JSON.parse(localStorage.getItem("user")).userId }
 
@@ -86,6 +90,11 @@ class BackOffice extends React.Component {
                 })
 
                 this.setState({ difCurricularUnits: updateCurricularUnits, difCurricularYears: updateCurricularYears, difSemesters: updateSemesters, difSeasons: updateSeasons, difInstructionTypes: updateInstructionTypes })
+
+                if (updateCurricularUnits.length === 0 && updateCurricularYears.length === 0 && updateSemesters.length === 0 && updateSeasons.length === 0 && updateInstructionTypes.length === 0) {
+                    localStorage.setItem("configuration", JSON.stringify(serverConfig))
+                    this.setState({ firstTime: false })
+                }
             })
             .catch(function (err) {
                 console.eror(err)
@@ -136,7 +145,7 @@ class BackOffice extends React.Component {
 
                 // check if the change is in use by pouchDB
                 PouchDB.plugin(PouchdbFind)
-                const db = new PouchDB("pees")
+                const db = new PouchDB(Constants.URL_COUCHDB_OFFLINE)
 
                 const find = { user_id: JSON.parse(localStorage.getItem("user")).userId }
 
@@ -162,12 +171,13 @@ class BackOffice extends React.Component {
     }
 
     render() {
-        console.log("pre-backoffice")
-
         if (!this.state.firstTime && this.state.difCurricularUnits.length === 0 && this.state.difCurricularYears.length === 0 &&
             this.state.difSemesters.length === 0 && this.state.difSeasons.length === 0 && this.state.difInstructionTypes.length === 0) {
             return (<Redirect to="/" />)
         }
+
+        if (JSON.stringify(this.props.backofficeData) === JSON.stringify({}))
+            return (<Redirect to="/" />)
 
         return (
             <Container>

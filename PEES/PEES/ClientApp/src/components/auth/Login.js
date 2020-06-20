@@ -35,14 +35,26 @@ class Login extends React.Component {
 
         const url = this.state.normalLogin ? "/api/users/login" : "/api/management/login"
         fetch(url, requestOptions)
-            .then(response => { if (response.status === 200) { return response.json(); } return Promise.reject(response.statusText); })
+            .then(response => {
+                if (response.status === 200) {
+                    if (this.state.normalLogin)
+                        return response.json()
+                    return
+                }
+
+                return Promise.reject(response.statusText);
+            })
             .then(json => {
+                if (!this.state.normalLogin) {
+                    this.setState({ validUser: true })
+                    return
+                }
+
                 if (json.userId !== undefined) {
                     localStorage.setItem("isOffline", false)
                     localStorage.setItem("user", JSON.stringify({ userId: json.userId, name: json.name }))
 
                     this.setState({ validUser: true })
-                    //window.location.reload(false)
                 }
                 else {
                     this.props.dispatch(Utils.Toast("Credenciais inválidas!", Utils.ToastTypes.Warning, false))
@@ -88,11 +100,15 @@ class Login extends React.Component {
                         </Form>
                     </Col>
                 </Row>
-                <Row style={{ marginTop: 0.5 + "em" }}>
-                    <Col className="text-center">
-                        <Link to="/newuser">novo registo</Link>
-                    </Col>
-                </Row>
+                {
+                    this.state.normalLogin ?
+                        <Row style={{ marginTop: 0.5 + "em" }}>
+                            <Col className="text-center">
+                                <Link to="/newuser">novo registo</Link>
+                            </Col>
+                        </Row>
+                        : null
+                }
             </Container>
         );
     }

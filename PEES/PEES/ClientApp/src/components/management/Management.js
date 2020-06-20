@@ -1,6 +1,5 @@
 ﻿import React from 'react';
 import Cookies from 'js-cookie'
-
 import Login from '../auth/Login'
 import ManagementDetail from './ManagementDetail'
 
@@ -13,7 +12,7 @@ export class Management extends React.Component {
             managementToken: Cookies.get('ManagementToken')
         };
 
-        this.handleStateChange = this.handleStateChange.bind(this);
+        this.handleStateChange = this.handleStateChange.bind(this)
     }
 
     handleStateChange() {
@@ -28,6 +27,6 @@ export class Management extends React.Component {
                     :
                     <ManagementDetail />)}
             </>
-        );
+        )
     }
 }

@@ -12,8 +12,6 @@ import { Redirect } from 'react-router-dom'
 import * as Constants from "../Constants"
 import * as Utils from "./global/Utils"
 
-const conf = JSON.parse(localStorage.getItem("configuration"))
-
 class Home extends React.Component {
     static displayName = Home.name;
 
@@ -31,58 +29,12 @@ class Home extends React.Component {
             firstSubmit: false,
             docId: "",
             gotBackofficeChanges: false,
-            noGo: true
+            noGo: true,
+            conf: JSON.parse(localStorage.getItem("configuration"))
         }
 
         this.handleToggle = this.handleToggle.bind(this)
         this.handleCreateDocument = this.handleCreateDocument.bind(this)
-    }
-
-    handleToggle() {
-        this.setState({ modal: false })
-    }
-
-    handleCreateDocument(e) {
-        e.preventDefault()
-
-        if (this.state.docName === "" || this.state.year === "" || this.state.semester === "" || this.state.unit === "" || this.state.season === "" || this.state.type === "") {
-            this.setState({ firstSubmit: true })
-            return
-        }
-
-        var doc = {
-            user_id: JSON.parse(localStorage.getItem("user")).userId,
-            instruction_type: this.state.type,
-            name: this.state.docName,
-            is_draft: true,
-            is_public: false,
-            curricular_year: this.state.year,
-            semester: this.state.semester,
-            curricular_unit: this.state.unit,
-            season: this.state.season,
-            duration: "",
-            grade: "",
-            header: {
-                school_name: conf.schoolName,
-                courses: []
-            },
-            questions: []
-        }
-
-        const db = new PouchDB(localStorage.getItem("isOffline") === "true" ? Constants.URL_COUCHDB_OFFLINE : Constants.URL_COUCHDB)
-        db.post(doc)
-            .then(response => {
-                if (!response.ok) {
-                    this.props.dispatch(Utils.Toast("Ocorreu um erro ao criar o enunciado", Utils.ToastTypes.Danger, true))
-                    return
-                }
-
-                this.setState({ docId: response.id })
-            })
-            .catch(err => {
-                console.error(err)
-                this.props.dispatch(Utils.Toast("Ocorreu uma exceção na aplicação", Utils.ToastTypes.Danger, true))
-            })
     }
 
     componentDidMount() {
@@ -131,20 +83,66 @@ class Home extends React.Component {
                     return !(serverConfig.instructionTypes.find(s => l.id === s.id) === undefined || serverConfig.instructionTypes.find(s => l.id === s.id && l.revisionId !== s.revisionId) !== undefined)
                 })
 
-            if (!gotChanges) {
+            if (!gotChanges)
                 localStorage.setItem("configuration", JSON.stringify(serverConfig))
-            }
-            else {
+            else
                 _this.props.dispatch({ type: "BACKOFFICE_DATA", payload: serverConfig })
-                _this.props.dispatch({ type: "BACKOFFICE_VERSION_CONTROL", payload: gotChanges })
-                _this.setState({ gotBackofficeChanges: true})
-            }
+
+            _this.setState({ gotBackofficeChanges: gotChanges })
+            _this.props.dispatch({ type: "BACKOFFICE_VERSION_CONTROL", payload: gotChanges })
 
             PouchDB.replicate(Constants.URL_COUCHDB_OFFLINE, Constants.URL_COUCHDB);
             PouchDB.replicate(Constants.URL_COUCHDB, Constants.URL_COUCHDB_OFFLINE);
 
-            _this.setState({noGo: false})
+            _this.setState({ noGo: false })
         })()
+    }
+
+    handleToggle() {
+        this.setState({ modal: false })
+    }
+
+    handleCreateDocument(e) {
+        e.preventDefault()
+
+        if (this.state.docName === "" || this.state.year === "" || this.state.semester === "" || this.state.unit === "" || this.state.season === "" || this.state.type === "") {
+            this.setState({ firstSubmit: true })
+            return
+        }
+
+        var doc = {
+            user_id: JSON.parse(localStorage.getItem("user")).userId,
+            instruction_type: this.state.type,
+            name: this.state.docName,
+            is_draft: true,
+            is_public: false,
+            curricular_year: this.state.year,
+            semester: this.state.semester,
+            curricular_unit: this.state.unit,
+            season: this.state.season,
+            duration: "",
+            grade: "",
+            header: {
+                school_name: this.state.conf.schoolName,
+                courses: []
+            },
+            questions: []
+        }
+
+        const db = new PouchDB(localStorage.getItem("isOffline") === "true" ? Constants.URL_COUCHDB_OFFLINE : Constants.URL_COUCHDB)
+        db.post(doc)
+            .then(response => {
+                if (!response.ok) {
+                    this.props.dispatch(Utils.Toast("Ocorreu um erro ao criar o enunciado", Utils.ToastTypes.Danger, true))
+                    return
+                }
+
+                this.setState({ docId: response.id })
+            })
+            .catch(err => {
+                console.error(err)
+                this.props.dispatch(Utils.Toast("Ocorreu uma exceção na aplicação", Utils.ToastTypes.Danger, true))
+            })
     }
 
     render() {
@@ -167,7 +165,13 @@ class Home extends React.Component {
                     </Row>
                     <Row style={{ marginTop: 1 + "em" }}>
                         <Col>
-                            {this.props.unitsView === "card" || this.props.unitId === "" ? <UnitsCard /> : <UnitsList />}
+                            {
+                                document.location.pathname.toLowerCase() !== "/unit" ?
+                                    <UnitsCard />
+                                    :
+                                    <UnitsList />
+                            }
+
                         </Col>
                     </Row>
                     <Row style={{ marginTop: 1 + "em" }}>
@@ -191,7 +195,7 @@ class Home extends React.Component {
                                 <Col sm={10}>
                                     <Input type="select" id="lstYear" onChange={(e) => this.setState({ year: e.target.value })} invalid={this.state.year === "" && this.state.firstSubmit}>
                                         <option value=""></option>
-                                        {conf.curricularYears.map(item => { return (<option key={item.id} value={item.id}>{item.value}</option>) })}
+                                        {this.state.conf.curricularYears.map(item => { return (<option key={item.id} value={item.id}>{item.value}</option>) })}
                                     </Input>
                                 </Col>
                             </FormGroup>
@@ -200,7 +204,7 @@ class Home extends React.Component {
                                 <Col sm={10}>
                                     <Input type="select" id="lstSemester" onChange={(e) => this.setState({ semester: e.target.value })} invalid={this.state.semester === "" && this.state.firstSubmit}>
                                         <option value=""></option>
-                                        {conf.semesters.map(item => { return (<option key={item.id} value={item.id}>{item.value}</option>) })}
+                                        {this.state.conf.semesters.map(item => { return (<option key={item.id} value={item.id}>{item.value}</option>) })}
                                     </Input>
                                 </Col>
                             </FormGroup>
@@ -209,7 +213,7 @@ class Home extends React.Component {
                                 <Col sm={10}>
                                     <Input type="select" id="lstUnit" onChange={(e) => this.setState({ unit: e.target.value })} invalid={this.state.unit === "" && this.state.firstSubmit}>
                                         <option value=""></option>
-                                        {conf.curricularUnits.map(item => { return (<option key={item.id} value={item.id}>{item.value}</option>) })}
+                                        {this.state.conf.curricularUnits.map(item => { return (<option key={item.id} value={item.id}>{item.value}</option>) })}
                                     </Input>
                                 </Col>
                             </FormGroup>
@@ -218,7 +222,7 @@ class Home extends React.Component {
                                 <Col sm={10}>
                                     <Input type="select" id="lstSeason" onChange={(e) => this.setState({ season: e.target.value })} invalid={this.state.season === "" && this.state.firstSubmit}>
                                         <option value=""></option>
-                                        {conf.seasons.map(item => { return (<option key={item.id} value={item.id}>{item.value}</option>) })}
+                                        {this.state.conf.seasons.map(item => { return (<option key={item.id} value={item.id}>{item.value}</option>) })}
                                     </Input>
                                 </Col>
                             </FormGroup>
@@ -227,7 +231,7 @@ class Home extends React.Component {
                                 <Col sm={10}>
                                     <Input type="select" id="lstInstructionType" onChange={(e) => this.setState({ type: e.target.value })} invalid={this.state.type === "" && this.state.firstSubmit}>
                                         <option value=""></option>
-                                        {conf.instructionTypes.map(item => { return (<option key={item.id} value={item.id}>{item.value}</option>) })}
+                                        {this.state.conf.instructionTypes.map(item => { return (<option key={item.id} value={item.id}>{item.value}</option>) })}
                                     </Input>
                                 </Col>
                             </FormGroup>
@@ -251,4 +255,4 @@ function mapStateToProps(state) {
     }
 }
 
-export default connect(mapStateToProps)(Home)
+export default connect(mapStateToProps,)(Home)

@@ -18,6 +18,8 @@
 
 .card-body {
     padding: 0.7rem !important;
+    line-height: inherit;
+    text-align: inherit;
 }
 
     .card-body svg {

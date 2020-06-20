@@ -9,7 +9,6 @@ import { Link } from "react-router-dom"
 import * as Constants from "../Constants"
 
 export const UnitsList = (props) => {
-    //const dispatch = useDispatch()
     const filter = useSelector(state => state.filter)
 
     const [list, setList] = useState([])

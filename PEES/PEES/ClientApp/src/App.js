@@ -11,7 +11,6 @@ import NewUser from './components/auth/NewUser'
 import Backoffice from './components/versioning/Backoffice'
 import * as Constants from "./Constants"
 import Preview from './components/document/Preview'
-import PouchDB from 'pouchdb'
 import './custom.css'
 
 async function checkNetwork() {
@@ -51,60 +50,7 @@ class App extends React.Component {
                     if (json !== _this.state.validAccessToken)
                         _this.setState({ validAccessToken: json })
 
-                    /*if (json) {
-                        (async function () {
-                            const response2 = await fetch('/api/users/configuration')
-                            const data = await response2.json()
-
-                            // compare
-                            const localConfig = JSON.parse(localStorage.getItem("configuration"))
-                            const serverConfig = data
-
-                            // Curricular Units
-                            let gotChanges = !localConfig.curricularUnits.every(l => {
-                                return !(serverConfig.curricularUnits.find(s => l.id === s.id) === undefined || serverConfig.curricularUnits.find(s => l.id === s.id && l.revisionId !== s.revisionId) !== undefined)
-                            })
-
-                            // Curricular Year
-                            if (!gotChanges)
-                                gotChanges = !localConfig.curricularYears.every(l => {
-                                    return !(serverConfig.curricularYears.find(s => l.id === s.id) === undefined || serverConfig.curricularYears.find(s => l.id === s.id && l.revisionId !== s.revisionId) !== undefined)
-                                })
-
-                            // Semester
-                            if (!gotChanges)
-                                gotChanges = !localConfig.semesters.every(l => {
-                                    return !(serverConfig.semesters.find(s => l.id === s.id) === undefined || serverConfig.semesters.find(s => l.id === s.id && l.revisionId !== s.revisionId) !== undefined)
-                                })
-
-                            // Season
-                            if (!gotChanges)
-                                gotChanges = !localConfig.seasons.every(l => {
-                                    return !(serverConfig.seasons.find(s => l.id === s.id) === undefined || serverConfig.seasons.find(s => l.id === s.id && l.revisionId !== s.revisionId) !== undefined)
-                                })
-
-                            // Instruction Type
-                            if (!gotChanges)
-                                gotChanges = !localConfig.instructionTypes.every(l => {
-                                    return !(serverConfig.instructionTypes.find(s => l.id === s.id) === undefined || serverConfig.instructionTypes.find(s => l.id === s.id && l.revisionId !== s.revisionId) !== undefined)
-                                })
-
-                            if (!gotChanges) {
-                                localStorage.setItem("configuration", JSON.stringify(serverConfig))
-                            }
-                            else {
-                                _this.props.dispatch({ type: "BACKOFFICE_DATA", payload: serverConfig })
-                                _this.props.dispatch({ type: "BACKOFFICE_VERSION_CONTROL", payload: gotChanges })
-                            }
-
-                            
-
-                            _this.setState({ noGo: false })
-                        })()
-                    }
-                    else {
-                        _this.setState({ noGo: false })
-                    }*/
+                    _this.setState({ noGo: false })
                 })()
             } else {
                 const user = localStorage.getItem("user")
@@ -127,17 +73,19 @@ class App extends React.Component {
             )
 
         if (this.state.noGo) return (<></>)
-
+        
         if (!this.state.validAccessToken)
             return (
                 <Layout>
                     <Switch>
                         <Route exact path="/" component={Login} />
+                        <Route exact path='/unit' component={Home} />
                         <Route exact path="/login" component={Login} />
                         <Route exact path="/newuser" component={NewUser} />
                         <Route exact path="/versioncontrol" component={Backoffice} />
                         <Route exact path='/document' component={Document} />
                         <Route exact path="/preview" component={Preview} />
+                        <Route exact path='/management' component={Management} />
                     </Switch>
                 </Layout>
             )
@@ -146,6 +94,7 @@ class App extends React.Component {
             <Layout>
                 <Switch>
                     <Route exact path='/' component={Home} />
+                    <Route exact path='/unit' component={Home} />
                     <Route exact path='/document' component={Document} />
                     <Route exact path='/login' component={Login} />
                     <Route exact path='/management' component={Management} />

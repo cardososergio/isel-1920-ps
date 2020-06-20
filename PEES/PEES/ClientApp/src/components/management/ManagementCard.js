@@ -1,5 +1,5 @@
-﻿import React from 'react';
-import { Card, CardBody, CardText } from "reactstrap";
+﻿import React from 'react'
+import { Card, CardBody, CardText } from "reactstrap"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTimes } from '@fortawesome/free-solid-svg-icons'
 import ContentEditable from 'react-contenteditable'
@@ -24,9 +24,8 @@ export default class ManagementCad extends React.Component {
     }
 
     handleKeyDown(e) {
-        if (e.keyCode === 13) {
+        if (e.keyCode === 13)
             e.preventDefault()
-        }
     }
 
     handleBlur(e) {
@@ -52,16 +51,11 @@ export default class ManagementCad extends React.Component {
                 <CardBody>
                     {this.props.disabled !== true && <FontAwesomeIcon icon={faTimes} value={this.props.item.id} onClick={this.handleDelete} />}
                     <CardText>
-                        <ContentEditable
-                            html={this.props.value.toString()}
-                            disabled={this.props.disabled ? true : false}
-                            tagName='span'
-                            className={this.props.large ? 'large' : null}
-                            onKeyDown={this.handleKeyDown} onBlur={this.handleBlur}
-                        />
+                        <ContentEditable html={this.props.value.toString()} disabled={this.props.disabled ? true : false} tagName='span'
+                            className={this.props.large ? 'large' : null} onKeyDown={this.handleKeyDown} onBlur={this.handleBlur} />
                     </CardText>
                 </CardBody>
             </Card>
-        );
+        )
     }
 }
