@@ -1,9 +1,9 @@
 import React from 'react'
 import { Container, Row, Col, Button, Modal, ModalHeader, ModalBody, ModalFooter, Form, FormGroup, Label, Input } from 'reactstrap'
 import { connect } from "react-redux"
-import { Filter } from './Filter'
-import { UnitsCard } from "./UnitsCard"
-import { UnitsList } from "./UnitsList"
+import Filter from './Filter'
+import UnitsCard from "./UnitsCard"
+import UnitsList from "./UnitsList"
 import "./Home.css"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPlus } from '@fortawesome/free-solid-svg-icons'
@@ -255,4 +255,4 @@ function mapStateToProps(state) {
     }
 }
 
-export default connect(mapStateToProps,)(Home)
+export default connect(mapStateToProps)(Home)

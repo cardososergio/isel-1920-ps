@@ -1,26 +1,44 @@
-﻿import React, { useState, useEffect } from "react"
+﻿import React from "react"
+import { connect } from "react-redux"
 import { CardBody, CardDeck, CardText } from 'reactstrap'
 import PouchDB from 'pouchdb'
 import PouchdbFind from 'pouchdb-find'
 import * as Constants from "../Constants"
 import { Link } from "react-router-dom"
 
-export const UnitsCard = (props) => {
-    const urlParameters = new URL(document.location.href).searchParams
+class UnitsCard extends React.Component {
+    constructor(props) {
+        super(props)
 
-    const [lstUnits, setLstUnits] = useState([])
+        this.state = {
+            lstUnits: [],
+            urlParams: new URL(document.location.href).searchParams
+        }
 
-    useEffect(() => {
+        this.getData = this.getData.bind(this)
+    }
+
+    componentDidMount() {
+        this.getData()
+    }
+
+    componentDidUpdate(prevProps) {
+        if (prevProps.filter !== this.props.filter) {
+            this.getData()
+        }
+    }
+
+    getData() {
         const units = JSON.parse(localStorage.getItem("configuration")).curricularUnits
 
         PouchDB.plugin(PouchdbFind)
         const db = new PouchDB(localStorage.getItem("isOffline") === "true" ? Constants.URL_COUCHDB_OFFLINE : Constants.URL_COUCHDB)
 
         let find = { user_id: JSON.parse(localStorage.getItem("user")).userId }
-        if (urlParameters.get("year") !== null) find = { ...find, curricular_year: urlParameters.get("year") }
-        if (urlParameters.get("semester") !== null) find = { ...find, semester: urlParameters.get("semester") }
-        if (urlParameters.get("unit") !== null) find = { ...find, curricular_unit: urlParameters.get("unit") }
-        if (urlParameters.get("season") !== null) find = { ...find, season: urlParameters.get("season") }
+        if (this.props.filter["year"].id !== "") find = { ...find, curricular_year: this.props.filter["year"].id }
+        if (this.props.filter["semester"].id !== "") find = { ...find, semester: this.props.filter["semester"].id }
+        if (this.props.filter["unit"].id !== "") find = { ...find, curricular_unit: this.props.filter["unit"].id }
+        if (this.props.filter["season"].id !== "") find = { ...find, season: this.props.filter["season"].id }
 
         db.find({ selector: find })
             .then((result) => {
@@ -34,34 +52,46 @@ export const UnitsCard = (props) => {
             })
             .then(docs => {
                 if (docs === undefined) {
-                    setLstUnits([])
+                    this.setState({ lstUnits: [] })
                     return
                 }
 
-                setLstUnits(Array.from([...new Set(docs.map(doc => doc.id))]).map(id => { return { id: id, value: docs.find(doc => doc.id === id).value } }))
+                this.setState({
+                    lstUnits: Array.from([...new Set(docs.map(doc => doc.id))]).map(id => { return { id: id, value: docs.find(doc => doc.id === id).value } }),
+                    urlParams: new URL(document.location.href).searchParams
+                })
             })
             .catch(function (err) {
                 console.log(err)
             })
-    }, []);
+    }
 
-    return (
-        <CardDeck style={{ display: 'flex', flexDirection: 'row', justifyContent: "center" }}>
-            {
-                lstUnits.map(unit => {
-                    const url = "/unit?" + urlParameters.toString() + (urlParameters.get("unit") === null ? "&unit=" + unit.id : "")
+    render() {
+        return (
+            <CardDeck style={{ display: 'flex', flexDirection: 'row', justifyContent: "center" }}>
+                {
+                    this.state.lstUnits.map(unit => {
+                        const url = "/unit?" + this.state.urlParams.toString() + (this.state.urlParams.get("unit") === null ? (this.state.urlParams.toString() === "" ? "": "&") + "unit=" + unit.id : "")
 
-                    return (
-                        <div key={unit.id} className="card2">
-                            <Link to={url}>
-                                <CardBody>
-                                    <CardText>{unit.value}</CardText>
-                                </CardBody>
-                            </Link>
-                        </div>
-                    )
-                })
-            }
-        </CardDeck>
-    )
+                        return (
+                            <div key={unit.id} className="card2">
+                                <Link to={url}>
+                                    <CardBody>
+                                        <CardText>{unit.value}</CardText>
+                                    </CardBody>
+                                </Link>
+                            </div>
+                        )
+                    })
+                }
+            </CardDeck>
+        )
+    }
 }
+function mapStateToProps(state) {
+    return {
+        filter: state.filter
+    }
+}
+
+export default connect(mapStateToProps)(UnitsCard)

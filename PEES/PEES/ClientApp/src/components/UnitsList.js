@@ -1,29 +1,37 @@
-﻿import React, { useState, useEffect } from "react"
+﻿import React from "react"
+import { connect } from "react-redux"
 import { Table } from "reactstrap"
 import PouchDB from 'pouchdb'
 import PouchdbFind from 'pouchdb-find'
-import { useSelector } from "react-redux"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCheck, faTimes, faFile } from '@fortawesome/free-solid-svg-icons'
 import { Link } from "react-router-dom"
 import * as Constants from "../Constants"
 
-export const UnitsList = (props) => {
-    const filter = useSelector(state => state.filter)
+class UnitsList extends React.Component {
+    constructor(props) {
+        super(props)
 
-    const [list, setList] = useState([])
+        this.state = {
+            list: []
+        }
+    }
 
-    useEffect(() => {
+    componentDidMount() {
         const conf = JSON.parse(localStorage.getItem("configuration"))
+        const parameters = new URL(document.location.href).searchParams
 
         PouchDB.plugin(PouchdbFind)
         const db = new PouchDB(localStorage.getItem("isOffline") === "true" ? Constants.URL_COUCHDB_OFFLINE : Constants.URL_COUCHDB)
 
         let find = { user_id: JSON.parse(localStorage.getItem("user")).userId }
-        if (filter.year.id !== "") find = { ...find, curricular_year: filter.year.id }
-        if (filter.semester.id !== "") find = { ...find, semester: filter.semester.id }
-        if (filter.unit.id !== "") find = { ...find, curricular_unit: filter.unit.id }
-        if (filter.season.id !== "") find = { ...find, season: filter.season.id }
+        if (this.props.filter.year.id !== "") find = { ...find, curricular_year: this.props.filter.year.id }
+        if (this.props.filter.semester.id !== "") find = { ...find, semester: this.props.filter.semester.id }
+        if (this.props.filter.season.id !== "") find = { ...find, season: this.props.filter.season.id }
+        if (parameters.get("unit") !== null)
+            find = { ...find, curricular_unit: parameters.get("unit") }
+        else
+            find = { ...find, curricular_unit: "#" } // invalid
 
         db.find({ selector: find })
             .then((result) => {
@@ -41,45 +49,54 @@ export const UnitsList = (props) => {
             })
             .then(docs => {
                 if (docs === undefined) {
-                    setList([])
+                    this.setState({ list: [] })
                     return
                 }
                 
-                setList(docs)
+                this.setState({ list: docs })
             })
             .catch(function (err) {
                 console.log(err)
             })
-    }, [filter.year.id, filter.semester.id, filter.unit.id, filter.season.id]);
+    }
 
-    return (
-        <Table hover>
-            <thead>
-                <tr>
-                    <th>Semestre</th>
-                    <th>Época</th>
-                    <th>Nome</th>
-                    <th className="text-center">Rascunho</th>
-                    <th className="text-center">Público</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                {
-                    list.map(item => {
-                        return (
-                            <tr key={item.id}>
-                                <td>{item.semester}</td>
-                                <td>{item.season}</td>
-                                <td>{item.name}</td>
-                                <td className="text-center"><FontAwesomeIcon icon={item.isDraft ? faCheck : faTimes} /></td>
-                                <td className="text-center"><FontAwesomeIcon icon={item.isPublic ? faCheck : faTimes} /></td>
-                                <td className="text-center"><Link to={`/document?id=${item.id}`}><FontAwesomeIcon icon={faFile} /></Link></td>
-                            </tr>
+    render() {
+        return (
+            <Table hover>
+                <thead>
+                    <tr>
+                        <th>Semestre</th>
+                        <th>Época</th>
+                        <th>Nome</th>
+                        <th className="text-center">Rascunho</th>
+                        <th className="text-center">Público</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {
+                        this.state.list.map(item => {
+                            return (
+                                <tr key={item.id}>
+                                    <td>{item.semester}</td>
+                                    <td>{item.season}</td>
+                                    <td>{item.name}</td>
+                                    <td className="text-center"><FontAwesomeIcon icon={item.isDraft ? faCheck : faTimes} /></td>
+                                    <td className="text-center"><FontAwesomeIcon icon={item.isPublic ? faCheck : faTimes} /></td>
+                                    <td className="text-center"><Link to={`/document?id=${item.id}`}><FontAwesomeIcon icon={faFile} /></Link></td>
+                                </tr>
                             )
-                    })
-                }
-            </tbody>
-        </Table>
-    )
+                        })
+                    }
+                </tbody>
+            </Table>
+        )
+    }
 }
+function mapStateToProps(state) {
+    return {
+        filter: state.filter
+    }
+}
+
+export default connect(mapStateToProps)(UnitsList)
