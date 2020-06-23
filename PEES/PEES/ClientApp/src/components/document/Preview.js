@@ -17,10 +17,7 @@ class Preview extends React.Component {
             loading: true,
             id: params.get("id"),
             revision_id: params.get("revision"),
-            doc: undefined,
-            default: {
-                numeringType: 2
-            }
+            doc: undefined
         }
     }
 
@@ -113,9 +110,6 @@ class Preview extends React.Component {
                                 )
                             }
                         </Col>
-                    </Row>
-                    <Row>
-                        <Col>References</Col>
                     </Row>
                 </Container>
             </>

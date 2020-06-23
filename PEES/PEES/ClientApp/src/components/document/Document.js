@@ -6,7 +6,7 @@ import {
     InputGroupAddon, InputGroupText, ModalFooter, Button, UncontrolledPopover, PopoverBody
 } from "reactstrap"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faInfo, faBars, faEye, faPlus, faTimes, faEllipsisV, faCaretUp, faCaretDown, faTrash, faCheck, faBold, faItalic, faUnderline, faSuperscript, faSubscript } from "@fortawesome/free-solid-svg-icons"
+import { faInfo, faBars, faEye, faPlus, faTimes, faEllipsisV, faCaretUp, faCaretDown, faTrash, faCheck, faBold, faItalic, faUnderline, faSuperscript, faSubscript, faFilePdf } from "@fortawesome/free-solid-svg-icons"
 import PouchDB from 'pouchdb'
 import DatePicker from "react-datepicker"
 import { registerLocale } from "react-datepicker"
@@ -167,8 +167,8 @@ class Document extends React.Component {
         const question = {
             question_id: uuid4(),
             numering_type: this.state.default.numeringType,
-            numering: "0",
-            grade: "0",
+            numering: this.state.default.numeringType === 2 ? "0" : "",
+            grade: this.state.default.numeringType === 2 ? "0" : "",
             text: String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'),
             position: position
         }
@@ -274,11 +274,11 @@ class Document extends React.Component {
             subUpdate[pos].grade = grade === 0 ? "" : grade.toString()
             update.questions = subUpdate
 
-            const x = this.state.doc.questions.findIndex(item => item.question_id === this.state.modalQuestion.mainId)
-            let xx = this.state.doc.questions
-            xx[x] = update
+            const qIndex = this.state.doc.questions.findIndex(item => item.question_id === this.state.modalQuestion.mainId)
+            let questions = this.state.doc.questions
+            questions[qIndex] = update
 
-            this.setState({ doc: { ...this.state.doc, questions: xx }, default: { ...this.state.default, numeringType: numeringType } })
+            this.setState({ doc: { ...this.state.doc, questions: questions }, default: { ...this.state.default, numeringType: numeringType } })
         }
 
         this.toggleQuestion()
@@ -604,7 +604,7 @@ class Document extends React.Component {
                         <Col xs="4" className="text-right">
                             <Link to="" onClick={this.handleDetail}><FontAwesomeIcon icon={faInfo} /></Link>
                             <Link to="" onClick={this.handleHeader}><FontAwesomeIcon icon={faBars} /></Link>
-                            <Link to="#" onClick={this.handlePreview}><FontAwesomeIcon icon={faEye} /></Link>
+                            <Link to="#" onClick={this.handleGeneratePDF}><FontAwesomeIcon icon={faFilePdf} /></Link>
                         </Col>
                     </Row>
                     <Collapse isOpen={this.state.header.isOpen} className="row text-center font">
@@ -654,9 +654,9 @@ class Document extends React.Component {
                                                 <div style={{ marginRight: 5 + "px" }}>
                                                     {item.grade !== "" ? "(" + item.grade.toString().replace(".", ",") + "%)" : null}
                                                 </div>
-                                                <div contentEditable="true" className="form-control-plaintext text-justify" spellCheck="false"
+                                                <div contentEditable="true" className="form-control-plaintext text-justify form-control" spellCheck="false"
                                                     onMouseUp={(e) => this.handleMouseUp(e, item.question_id, "main")} id={`divQuestion${item.question_id}`}
-                                                    dangerouslySetInnerHTML={this.createMarkup(item.text)}
+                                                    dangerouslySetInnerHTML={this.createMarkup(item.text)} style={{ height: "inherit" }}
                                                     onBlur={(e) => this.handleChangeTextQuestion(e, item.question_id)}></div>
                                                 <div className="question-options" style={{ display: "inherit" }}>
                                                     <FontAwesomeIcon icon={faCaretUp} style={{ color: item.position !== 1 ? "#4da3ff" : null, cursor: "pointer" }}
@@ -681,9 +681,9 @@ class Document extends React.Component {
                                                                         <div style={{ marginRight: 5 + "px" }}>
                                                                             {subItem.grade !== "" ? "(" + subItem.grade.toString().replace(".", ",") + "%)" : null}
                                                                         </div>
-                                                                        <div contentEditable="true" className="form-control-plaintext text-justify" spellCheck="false"
+                                                                        <div contentEditable="true" className="form-control-plaintext text-justify form-control" spellCheck="false"
                                                                             onMouseUp={(e) => this.handleMouseUp(e, subItem.question_id, "sub", item.question_id)} id={`divQuestion${subItem.question_id}`}
-                                                                            onBlur={(e) => this.handleChangeTextQuestion(e, subItem.question_id, item.question_id)}
+                                                                            onBlur={(e) => this.handleChangeTextQuestion(e, subItem.question_id, item.question_id)} style={{ height: "inherit" }}
                                                                             dangerouslySetInnerHTML={this.createMarkup(subItem.text)}></div>
                                                                         <div className="question-options" style={{ display: "inherit" }}>
                                                                             <FontAwesomeIcon icon={faCaretUp} style={{ color: subItem.position !== 1 ? "#4da3ff" : null, cursor: "pointer" }}
@@ -728,10 +728,7 @@ class Document extends React.Component {
                             </InputGroup>
                         </Col>
                     </Row>
-                    <Row>
-                        <Col>References</Col>
-                    </Row>
-                    <Row>
+                    <Row style={{ marginBottom: 10 + "px" }}>
                         <Col className="text-right">
                             <Button color="primary" onClick={this.handleSaveDocument}>Gravar</Button>
                         </Col>
