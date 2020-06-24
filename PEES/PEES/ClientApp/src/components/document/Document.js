@@ -3,10 +3,10 @@ import { connect } from "react-redux"
 import { Link } from "react-router-dom"
 import {
     Container, Row, Col, Modal, ModalHeader, ModalBody, Form, FormGroup, Label, Input, CustomInput, Collapse, InputGroup,
-    InputGroupAddon, InputGroupText, ModalFooter, Button, UncontrolledPopover, PopoverBody
+    InputGroupAddon, InputGroupText, ModalFooter, Button, UncontrolledPopover, PopoverBody, CardDeck, CardBody, Card, CardTitle
 } from "reactstrap"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faInfo, faBars, faEye, faPlus, faTimes, faEllipsisV, faCaretUp, faCaretDown, faTrash, faCheck, faBold, faItalic, faUnderline, faSuperscript, faSubscript, faFilePdf } from "@fortawesome/free-solid-svg-icons"
+import { faInfo, faBars, faEye, faPlus, faTimes, faEllipsisV, faCaretUp, faCaretDown, faTrash, faCheck, faBold, faItalic, faUnderline, faSuperscript, faSubscript, faFilePdf, faFile, faTimesCircle } from "@fortawesome/free-solid-svg-icons"
 import PouchDB from 'pouchdb'
 import DatePicker from "react-datepicker"
 import { registerLocale } from "react-datepicker"
@@ -63,7 +63,8 @@ class Document extends React.Component {
             modalConflit: {
                 isOpen: false,
                 revisions: []
-            }
+            },
+            attachments: []
         }
 
         this.toggle = this.toggle.bind(this)
@@ -86,6 +87,8 @@ class Document extends React.Component {
 
         this.handleViewRevision = this.handleViewRevision.bind(this)
         this.handleChangeRevision = this.handleChangeRevision.bind(this)
+
+        this.handleAddAttach = this.handleAddAttach.bind(this)
     }
 
     toggle() {
@@ -117,13 +120,26 @@ class Document extends React.Component {
     componentDidMount() {
         const db = new PouchDB(localStorage.getItem("isOffline") === "true" ? Constants.URL_COUCHDB_OFFLINE : Constants.URL_COUCHDB)
 
-        db.get(this.state.id)
+        db.get(this.state.id, { attachments: true })
             .then(doc => {
                 console.log(doc)
                 // change curricular unit id for name
                 doc.header.curricular_unit = conf.curricularUnits.find(item => item.id === doc.curricular_unit).value
 
-                this.setState({ doc: doc, loading: false })
+                // attach
+                let attach = []
+                if (doc._attachments !== undefined) {
+                    for (var prop in doc._attachments) {
+                        attach.push({
+                            filename: prop, new: false,
+                            data: doc._attachments[prop].data,
+                            content_type: doc._attachments[prop].content_type,
+                            url: URL.createObjectURL(b64toBlob(doc._attachments[prop].data, doc._attachments[prop].content_type))
+                        })
+                    }
+                }
+
+                this.setState({ doc: doc, loading: false, attachments: attach })
 
             }).catch(error => {
                 console.error(error)
@@ -522,6 +538,19 @@ class Document extends React.Component {
         let doc = this.state.doc
         //doc._rev = "33-abd9520cc0c948460e79262f715f7adf" //FORCE FOR TESTING
 
+        // attach
+        if (_this.state.attachments.length !== 0 && doc._attachments === undefined)
+            doc._attachments = {}
+            
+        _this.state.attachments.filter(item => item.new).forEach(item => {
+            const filename = item.filename
+
+            doc._attachments[filename] = {
+                content_type: item.content_type,
+                data: item.data
+            }
+        })
+
         db.put(doc)
             .then(function (response) {
                 if (response.ok) {
@@ -590,6 +619,32 @@ class Document extends React.Component {
         }).catch(function (err) {
             console.log(err)
         });
+    }
+
+    handleAddAttach = (e) => {
+        const file = e.target.files[0]
+
+        if (file.type !== "application/pdf") {
+            this.props.dispatch(Utils.Toast("Só é permitido selecionar ficheiros PDF!", Utils.ToastTypes.Warning, false))
+            return
+        }
+
+        let update = this.state.attachments
+
+        const fileReader = new FileReader()
+        fileReader.readAsDataURL(file)
+
+        fileReader.onload = (e) => {
+            update.push({ filename: file.name, data: fileReader.result.split(",")[1], url: URL.createObjectURL(file), content_type: file.type, new: true })
+
+            this.setState({ attachments: update })
+        }
+    }
+
+    handleDeleteAttach(index, e) {
+        e.stopPropagation()
+
+        console.log(index)
     }
 
     render() {
@@ -726,6 +781,34 @@ class Document extends React.Component {
                                     <InputGroupText><FontAwesomeIcon icon={faPlus} /></InputGroupText>
                                 </InputGroupAddon>
                             </InputGroup>
+                        </Col>
+                    </Row>
+                    <Row style={{ marginTop: 10 + "px", marginBottom: 5 + "px", borderTop: "1px solid lightgray" }}>
+                        <Col>
+                            Ficheiros anexos
+                        </Col>
+                    </Row>
+                    <Row className="attach">
+                        <Col>
+                            <CardDeck>
+                                {this.state.attachments.map((item, index) =>
+                                    <Card key={index} className="text-center">
+                                        <CardBody onClick={() => window.open(item.url)}>
+                                            <FontAwesomeIcon icon={faFile} />
+                                            <CardTitle title={item.filename}>{item.filename}</CardTitle>
+                                            <FontAwesomeIcon icon={faTimesCircle} className="delete-file" onClick={(e) => this.handleDeleteAttach(index, e)} />
+                                        </CardBody>
+                                    </Card>
+                                )}
+                                <Card className="text-center">
+                                    <CardBody>
+                                        <FontAwesomeIcon icon={faPlus} />
+                                        <CardTitle>Adicionar</CardTitle>
+                                        <input type="file" id="addAttach" title="" onChange={this.handleAddAttach}
+                                            style={{ position: "relative", top: -75 + "px", left: 0 + "px", width: 88 + "px", height: 62 + "px", opacity: 0, cursor: "pointer" }} />
+                                    </CardBody>
+                                </Card>
+                            </CardDeck>
                         </Col>
                     </Row>
                     <Row style={{ marginBottom: 10 + "px" }}>
@@ -910,6 +993,26 @@ class Document extends React.Component {
             </>
         )
     }
+}
+
+const b64toBlob = (b64Data, contentType = '', sliceSize = 512) => {
+    const byteCharacters = atob(b64Data);
+    const byteArrays = [];
+
+    for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+        const slice = byteCharacters.slice(offset, offset + sliceSize);
+
+        const byteNumbers = new Array(slice.length);
+        for (let i = 0; i < slice.length; i++) {
+            byteNumbers[i] = slice.charCodeAt(i);
+        }
+
+        const byteArray = new Uint8Array(byteNumbers);
+        byteArrays.push(byteArray);
+    }
+
+    const blob = new Blob(byteArrays, { type: contentType });
+    return blob;
 }
 
 export default connect()(Document)

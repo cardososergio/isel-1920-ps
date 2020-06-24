@@ -56,3 +56,36 @@
     margin-left: 4px;
     margin-right: 4px;
 }
+
+.attach .card {
+    height: inherit;
+    min-width: 6rem !important;
+    max-width: 6rem !important;
+    cursor: pointer;
+}
+.attach .card-body {
+    padding: 0.2rem !important;
+    max-height: 72px;
+}
+.attach svg {
+    font-size: 2rem;
+    float: inherit;
+    color: inherit;
+}
+.attach .card-title {
+    margin-bottom: inherit;
+    width: 5.7rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.attach .delete-file {
+    position: relative;
+    font-size: 1rem;
+    margin: auto;
+    top: -4.4rem;
+    float: right;
+    right: -0.7rem;
+    background-color: #fff;
+    color: #C82333;
+}
