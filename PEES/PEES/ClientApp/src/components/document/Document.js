@@ -539,10 +539,13 @@ class Document extends React.Component {
         //doc._rev = "33-abd9520cc0c948460e79262f715f7adf" //FORCE FOR TESTING
 
         // attach
-        if (_this.state.attachments.length !== 0 && doc._attachments === undefined)
-            doc._attachments = {}
-            
-        _this.state.attachments.filter(item => item.new).forEach(item => {
+        //if (_this.state.attachments.length !== 0 && doc._attachments === undefined)
+        doc._attachments = {}
+
+        _this.state.attachments.forEach(item => {
+            if (item.delete)
+                return
+
             const filename = item.filename
 
             doc._attachments[filename] = {
@@ -641,10 +644,20 @@ class Document extends React.Component {
         }
     }
 
-    handleDeleteAttach(index, e) {
+    handleDeleteAttach(pos, e) {
         e.stopPropagation()
 
-        console.log(index)
+        const update = this.state.attachments.map((item, index) => {
+            if (index === pos)
+                item.delete = true
+            return item
+        })
+
+        this.setState({ attachments: update })
+    }
+
+    handleGeneratePDF() {
+        
     }
 
     render() {
@@ -659,7 +672,7 @@ class Document extends React.Component {
                         <Col xs="4" className="text-right">
                             <Link to="" onClick={this.handleDetail}><FontAwesomeIcon icon={faInfo} /></Link>
                             <Link to="" onClick={this.handleHeader}><FontAwesomeIcon icon={faBars} /></Link>
-                            <Link to="#" onClick={this.handleGeneratePDF}><FontAwesomeIcon icon={faFilePdf} /></Link>
+                            <Link to={`/pdf?id=${this.state.id}`} onClick={this.handleGeneratePDF}><FontAwesomeIcon icon={faFilePdf} /></Link>
                         </Col>
                     </Row>
                     <Collapse isOpen={this.state.header.isOpen} className="row text-center font">
@@ -791,7 +804,7 @@ class Document extends React.Component {
                     <Row className="attach">
                         <Col>
                             <CardDeck>
-                                {this.state.attachments.map((item, index) =>
+                                {this.state.attachments.filter(item => !item.delete).map((item, index) =>
                                     <Card key={index} className="text-center">
                                         <CardBody onClick={() => window.open(item.url)}>
                                             <FontAwesomeIcon icon={faFile} />
@@ -801,11 +814,10 @@ class Document extends React.Component {
                                     </Card>
                                 )}
                                 <Card className="text-center">
-                                    <CardBody>
-                                        <FontAwesomeIcon icon={faPlus} />
-                                        <CardTitle>Adicionar</CardTitle>
+                                    <CardBody className="align-middle">
+                                        <FontAwesomeIcon icon={faPlus} style={{ fontSize: 1.5 + "rem", marginTop: 1.2 + "rem", cursor: "pointer" }} />
                                         <input type="file" id="addAttach" title="" onChange={this.handleAddAttach}
-                                            style={{ position: "relative", top: -75 + "px", left: 0 + "px", width: 88 + "px", height: 62 + "px", opacity: 0, cursor: "pointer" }} />
+                                            style={{ position: "relative", top: -42 + "px", left: 0 + "px", width: 88 + "px", height: 62 + "px", opacity: 0, cursor: "pointer" }} />
                                     </CardBody>
                                 </Card>
                             </CardDeck>

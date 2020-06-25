@@ -11,6 +11,7 @@ import NewUser from './components/auth/NewUser'
 import Backoffice from './components/versioning/Backoffice'
 import * as Constants from "./Constants"
 import Preview from './components/document/Preview'
+import PDF from './components/document/PDF'
 import './custom.css'
 
 async function checkNetwork() {
@@ -85,6 +86,7 @@ class App extends React.Component {
                         <Route exact path="/versioncontrol" component={Backoffice} />
                         <Route exact path='/document' component={Document} />
                         <Route exact path="/preview" component={Preview} />
+                        <Route exact path="/pdf" component={PDF} />
                         <Route exact path='/management' component={Management} />
                     </Switch>
                 </Layout>
@@ -101,6 +103,7 @@ class App extends React.Component {
                     <Route exact path="/newuser" component={NewUser} />
                     <Route exact path="/versioncontrol" component={Backoffice} />
                     <Route exact path="/preview" component={Preview} />
+                    <Route exact path="/pdf" component={PDF} />
                     <Route component={PageNotFound} />
                 </Switch>
             </Layout>
