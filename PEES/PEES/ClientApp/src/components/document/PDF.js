@@ -1,9 +1,8 @@
 ﻿import React from "react"
 import { connect } from "react-redux"
-import { Container, Row, Col } from "reactstrap"
+import { Container, Row, Col, Button } from "reactstrap"
 import PouchDB from 'pouchdb'
 import * as Constants from "../../Constants"
-import "./Document.css"
 
 const conf = JSON.parse(localStorage.getItem("configuration"))
 
@@ -18,6 +17,8 @@ class PDF extends React.Component {
             id: params.get("id"),
             doc: undefined
         }
+
+        this.handleGeneratePDF = this.handleGeneratePDF.bind(this)
     }
 
     createMarkup(text) {
@@ -39,12 +40,34 @@ class PDF extends React.Component {
             })
     }
 
+    handleGeneratePDF(e) {
+        e.preventDefault()
+
+        const requestOptions = {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(document.getElementsByTagName("html")[0].innerHTML)
+        };
+
+        fetch("/api/pdf/" + this.state.id, requestOptions)
+            .then(response => response.json())
+            .then(json => {
+                window.open(json, "_blank")
+            })
+            .catch(error => {
+                console.error(error)
+            })
+    }
+
     render() {
         if (this.state.loading)
             return (<></>)
 
         return (
-            <Container fluid={true} className="document">
+            <Container fluid={true} className="pdf">
+                <div className="text-center">
+                    <Button onClick={(e) => this.handleGeneratePDF(e)} color="primary" size="lg" block>Gerar PDF</Button>
+                </div>
                 <Row className="text-center font">
                     <Col xs={{ size: 6, offset: 3 }} style={{ fontWeight: "bold" }}>
                         {this.state.doc.header.school_name}
@@ -66,13 +89,13 @@ class PDF extends React.Component {
                             this.state.doc.questions.sort((a, b) => a.position - b.position).map(item =>
                                 <div key={item.question_id} className="row-question">
                                     <div className="row-flex">
-                                        <div className="div-numering">
+                                        <span className="div-numering">
                                             {item.numering_type === 2 ? item.numering + "." : <ul style={{ marginBottom: 0 }}><li></li></ul>}
-                                        </div>
-                                        <div style={{ marginRight: 5 + "px" }}>
+                                        </span>
+                                        <span style={{ marginRight: 5 + "px" }}>
                                             {item.grade !== "" ? "(" + item.grade.toString().replace(".", ",") + "%)" : null}
-                                        </div>
-                                        <div className="form-control-plaintext text-justify" dangerouslySetInnerHTML={this.createMarkup(item.text)}></div>
+                                        </span>
+                                        <span className="text-justify" dangerouslySetInnerHTML={this.createMarkup(item.text)}></span>
                                     </div>
                                     <div style={{ marginLeft: 50 + "px" }}>
                                         {
@@ -80,13 +103,13 @@ class PDF extends React.Component {
                                                 item.questions.sort((a, b) => a.position - b.position).map(subItem =>
                                                     <div key={subItem.question_id} className="row-question">
                                                         <div className="row-flex">
-                                                            <div className="div-numering">
+                                                            <span className="div-numering">
                                                                 {subItem.numering_type === 2 ? subItem.numering + "." : <ul style={{ marginBottom: 0 }}><li></li></ul>}
-                                                            </div>
-                                                            <div style={{ marginRight: 5 + "px" }}>
+                                                            </span>
+                                                            <span style={{ marginRight: 5 + "px" }}>
                                                                 {subItem.grade !== "" ? "(" + subItem.grade.toString().replace(".", ",") + "%)" : null}
-                                                            </div>
-                                                            <div className="form-control-plaintext text-justify" dangerouslySetInnerHTML={this.createMarkup(subItem.text)}></div>
+                                                            </span>
+                                                            <span className="text-justify" dangerouslySetInnerHTML={this.createMarkup(subItem.text)}></span>
                                                         </div>
                                                     </div>
                                                 )
@@ -96,7 +119,7 @@ class PDF extends React.Component {
                                         {
                                             item.footer_note !== undefined && item.footer_note !== "" ?
                                                 <div style={{ marginTop: 5 + "px" }}>
-                                                    <div className="form-control-plaintext text-justify" dangerouslySetInnerHTML={this.createMarkup(item.footer_note)}></div>
+                                                    <div className="text-justify" dangerouslySetInnerHTML={this.createMarkup(item.footer_note)}></div>
                                                 </div>
                                                 : null
                                         }

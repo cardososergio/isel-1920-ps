@@ -60,7 +60,7 @@ class Document extends React.Component {
                 id: 0,
                 type: "main"
             },
-            modalConflit: {
+            modalVersions: {
                 isOpen: false,
                 revisions: []
             },
@@ -69,7 +69,7 @@ class Document extends React.Component {
 
         this.toggle = this.toggle.bind(this)
         this.toggleQuestion = this.toggleQuestion.bind(this)
-        this.toggleConflit = this.toggleConflit.bind(this)
+        this.toggleVersions = this.toggleVersions.bind(this)
 
         this.handleDetail = this.handleDetail.bind(this)
         this.handleNewCourse = this.handleNewCourse.bind(this)
@@ -85,6 +85,7 @@ class Document extends React.Component {
         this.handleFormat = this.handleFormat.bind(this)
         this.handleSaveDocument = this.handleSaveDocument.bind(this)
 
+        this.handleViewVersion = this.handleViewVersion.bind(this)
         this.handleViewRevision = this.handleViewRevision.bind(this)
         this.handleChangeRevision = this.handleChangeRevision.bind(this)
 
@@ -97,8 +98,8 @@ class Document extends React.Component {
     toggleQuestion() {
         this.setState({ modalQuestion: { ...this.state.modalQuestion, isOpen: !this.state.modalQuestion.isOpen } })
     }
-    toggleConflit() {
-        this.setState({ modalConflit: { ...this.state.modalConflit, isOpen: !this.state.modalConflit.isOpen } })
+    toggleVersions() {
+        this.setState({ modalVersions: { ...this.state.modalVersions, isOpen: !this.state.modalVersions.isOpen } })
     }
 
     createMarkup(text) {
@@ -536,10 +537,8 @@ class Document extends React.Component {
         const _this = this
 
         let doc = this.state.doc
-        //doc._rev = "33-abd9520cc0c948460e79262f715f7adf" //FORCE FOR TESTING
 
         // attach
-        //if (_this.state.attachments.length !== 0 && doc._attachments === undefined)
         doc._attachments = {}
 
         _this.state.attachments.forEach(item => {
@@ -554,37 +553,24 @@ class Document extends React.Component {
             }
         })
 
-        db.put(doc)
-            .then(function (response) {
-                if (response.ok) {
-                    _this.setState({ doc: { ...doc, _rev: response.rev } })
+        db.get(doc._id).then(function (doc2) {
+            doc._rev = doc2._rev
 
-                    _this.props.dispatch(Utils.Toast("Enunciado gravado!", Utils.ToastTypes.Info, false))
-                }
+            db.put(doc)
+                .then(function (response) {
+                    if (response.ok) {
+                        _this.setState({ doc: { ...doc, _rev: response.rev } })
 
-            }).catch(function (err) {
-                console.error(err)
+                        _this.props.dispatch(Utils.Toast("Enunciado gravado!", Utils.ToastTypes.Info, false))
+                    }
 
-                if (err.status === 409) {
-                    db.get(doc._id, { revs: true })
-                        .then(newDoc => {
-                            const currentRev = parseInt(doc._rev.split("-")[0])
-                            const lastRev = newDoc._revisions.start
+                }).catch(function (err) {
+                    console.error(err)
+                });
 
-                            let revs = []
-                            for (let r = 0; r <= (lastRev - currentRev); r++)
-                                revs.push((lastRev - r) + "-" + newDoc._revisions.ids[r])
-
-                            _this.setState({
-                                modalConflit: {
-                                    ..._this.state.modalConflit, revisions: revs
-                                }
-                            })
-
-                            _this.toggleConflit()
-                        })
-                }
-            });
+        }).catch(function (err) {
+            console.error(err)
+        });
     }
 
     handleViewRevision(e, revisionId) {
@@ -607,7 +593,7 @@ class Document extends React.Component {
             else
                 _doc = doc
 
-            doc._rev = _this.state.modalConflit.revisions[0]
+            doc._rev = _this.state.modalVersions.revisions[0]
 
             return db.put(doc)
         }).then(function (response) {
@@ -616,7 +602,7 @@ class Document extends React.Component {
                 return
             }
 
-            _this.setState({ doc: { ..._doc, _rev: response.rev }, modalConflit: { ..._this.state.modalConflit, isOpen: false } })
+            _this.setState({ doc: { ..._doc, _rev: response.rev }, modalVersions: { ..._this.state.modalVersions, isOpen: false } })
 
             _this.props.dispatch(Utils.Toast("Enunciado gravado!", Utils.ToastTypes.Info, false))
         }).catch(function (err) {
@@ -656,8 +642,35 @@ class Document extends React.Component {
         this.setState({ attachments: update })
     }
 
-    handleGeneratePDF() {
-        
+    handleViewVersion = (e) => {
+        e.preventDefault()
+
+        const db = new PouchDB(localStorage.getItem("isOffline") === "true" ? Constants.URL_COUCHDB_OFFLINE : Constants.URL_COUCHDB)
+        const _this = this
+        const doc = this.state.doc
+
+        db.get(doc._id, { revs: true })
+            .then(newDoc => {
+                let count = newDoc._revisions.start
+                let revs = []
+                let max = 1
+                newDoc._revisions.ids.forEach(item => {
+                    if (max <= 10) {
+                        revs.push(count + "-" + item)
+                        count--
+                    }
+
+                    max++
+                })
+
+                _this.setState({
+                    modalVersions: {
+                        ..._this.state.modalVersions, revisions: revs
+                    }
+                })
+
+                _this.toggleVersions()
+            })
     }
 
     render() {
@@ -670,9 +683,10 @@ class Document extends React.Component {
                     <Row className="header">
                         <Col xs="8">{this.state.doc.name}</Col>
                         <Col xs="4" className="text-right">
-                            <Link to="" onClick={this.handleDetail}><FontAwesomeIcon icon={faInfo} /></Link>
-                            <Link to="" onClick={this.handleHeader}><FontAwesomeIcon icon={faBars} /></Link>
-                            <Link to={`/pdf?id=${this.state.id}`} onClick={this.handleGeneratePDF}><FontAwesomeIcon icon={faFilePdf} /></Link>
+                            <Link to="" onClick={this.handleDetail} title="Detalhe"><FontAwesomeIcon icon={faInfo} /></Link>
+                            <Link to="" onClick={this.handleHeader} title="Cabeçalho"><FontAwesomeIcon icon={faBars} /></Link>
+                            <Link to={`/pdf?id=${this.state.id}`} target="_blank" title="Gerar PDF"><FontAwesomeIcon icon={faFilePdf} /></Link>
+                            <Link to="" onClick={this.handleViewVersion} title="Visualizar versions"><FontAwesomeIcon icon={faEye} /></Link>
                         </Col>
                     </Row>
                     <Collapse isOpen={this.state.header.isOpen} className="row text-center font">
@@ -975,25 +989,20 @@ class Document extends React.Component {
                     </ModalFooter>
                 </Modal>
 
-                <Modal isOpen={this.state.modalConflit.isOpen} toggle={this.toggleConflit} backdrop="static" keyboard={false}>
-                    <ModalHeader toggle={this.toggleConflit}>Conflito no enunciado</ModalHeader>
+                <Modal isOpen={this.state.modalVersions.isOpen} toggle={this.toggleVersions} backdrop="static" keyboard={false}>
+                    <ModalHeader toggle={this.toggleVersions}>Versões do enunciado (últimas 10)</ModalHeader>
                     <ModalBody>
-                        <div style={{ marginBottom: 20 + "px" }}>Existem novas versões do enunciado que diferem do que está a gravar.</div>
                         <Container>
                             <Row>
                                 <Col xs="9"><b>Versão</b></Col>
                                 <Col xs="3"></Col>
                             </Row>
                             {
-                                this.state.modalConflit.revisions.map((item, index) =>
+                                this.state.modalVersions.revisions.map((item, index) =>
                                     <Row key={item} style={{ paddingTop: 5 + "px", paddingBottom: 5 + "px" }}>
-                                        <Col xs="9">{index === this.state.modalConflit.revisions.length - 1 ? "local" : item}</Col>
+                                        <Col xs="9">{item}</Col>
                                         <Col xs="3" className="text-right">
-                                            {index === this.state.modalConflit.revisions.length - 1 ?
-                                                null
-                                                :
-                                                <Link to="#" onClick={(e) => this.handleViewRevision(e, item)} style={{ padding: 5 + "px" }} title="Visualizar"><FontAwesomeIcon icon={faEye} /></Link>
-                                            }
+                                            <Link to="#" onClick={(e) => this.handleViewRevision(e, item)} style={{ padding: 5 + "px" }} title="Visualizar"><FontAwesomeIcon icon={faEye} /></Link>
                                             <Link to="#" onClick={(e) => this.handleChangeRevision(e, item)} style={{ padding: 5 + "px" }} title="Escolher"><FontAwesomeIcon icon={faCheck} /></Link>
                                         </Col>
                                     </Row>

@@ -54,42 +54,51 @@ class Home extends React.Component {
             const localConfig = JSON.parse(localStorage.getItem("configuration"))
             const serverConfig = data
 
-            // Curricular Units
-            let gotChanges = !localConfig.curricularUnits.every(l => {
-                return !(serverConfig.curricularUnits.find(s => l.id === s.id) === undefined || serverConfig.curricularUnits.find(s => l.id === s.id && l.revisionId !== s.revisionId) !== undefined)
-            })
-
-            // Curricular Year
-            if (!gotChanges)
-                gotChanges = !localConfig.curricularYears.every(l => {
-                    return !(serverConfig.curricularYears.find(s => l.id === s.id) === undefined || serverConfig.curricularYears.find(s => l.id === s.id && l.revisionId !== s.revisionId) !== undefined)
-                })
-
-            // Semester
-            if (!gotChanges)
-                gotChanges = !localConfig.semesters.every(l => {
-                    return !(serverConfig.semesters.find(s => l.id === s.id) === undefined || serverConfig.semesters.find(s => l.id === s.id && l.revisionId !== s.revisionId) !== undefined)
-                })
-
-            // Season
-            if (!gotChanges)
-                gotChanges = !localConfig.seasons.every(l => {
-                    return !(serverConfig.seasons.find(s => l.id === s.id) === undefined || serverConfig.seasons.find(s => l.id === s.id && l.revisionId !== s.revisionId) !== undefined)
-                })
-
-            // Instruction Type
-            if (!gotChanges)
-                gotChanges = !localConfig.instructionTypes.every(l => {
-                    return !(serverConfig.instructionTypes.find(s => l.id === s.id) === undefined || serverConfig.instructionTypes.find(s => l.id === s.id && l.revisionId !== s.revisionId) !== undefined)
-                })
-
-            if (!gotChanges)
+            // first time
+            if (localConfig === null) {
                 localStorage.setItem("configuration", JSON.stringify(serverConfig))
-            else
-                _this.props.dispatch({ type: "BACKOFFICE_DATA", payload: serverConfig })
+                this.setState({ conf: JSON.parse(localStorage.getItem("configuration")) })
+            }
+            else {
 
-            _this.setState({ gotBackofficeChanges: gotChanges })
-            _this.props.dispatch({ type: "BACKOFFICE_VERSION_CONTROL", payload: gotChanges })
+                // Curricular Units
+                let gotChanges = !localConfig.curricularUnits.every(l => {
+                    return !(serverConfig.curricularUnits.find(s => l.id === s.id) === undefined || serverConfig.curricularUnits.find(s => l.id === s.id && l.revisionId !== s.revisionId) !== undefined)
+                })
+
+                // Curricular Year
+                if (!gotChanges)
+                    gotChanges = !localConfig.curricularYears.every(l => {
+                        return !(serverConfig.curricularYears.find(s => l.id === s.id) === undefined || serverConfig.curricularYears.find(s => l.id === s.id && l.revisionId !== s.revisionId) !== undefined)
+                    })
+
+                // Semester
+                if (!gotChanges)
+                    gotChanges = !localConfig.semesters.every(l => {
+                        return !(serverConfig.semesters.find(s => l.id === s.id) === undefined || serverConfig.semesters.find(s => l.id === s.id && l.revisionId !== s.revisionId) !== undefined)
+                    })
+
+                // Season
+                if (!gotChanges)
+                    gotChanges = !localConfig.seasons.every(l => {
+                        return !(serverConfig.seasons.find(s => l.id === s.id) === undefined || serverConfig.seasons.find(s => l.id === s.id && l.revisionId !== s.revisionId) !== undefined)
+                    })
+
+                // Instruction Type
+                if (!gotChanges)
+                    gotChanges = !localConfig.instructionTypes.every(l => {
+                        return !(serverConfig.instructionTypes.find(s => l.id === s.id) === undefined || serverConfig.instructionTypes.find(s => l.id === s.id && l.revisionId !== s.revisionId) !== undefined)
+                    })
+
+
+                if (!gotChanges)
+                    localStorage.setItem("configuration", JSON.stringify(serverConfig))
+                else
+                    _this.props.dispatch({ type: "BACKOFFICE_DATA", payload: serverConfig })
+
+                _this.setState({ gotBackofficeChanges: gotChanges })
+                _this.props.dispatch({ type: "BACKOFFICE_VERSION_CONTROL", payload: gotChanges })
+            }
 
             PouchDB.replicate(Constants.URL_COUCHDB_OFFLINE, Constants.URL_COUCHDB);
             PouchDB.replicate(Constants.URL_COUCHDB, Constants.URL_COUCHDB_OFFLINE);
