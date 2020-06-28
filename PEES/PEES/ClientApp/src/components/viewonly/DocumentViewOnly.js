@@ -3,15 +3,11 @@ import { connect } from "react-redux"
 import { Container, Row, Col, CardDeck, Card, CardBody, CardTitle } from "reactstrap"
 import PouchDB from 'pouchdb'
 import * as Constants from "../global/Constants"
-import "./Document.css"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faFile } from "@fortawesome/free-solid-svg-icons"
 import { Redirect } from "react-router-dom"
-import * as Utils from "../global/Utils"
 
-const conf = JSON.parse(localStorage.getItem("configuration"))
-
-class Preview extends React.Component {
+class DocumentViewOnly extends React.Component {
     constructor(props) {
         super(props)
 
@@ -23,7 +19,8 @@ class Preview extends React.Component {
             revision_id: params.get("revision"),
             doc: undefined,
             attachments: [],
-            noGo: false
+            noGo: false,
+            conf: JSON.parse(localStorage.getItem("configuration"))
         }
     }
 
@@ -36,8 +33,13 @@ class Preview extends React.Component {
 
         db.get(this.state.id, { rev: this.state.revision_id, attachments: true })
             .then(doc => {
+                if (!doc.is_public || this.state.conf === null) {
+                    this.setState({ noGo: true })
+                    return
+                }
+
                 // change curricular unit id for name
-                doc.header.curricular_unit = conf.curricularUnits.find(item => item.id === doc.curricular_unit).value
+                doc.header.curricular_unit = this.state.conf.curricularUnits.find(item => item.id === doc.curricular_unit).value
 
                 // attach
                 let attach = []
@@ -56,14 +58,15 @@ class Preview extends React.Component {
 
             }).catch(error => {
                 console.error(error)
-                this.props.dispatch(Utils.Toast("Houve uma exceção na aplicação!", Utils.ToastTypes.Danger, true))
                 this.setState({ noGo: true })
             })
     }
 
     render() {
         if (this.state.noGo)
-            return (<Redirect to="/" />)
+            return (
+                <Redirect to="/view" />
+            )
 
         if (this.state.loading)
             return (<></>)
@@ -81,7 +84,7 @@ class Preview extends React.Component {
                         <Col xs={{ size: 6, offset: 3 }}>
                             {this.state.doc.header.courses.map((item, index) => <div key={index}>{item}</div>)}
                         </Col>
-                        <Col xs={{ size: 6, offset: 3 }} style={{ fontWeight: "bold" }}>{conf.curricularUnits.find(item => item.id === this.state.doc.curricular_unit).value}</Col>
+                        <Col xs={{ size: 6, offset: 3 }} style={{ fontWeight: "bold" }}>{this.state.conf.curricularUnits.find(item => item.id === this.state.doc.curricular_unit).value}</Col>
                         <Col xs={{ size: 6, offset: 3 }}>
                             <div className="text-center">{this.state.doc.header.description}</div>
                         </Col>
@@ -175,4 +178,4 @@ const b64toBlob = (b64Data, contentType = '', sliceSize = 512) => {
     return blob;
 }
 
-export default connect()(Preview)
+export default connect()(DocumentViewOnly)

@@ -34,7 +34,12 @@ class UnitsCard extends React.Component {
         PouchDB.plugin(PouchdbFind)
         const db = new PouchDB(localStorage.getItem("isOffline") === "true" ? Constants.URL_COUCHDB_OFFLINE : Constants.URL_COUCHDB)
 
-        let find = { user_id: JSON.parse(localStorage.getItem("user")).userId }
+        let find
+        if (this.props.viewOnly)
+            find = { is_public: true }
+        else
+            find = { user_id: JSON.parse(localStorage.getItem("user")).userId }
+
         if (this.props.filter["year"].id !== "") find = { ...find, curricular_year: this.props.filter["year"].id }
         if (this.props.filter["semester"].id !== "") find = { ...find, semester: this.props.filter["semester"].id }
         if (this.props.filter["unit"].id !== "") find = { ...find, curricular_unit: this.props.filter["unit"].id }
@@ -90,7 +95,8 @@ class UnitsCard extends React.Component {
 }
 function mapStateToProps(state) {
     return {
-        filter: state.filter
+        filter: state.filter,
+        viewOnly: state.viewOnly
     }
 }
 

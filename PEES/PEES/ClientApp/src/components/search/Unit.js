@@ -6,6 +6,7 @@ import UnitsList from "./UnitsList"
 import "../Home.css"
 import { Redirect } from 'react-router-dom'
 import NewDocument from '../document/NewDocument'
+import Cookies from "js-cookie"
 
 class Unit extends React.Component {
 
@@ -17,6 +18,10 @@ class Unit extends React.Component {
             conf: JSON.parse(localStorage.getItem("configuration"))
         }
 
+        if (Cookies.get("ViewOnlyToken") !== undefined) {
+            props.dispatch({ type: "VIEW_ONLY", payload: true })
+        }
+
         this.handleCreateDocument = this.handleCreateDocument.bind(this)
     }
 
@@ -25,6 +30,9 @@ class Unit extends React.Component {
     }
 
     render() {
+        if (this.state.conf === null)
+            return (<Redirect to="/" />)
+
         if (this.state.docId !== "")
             return (<Redirect to={`/document?id=${this.state.docId}`} />)
 
@@ -42,7 +50,12 @@ class Unit extends React.Component {
                         </Col>
                     </Row>
                 </Container>
-                <NewDocument handleCreateDocument={this.handleCreateDocument} />
+                {
+                    !this.props.viewOnly ?
+                        <NewDocument handleCreateDocument={this.handleCreateDocument} />
+                        :
+                        null
+                }
             </>
         );
     }
@@ -52,7 +65,8 @@ function mapStateToProps(state) {
     return {
         filter: state.filter,
         unitsView: state.unitsView,
-        unitId: state.unitId
+        unitId: state.unitId,
+        viewOnly: state.viewOnly
     }
 }
 

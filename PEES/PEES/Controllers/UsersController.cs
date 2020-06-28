@@ -122,5 +122,35 @@ namespace PEES.Controllers
 
             return new JsonResult(result);
         }
+
+        [Route("/api/[controller]/[action]")]
+        [HttpGet]
+        public ActionResult ConfigurationViewOnly()
+        {
+            // check for cookie
+            try
+            {
+                var sessionToken = "view";
+                if (!Request.Cookies.TryGetValue("ViewOnlyToken", out string cookieToken) || cookieToken != sessionToken)
+                    return new BadRequestResult();
+            }
+            catch (Exception)
+            {
+                return new BadRequestResult();
+            }
+
+            Configuration result = new Configuration();
+
+            try
+            {
+                result = Management.GetConfiguration();
+            }
+            catch (Exception)
+            {
+                return new BadRequestResult();
+            }
+
+            return new JsonResult(result);
+        }
     }
 }

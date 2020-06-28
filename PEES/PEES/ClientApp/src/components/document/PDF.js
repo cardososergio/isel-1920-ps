@@ -15,7 +15,8 @@ class PDF extends React.Component {
         this.state = {
             loading: true,
             id: params.get("id"),
-            doc: undefined
+            doc: undefined,
+            noGo: false
         }
 
         this.handleGeneratePDF = this.handleGeneratePDF.bind(this)
@@ -37,6 +38,7 @@ class PDF extends React.Component {
 
             }).catch(error => {
                 console.error(error)
+                this.setState({ noGo: true })
             })
     }
 
@@ -60,7 +62,7 @@ class PDF extends React.Component {
     }
 
     render() {
-        if (this.state.loading)
+        if (this.state.loading || this.state.noGo)
             return (<></>)
 
         return (

@@ -3,6 +3,7 @@ import { connect } from "react-redux"
 import { Form, Button, FormGroup, Input, Label, Container, Row, Col } from "reactstrap"
 import { Link, Redirect } from 'react-router-dom'
 import * as Utils from "../global/Utils"
+import Cookies from "js-cookie"
 
 class Login extends React.Component {
     constructor(props) {
@@ -52,6 +53,9 @@ class Login extends React.Component {
                 if (json.userId !== undefined) {
                     localStorage.setItem("isOffline", false)
                     localStorage.setItem("user", JSON.stringify({ userId: json.userId, name: json.name }))
+
+                    Cookies.remove("ViewOnlyToken")
+                    this.props.dispatch({ type: "VIEW_ONLY", payload: false })
 
                     this.setState({ validUser: true })
                 }

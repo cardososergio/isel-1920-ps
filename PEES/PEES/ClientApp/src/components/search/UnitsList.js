@@ -24,7 +24,12 @@ class UnitsList extends React.Component {
         PouchDB.plugin(PouchdbFind)
         const db = new PouchDB(localStorage.getItem("isOffline") === "true" ? Constants.URL_COUCHDB_OFFLINE : Constants.URL_COUCHDB)
 
-        let find = { user_id: JSON.parse(localStorage.getItem("user")).userId }
+        let find
+        if (this.props.viewOnly)
+            find = { is_public: true }
+        else
+            find = { user_id: JSON.parse(localStorage.getItem("user")).userId }
+
         if (this.props.filter.year.id !== "") find = { ...find, curricular_year: this.props.filter.year.id }
         if (this.props.filter.semester.id !== "") find = { ...find, semester: this.props.filter.semester.id }
         if (this.props.filter.season.id !== "") find = { ...find, season: this.props.filter.season.id }
@@ -52,7 +57,7 @@ class UnitsList extends React.Component {
                     this.setState({ list: [] })
                     return
                 }
-                
+
                 this.setState({ list: docs })
             })
             .catch(function (err) {
@@ -61,6 +66,7 @@ class UnitsList extends React.Component {
     }
 
     render() {
+
         return (
             <Table hover>
                 <thead>
@@ -68,8 +74,15 @@ class UnitsList extends React.Component {
                         <th>Semestre</th>
                         <th>Época</th>
                         <th>Nome</th>
-                        <th className="text-center">Rascunho</th>
-                        <th className="text-center">Público</th>
+                        {!this.props.viewOnly ?
+                            <>
+                                <th className="text-center">Rascunho</th>
+                                <th className="text-center">Público</th>
+                            </>
+                            :
+                            null
+                        }
+
                         <th></th>
                     </tr>
                 </thead>
@@ -81,9 +94,22 @@ class UnitsList extends React.Component {
                                     <td>{item.semester}</td>
                                     <td>{item.season}</td>
                                     <td>{item.name}</td>
-                                    <td className="text-center"><FontAwesomeIcon icon={item.isDraft ? faCheck : faTimes} /></td>
-                                    <td className="text-center"><FontAwesomeIcon icon={item.isPublic ? faCheck : faTimes} /></td>
-                                    <td className="text-center"><Link to={`/document?id=${item.id}`}><FontAwesomeIcon icon={faFile} /></Link></td>
+                                    {!this.props.viewOnly ?
+                                        <>
+                                            <td className="text-center"><FontAwesomeIcon icon={item.isDraft ? faCheck : faTimes} /></td>
+                                            <td className="text-center"><FontAwesomeIcon icon={item.isPublic ? faCheck : faTimes} /></td>
+                                        </>
+                                        :
+                                        null
+                                    }
+                                    <td className="text-center">
+                                        {!this.props.viewOnly ?
+                                            <Link to={`/document?id=${item.id}`}><FontAwesomeIcon icon={faFile} /></Link>
+                                            :
+                                            <Link to={`/view/document?id=${item.id}`}><FontAwesomeIcon icon={faFile} /></Link>
+                                        }
+
+                                    </td>
                                 </tr>
                             )
                         })
@@ -95,7 +121,8 @@ class UnitsList extends React.Component {
 }
 function mapStateToProps(state) {
     return {
-        filter: state.filter
+        filter: state.filter,
+        viewOnly: state.viewOnly
     }
 }
 

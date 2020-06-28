@@ -29,7 +29,7 @@ class Home extends React.Component {
 
     componentDidMount() {
 
-        if (Cookies.get('AccessToken') === undefined) {
+        if (Cookies.get('AccessToken') === undefined || Cookies.get("ViewOnlyToken") !== undefined) {
             this.setState({ haveAccessCookie: false })
             return
         }
@@ -43,6 +43,10 @@ class Home extends React.Component {
 
         (async function () {
             const response2 = await fetch('/api/users/configuration')
+            if (response2.status !== 200) {
+                _this.setState({ haveAccessCookie: false })
+                return
+            }
             const data = await response2.json()
 
             // compare
@@ -52,7 +56,7 @@ class Home extends React.Component {
             // first time
             if (localConfig === null) {
                 localStorage.setItem("configuration", JSON.stringify(serverConfig))
-                this.setState({ conf: JSON.parse(localStorage.getItem("configuration")) })
+                _this.setState({ conf: JSON.parse(localStorage.getItem("configuration")) })
             }
             else {
                 // Curricular Units

@@ -19,8 +19,6 @@ import * as Utils from "../global/Utils"
 
 registerLocale('pt', pt)
 
-const conf = JSON.parse(localStorage.getItem("configuration"))
-
 class Document extends React.Component {
     constructor(props) {
         super(props)
@@ -64,7 +62,8 @@ class Document extends React.Component {
                 isOpen: false,
                 revisions: []
             },
-            attachments: []
+            attachments: [],
+            conf: JSON.parse(localStorage.getItem("configuration"))
         }
 
         this.toggle = this.toggle.bind(this)
@@ -123,9 +122,8 @@ class Document extends React.Component {
 
         db.get(this.state.id, { attachments: true })
             .then(doc => {
-                console.log(doc)
                 // change curricular unit id for name
-                doc.header.curricular_unit = conf.curricularUnits.find(item => item.id === doc.curricular_unit).value
+                doc.header.curricular_unit = this.state.conf.curricularUnits.find(item => item.id === doc.curricular_unit).value
 
                 // attach
                 let attach = []
@@ -711,7 +709,7 @@ class Document extends React.Component {
                                 </InputGroupAddon>
                             </InputGroup>
                         </Col>
-                        <Col xs={{ size: 6, offset: 3 }} style={{ fontWeight: "bold" }}>{conf.curricularUnits.find(item => item.id === this.state.doc.curricular_unit).value}</Col>
+                        <Col xs={{ size: 6, offset: 3 }} style={{ fontWeight: "bold" }}>{this.state.conf.curricularUnits.find(item => item.id === this.state.doc.curricular_unit).value}</Col>
                         <Col xs={{ size: 6, offset: 3 }}>
                             <Input type="text" defaultValue={this.state.doc.header.description} className="text-center" placeholder="descritivo do enunciado" autoComplete="off"
                                 onChange={(e) => this.setState({ doc: { ...this.state.doc, header: { ...this.state.doc.header, description: e.target.value } } })} />
@@ -874,13 +872,13 @@ class Document extends React.Component {
                                 <Label for="lstYear" sm={2}>Ano</Label>
                                 <Col sm={4}>
                                     <Input type="select" id="lstYear" value={this.state.doc.curricular_year} onChange={(e) => this.setState({ doc: { ...this.state.doc, curricular_year: e.target.value } })}>
-                                        {conf.curricularYears.map(item => { return (<option key={item.id} value={item.id}>{item.value}</option>) })}
+                                        {this.state.conf.curricularYears.map(item => { return (<option key={item.id} value={item.id}>{item.value}</option>) })}
                                     </Input>
                                 </Col>
                                 <Label for="lstSemester" sm={2}>Semestre</Label>
                                 <Col sm={4}>
                                     <Input type="select" id="lstSemester" value={this.state.doc.semester} onChange={(e) => this.setState({ doc: { ...this.state.doc, semester: e.target.value } })}>
-                                        {conf.semesters.map(item => { return (<option key={item.id} value={item.id}>{item.value}</option>) })}
+                                        {this.state.conf.semesters.map(item => { return (<option key={item.id} value={item.id}>{item.value}</option>) })}
                                     </Input>
                                 </Col>
                             </FormGroup>
@@ -888,13 +886,13 @@ class Document extends React.Component {
                                 <Label for="lstUnit" sm={2}>Disciplina</Label>
                                 <Col sm={4}>
                                     <Input type="select" id="lstUnit" value={this.state.doc.curricular_unit} onChange={(e) => this.setState({ doc: { ...this.state.doc, curricular_unit: e.target.value } })}>
-                                        {conf.curricularUnits.map(item => { return (<option key={item.id} value={item.id}>{item.value}</option>) })}
+                                        {this.state.conf.curricularUnits.map(item => { return (<option key={item.id} value={item.id}>{item.value}</option>) })}
                                     </Input>
                                 </Col>
                                 <Label for="lstSeason" sm={2}>Época</Label>
                                 <Col sm={4}>
                                     <Input type="select" id="lstSeason" value={this.state.doc.season} onChange={(e) => this.setState({ doc: { ...this.state.doc, season: e.target.value } })}>
-                                        {conf.seasons.map(item => { return (<option key={item.id} value={item.id}>{item.value}</option>) })}
+                                        {this.state.conf.seasons.map(item => { return (<option key={item.id} value={item.id}>{item.value}</option>) })}
                                     </Input>
                                 </Col>
                             </FormGroup>
@@ -931,7 +929,7 @@ class Document extends React.Component {
                                 <Label for="lstInstructionType" sm={2}>Tipo</Label>
                                 <Col sm={4}>
                                     <Input type="select" id="lstInstructionType" value={this.state.doc.instruction_type} onChange={(e) => this.setState({ doc: { ...this.state.doc, instruction_type: e.target.value } })}>
-                                        {conf.instructionTypes.map(item => { return (<option key={item.id} value={item.id}>{item.value}</option>) })}
+                                        {this.state.conf.instructionTypes.map(item => { return (<option key={item.id} value={item.id}>{item.value}</option>) })}
                                     </Input>
                                 </Col>
                                 <Label for="txtGrade" sm={2}>Cotação</Label>
@@ -953,7 +951,7 @@ class Document extends React.Component {
                                 <Col sm={4}>
                                     <Input type="select" id="lstNumeringType" defaultValue={this.state.modalQuestion.fields.numeringType}
                                         onChange={(e) => this.setState({ modalQuestion: { ...this.state.modalQuestion, fields: { ...this.state.modalQuestion.fields, numeringType: e.target.value * 1 } } })}>
-                                        {conf.numeringTypes.map(item => { return (<option key={item.id} value={item.id}>{item.value}</option>) })}
+                                        {this.state.conf.numeringTypes.map(item => { return (<option key={item.id} value={item.id}>{item.value}</option>) })}
                                     </Input>
                                 </Col>
                                 <Label for="txtNumering" sm={2}>Numeração</Label>

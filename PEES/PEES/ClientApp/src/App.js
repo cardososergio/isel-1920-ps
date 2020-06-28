@@ -5,6 +5,7 @@ import Layout from './components/Layout'
 import Home from './components/Home'
 import Unit from './components/search/Unit'
 import Login from './components/auth/Login'
+import ViewOnly from './components/viewonly/ViewOnly'
 import { Management } from './components/management/Management'
 import { PageNotFound } from "./components/PageNotFound"
 import Document from './components/document/Document'
@@ -14,6 +15,7 @@ import * as Constants from "./components/global/Constants"
 import Preview from './components/document/Preview'
 import PDF from './components/document/PDF'
 import './custom.css'
+import DocumentViewOnly from './components/viewonly/DocumentViewOnly'
 
 async function checkNetwork() {
     try {
@@ -37,6 +39,11 @@ class App extends React.Component {
     }
 
     componentDidMount() {
+        if (document.location.pathname.toLowerCase() === "/view") {
+            this.setState({ noGo: false })
+            return
+        }
+
         const _this = this;
 
         (async function () {
@@ -67,13 +74,6 @@ class App extends React.Component {
 
     render() {
 
-        if (document.location.pathname.toLowerCase() === "/newuser")
-            return (
-                <Layout>
-                    <NewUser />
-                </Layout>
-            )
-
         if (this.state.noGo) return (<></>)
 
         return (
@@ -88,6 +88,8 @@ class App extends React.Component {
                     <Route exact path="/versioncontrol" component={Backoffice} />
                     <Route exact path="/preview" component={Preview} />
                     <Route exact path="/pdf" component={PDF} />
+                    <Route exact path="/view" component={ViewOnly} />
+                    <Route exact path="/view/document" component={DocumentViewOnly} />
                     <Route component={PageNotFound} />
                 </Switch>
             </Layout>

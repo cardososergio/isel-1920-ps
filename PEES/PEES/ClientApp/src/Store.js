@@ -15,10 +15,12 @@ const initialState = {
         text: "none",
         color: "primary",
         fixed: false
-    }
+    },
+    viewOnly: false
 };
 
 function reducer(state = initialState, action) {
+    
     switch (action.type) {
         case "LOGIN":
             return { ...state, login: true }
@@ -36,6 +38,8 @@ function reducer(state = initialState, action) {
             return { ...state, alert: action.payload }
         case "UNMOUNT_ALERT":
             return { ...state, alert: { ...state.alert, show: false } }
+        case "VIEW_ONLY":
+            return { ...state, viewOnly: action.payload }
         default:
             return state;
     }
