@@ -3,7 +3,7 @@ import { connect } from "react-redux"
 import { CardBody, CardDeck, CardText } from 'reactstrap'
 import PouchDB from 'pouchdb'
 import PouchdbFind from 'pouchdb-find'
-import * as Constants from "../Constants"
+import * as Constants from "../global/Constants"
 import { Link } from "react-router-dom"
 
 class UnitsCard extends React.Component {

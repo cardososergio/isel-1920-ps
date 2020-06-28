@@ -2,7 +2,7 @@
 import { connect } from "react-redux"
 import { Container, Row, Col, Button } from "reactstrap"
 import PouchDB from 'pouchdb'
-import * as Constants from "../../Constants"
+import * as Constants from "../global/Constants"
 
 const conf = JSON.parse(localStorage.getItem("configuration"))
 

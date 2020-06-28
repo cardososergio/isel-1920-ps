@@ -44,7 +44,7 @@ namespace PEES.Controllers
                 samlResponse.LoadXmlFromBase64(Request.Form["SAMLResponse"].ToString());
                 var user = samlResponse.Check();
 
-                Response.Cookies.Append("AccessToken", Utils.EncryptKey(Encoding.ASCII.GetBytes(user.Email)));
+                Response.Cookies.Append("AccessToken", Utils.EncryptKey(Encoding.ASCII.GetBytes(user.Email)), new Microsoft.AspNetCore.Http.CookieOptions() { Domain = "localhost" });
 
                 return RedirectPermanent("/");
             }

@@ -14,7 +14,7 @@ import "react-datepicker/dist/react-datepicker.css"
 import pt from 'date-fns/locale/pt'
 import uuid4 from 'uuid4'
 import "./Document.css"
-import * as Constants from "../../Constants"
+import * as Constants from "../global/Constants"
 import * as Utils from "../global/Utils"
 
 registerLocale('pt', pt)

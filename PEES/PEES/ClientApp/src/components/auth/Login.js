@@ -1,8 +1,7 @@
 ﻿import React from 'react'
 import { connect } from "react-redux"
 import { Form, Button, FormGroup, Input, Label, Container, Row, Col } from "reactstrap"
-import { Link, Redirect, Switch, Route } from 'react-router-dom'
-import Home from '../Home'
+import { Link, Redirect } from 'react-router-dom'
 import * as Utils from "../global/Utils"
 
 class Login extends React.Component {
@@ -69,14 +68,7 @@ class Login extends React.Component {
     render() {
 
         if (this.state.validUser)
-            return (
-                <>
-                    <Switch>
-                        <Route exact path='/' component={Home} />
-                    </Switch>
-                    <Redirect to="/" push />
-                </>
-            )
+            return (<Redirect to="/" />)
 
         return (
             <Container>

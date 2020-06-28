@@ -47,7 +47,7 @@ const NewUser = (props) => {
     }
 
     if (registerDone)
-        return (<Redirect to="/"/>)
+        return (<Redirect to="/login"/>)
         
     return (
         <Container>

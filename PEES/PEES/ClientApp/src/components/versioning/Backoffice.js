@@ -5,7 +5,7 @@ import PouchdbFind from 'pouchdb-find'
 import { connect } from 'react-redux'
 import { LocalVersion } from "./LocalVersion"
 import { Redirect } from "react-router-dom"
-import * as Constants from "../../Constants"
+import * as Constants from "../global/Constants"
 
 class BackOffice extends React.Component {
     constructor(props) {

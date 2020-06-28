@@ -2,7 +2,7 @@
 import { connect } from "react-redux"
 import { Container, Row, Col, CardDeck, Card, CardBody, CardTitle } from "reactstrap"
 import PouchDB from 'pouchdb'
-import * as Constants from "../../Constants"
+import * as Constants from "../global/Constants"
 import "./Document.css"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faFile } from "@fortawesome/free-solid-svg-icons"
