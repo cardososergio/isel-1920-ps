@@ -1,0 +1,137 @@
+{
+    "_id": "29feacb4093873d28a44834fde01b9c9",
+    "_rev": "55-3fb94a0b0580487acd058dc380d1a744",
+    "user_id": "45960711-7ff9-4fca-bec9-73e32de24f4f",
+    "instruction_type": "d9b9f7ed-2610-4859-8120-d43a6e507361",
+    "name": "Primeiro enunciado",
+    "is_draft": true,
+    "is_public": true,
+    "curricular_year": "e6b832f6-7104-4eb0-a4c7-3f3d62df3fbc",
+    "semester": "33c05c96-db68-47f0-b0fb-9a6ade294ebf",
+    "curricular_unit": "845243c5-f5c7-403e-8ece-1abb060703c0",
+    "season": "7da99610-1c48-4c98-9440-02ac17619a50",
+    "duration": "",
+    "header": {
+        "school_name": "Instituto Superior de Engenharia de Lisboa",
+        "courses": [
+            "Cursor 1",
+            "Cursor 2"
+        ],
+        "curricular_unit": "Matemática I"
+    },
+    "questions": [
+        {
+            "question_id": 1,
+            "numering_type": 2,
+            "numering": "1",
+            "grade": "1,5",
+            "text": "A <b>dimen<i>são</i></b><i> de uma </i>assinatura digital (em bytes) é proporcional à <b>dimensão</b> da mensagem assinada?",
+            "position": 1
+        },
+        {
+            "question_id": 2,
+            "numering_type": 2,
+            "numering": "2",
+            "grade": "1,5",
+            "text": "Apresente uma forma de atacar uma implementação de um esquema de cifra assimétrica cujo algoritmo de cifra, Ea(K)(m), seja determinístico (isto é, se x = y então Ea(K)(x) = Ea(K)(y)).",
+            "position": 2
+        },
+        {
+            "question_id": 3,
+            "numering_type": 2,
+            "numering": "3",
+            "grade": "2",
+            "text": "No contexto dos esquemas de cifra baseados em primitivas de bloco, considere o modo de operação definido por:",
+            "position": 3,
+            "questions": [
+                {
+                    "question_id": 31,
+                    "numering_type": 1,
+                    "numering": "",
+                    "grade": "",
+                    "text": "Seja x = x1,..., XL a divisão nos blocos xi do texto em claro x, e y = y1,...,YL o criptograma resultante da cifra da mensagem x;",
+                    "position": 1
+                },
+                {
+                    "question_id": 32,
+                    "numering_type": 1,
+                    "numering": "",
+                    "grade": "",
+                    "text": "Seja yi = E(k)(xi + xi-1), para i = 1,...,L, onde E é a primitiva de cifra, + denota o ou-exclusivo bit a bit;",
+                    "position": 2
+                },
+                {
+                    "question_id": 33,
+                    "numering_type": 1,
+                    "numering": "",
+                    "grade": "",
+                    "text": "Seja x0 é o vector inicial (IV)",
+                    "position": 3
+                }
+            ]
+        },
+        {
+            "question_id": 4,
+            "numering_type": 2,
+            "numering": "4",
+            "grade": "4",
+            "text": "Considere a infra-estrutura de certificados X.509 e o protocolo TLS com troca de chaves usando RSA:",
+            "position": 4,
+            "questions": [
+                {
+                    "question_id": 41,
+                    "numering_type": 2,
+                    "numering": "4.1",
+                    "grade": "",
+                    "text": "Numa cadeia de certificados válida, a chave privada está presente em algum deles?",
+                    "position": 1
+                },
+                {
+                    "question_id": 42,
+                    "numering_type": 2,
+                    "numering": "4.2",
+                    "grade": "",
+                    "text": "Durante o <i>handshake</i>, como é obtida a raiz de confiança usada para validar o certificado do servidor?",
+                    "position": 2
+                }
+            ]
+        },
+        {
+            "question_id": 5,
+            "numering_type": 2,
+            "numering": "5",
+            "grade": "1,5",
+            "text": "Considere a função de <i>hash</i> H(m) definida por:",
+            "position": 5,
+            "footer_note": "Explique porque motivo é computacionalmente fazível, dado m, obter m' != m tal que H(m') = H(m).",
+            "questions": [
+                {
+                    "question_id": 51,
+                    "numering_type": 1,
+                    "numering": "",
+                    "grade": "",
+                    "text": "Seja Ep(k)(b) uma primitiva de cifra em bloco que usa chaves k de n bits e blocos b de n bits",
+                    "position": 1
+                },
+                {
+                    "question_id": 52,
+                    "numering_type": 1,
+                    "numering": "",
+                    "grade": "",
+                    "text": "O valor de hash é H(m) = yL.",
+                    "position": 2
+                }
+            ]
+        }
+    ],
+    "grade": "",
+    "_attachments": {
+        "ai32263.pdf": {
+            "content_type": "application/pdf",
+            "revpos": 54,
+            "digest": "md5-7M2DuyAgIC6QEFT2YfWEKA==",
+            "length": 295715,
+            "stub": true
+        }
+    }
+}
