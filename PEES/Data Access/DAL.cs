@@ -12,7 +12,7 @@ namespace DataAccess.DAL
     {
         public static string connectionString;
 
-        public static User GetUser(string email)
+        public static User GetUser(string email, int profile)
         {
             var result = new User();
 
@@ -20,17 +20,21 @@ namespace DataAccess.DAL
             {
                 List<SqlParameter> parameters = new List<SqlParameter>();
                 parameters.Add(new SqlParameter("@Email", email));
+                parameters.Add(new SqlParameter("@Profile", profile));
 
                 using (SqlDataReader reader = db.ExecSPDataReader("dbo.spGetUser", parameters))
                 {
-                    reader.Read();
+                    if (reader.HasRows)
+                    {
+                        reader.Read();
 
-                    result.UserId = reader["UserId"].ToString();
-                    result.Name = (string)reader["Name"];
-                    result.Email = email;
-                    result.Password = (string)reader["Password"];
-                    result.Salt = (string)reader["Salt"];
-                    result.ProfileId = (int)reader["ProfileId"];
+                        result.UserId = reader["UserId"].ToString();
+                        result.Name = (string)reader["Name"];
+                        result.Email = email;
+                        result.Password = (string)reader["Password"];
+                        result.Salt = (string)reader["Salt"];
+                        result.ProfileId = (int)reader["ProfileId"];
+                    }
                 }
             }
 

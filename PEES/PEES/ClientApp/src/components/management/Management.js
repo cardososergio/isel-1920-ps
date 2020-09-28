@@ -20,6 +20,7 @@ export class Management extends React.Component {
     }
 
     render() {
+        
         return (
             <>
                 {(this.state.managementToken === undefined ?

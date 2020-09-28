@@ -47,7 +47,7 @@ namespace PEES.Controllers
 
             try
             {
-                user = Global.GetUser(login.Email);
+                user = Global.GetUser(login.Email, 1);
 
                 if (user.Password != "" && user.Salt != "")
                     valid = (Utils.CreatePasswordHash(login.Password, user.Salt) == user.Password);
@@ -58,8 +58,14 @@ namespace PEES.Controllers
             }
 
             var token = valid ? Guid.NewGuid().ToString() : "";
-            HttpContext.Session.SetString("AccessToken", token);
-            Response.Cookies.Append("AccessToken", token, new CookieOptions() { SameSite = SameSiteMode.Strict, IsEssential = true });
+            if (token != "") {
+                HttpContext.Session.SetString("AccessToken", token);
+                Response.Cookies.Append("AccessToken", token, new CookieOptions() { SameSite = SameSiteMode.Strict, IsEssential = true });
+            }
+            else
+            {
+                user = new User();
+            }
 
             return new JsonResult(user);
         }

@@ -26,12 +26,13 @@ namespace PEES.Controllers
         public ActionResult Login([FromBody] RequestLogin login)
         {
             bool result = false;
+            User user = new User();
 
             try
             {
-                var passwordSalt = Global.GetUser(login.Email);
+                var passwordSalt = Global.GetUser(login.Email, 3);
 
-                if (passwordSalt.Password != "" && passwordSalt.Salt != "")
+                if (passwordSalt.Password != null && passwordSalt.Password != "" && passwordSalt.Salt != "")
                     result = (Utils.CreatePasswordHash(login.Password, passwordSalt.Salt) == passwordSalt.Password);
             }
             catch (Exception)
@@ -40,10 +41,14 @@ namespace PEES.Controllers
             }
 
             var token = result ? Guid.NewGuid().ToString() : "";
-            HttpContext.Session.SetString("ManagementToken", token);
-            Response.Cookies.Append("ManagementToken", token, new CookieOptions() { SameSite = SameSiteMode.Strict, IsEssential = true });
-            
-            return new OkResult();
+            if (token != "")
+            {
+                HttpContext.Session.SetString("ManagementToken", token);
+                Response.Cookies.Append("ManagementToken", token, new CookieOptions() { SameSite = SameSiteMode.Strict, IsEssential = true });
+                user.UserId = "";
+            }
+
+            return new JsonResult(user);
         }
 
         [HttpGet]

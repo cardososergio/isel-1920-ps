@@ -37,20 +37,18 @@ class Login extends React.Component {
         fetch(url, requestOptions)
             .then(response => {
                 if (response.status === 200) {
-                    if (this.state.normalLogin)
-                        return response.json()
-                    return
+                    return response.json()
                 }
 
                 return Promise.reject(response.statusText);
             })
             .then(json => {
                 if (!this.state.normalLogin) {
-                    this.setState({ validUser: true })
-                    return
+                    if (json.userId !== null)
+                        this.handleStateChange();
                 }
 
-                if (json.userId !== undefined) {
+                if (json.userId !== undefined && json.userId !== null) {
                     localStorage.setItem("isOffline", false)
                     localStorage.setItem("user", JSON.stringify({ userId: json.userId, name: json.name }))
 
@@ -69,10 +67,16 @@ class Login extends React.Component {
             });
     }
 
+    handleStateChange() {
+        this.props.handleStateChange()
+    }
+
     render() {
 
-        if (this.state.validUser)
+        if (this.state.validUser && this.state.normalLogin)
             return (<Redirect to="/" />)
+        if (this.state.validUser && !this.state.normalLogin)
+            return (<Redirect to="/management" />)
 
         return (
             <Container>
